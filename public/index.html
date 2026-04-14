@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Doodle or Not</title>
+<script>window.process = { env: { NODE_ENV: 'production' } };</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="./doodles-dataset.js"></script>
+<style>
+  html, body, #root { height: 100%; margin: 0; }
+  body { font-family: 'Quicksand', system-ui, sans-serif; color: #2D2D3F; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+
+/* ==========================================================================
+   DOODLE OR NOT — Daily Doodles NFT trivia game
+   Single-file React app. Tailwind utility classes only.
+   No emojis — all iconography is custom inline SVG in Doodles line-art style.
+   ========================================================================== */
+
+/* ---------- Storage helper: localStorage with in-memory fallback ---------- */
+const _mem = {};
+const storage = {
+  get(k, fb = null) {
+    try { const v = localStorage.getItem(k); return v === null ? fb : JSON.parse(v); }
+    catch { return _mem[k] === undefined ? fb : _mem[k]; }
+  },
+  set(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); }
+    catch { _mem[k] = v; }
+  }
+};
+
+/* ---------- Daily seed (deterministic pseudo-random per day) ---------- */
+const hashCode = (str) => {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+};
+const mulberry32 = (seed) => () => {
+  seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const todayStr = () => new Date().toISOString().slice(0, 10);
+const dayNumber = () => {
+  const start = new Date('2025-01-01').getTime();
+  return Math.floor((Date.now() - start) / 86400000) + 1;
+};
+const getWeekKey = () => {
+  const d = new Date();
+  const yearStart = new Date(d.getFullYear(), 0, 1);
+  const wk = Math.ceil(((d - yearStart) / 86400000 + yearStart.getDay() + 1) / 7);
+  return `${d.getFullYear()}-W${String(wk).padStart(2, '0')}`;
+};
+
+/* ==========================================================================
+   REAL DOODLES DATASET
+   Loaded from window.DOODLES_DATA (see doodles-dataset.js).
+   Shape: { imgPrefix: string, total: number,
+            rarity: { [traitType]: { [value]: percent, __none__?: percent } },
+            doodles: [{ id, i, t: { face, head, background, body, hair, piercing? }, r, rank }] }
+   ========================================================================== */
+
+const DATA = (typeof window !== 'undefined' && window.DOODLES_DATA) || {
+  imgPrefix: '', total: 0, rarity: {}, doodles: []
+};
+const DOODLES = DATA.doodles;
+const RARITY = DATA.rarity;
+const IMG_PREFIX = DATA.imgPrefix;
+const TRAIT_TYPES = ['face','head','background','body','hair','piercing'];
+
+const doodleImage = (d) => IMG_PREFIX + d.i;
+const openseaUrl = (d) => `https://opensea.io/assets/ethereum/0x8a90cab2b38dba80c64b7734e58ee1db38b8992e/${d.id}`;
+
+/* Rarity % for a (type, value). Returns 100 when unknown (very common fallback). */
+const rarityPct = (type, value) => {
+  const r = (RARITY[type] || {})[value];
+  return r == null ? 100 : r;
+};
+
+/* Whether a doodle has a specific trait (type + value). */
+const hasTrait = (d, type, value) => {
+  if (!d) return false;
+  const v = d.t ? d.t[type] : undefined;
+  if (value === '__none__') return v == null;
+  return v === value;
+};
+
+/* Labels */
+const titleCase = (s) => (s || '').replace(/\b\w/g, (c) => c.toUpperCase());
+const traitLabel = (type, value) => `${titleCase(value)} ${titleCase(type)}`;
+
+/* Build a pool of "askable" traits for Guess mode:
+   Pick traits that are neither super-common nor ultra-rare,
+   so yes/no questions feel fair and discriminating. */
+const GUESS_POOL = (() => {
+  const pool = [];
+  for (const type of TRAIT_TYPES) {
+    const map = RARITY[type] || {};
+    for (const [value, pct] of Object.entries(map)) {
+      if (value === '__none__') continue;
+      if (pct >= 0.3 && pct <= 20) pool.push({ type, value, pct });
+    }
+  }
+  return pool;
+})();
+
+/* ==========================================================================
+   ICON SYSTEM — all custom inline SVG, thick black outlines, pastel fills
+   ========================================================================== */
+
+const STROKE = '#2D2D3F';
+
+const BaseSVG = ({ size = 24, children, viewBox = '0 0 24 24', className = '' }) => (
+  <svg width={size} height={size} viewBox={viewBox} fill="none" className={className}
+       strokeLinecap="round" strokeLinejoin="round">{children}</svg>
+);
+
+const FlowerIcon = ({ size = 24, petal = '#FFFFFF', center = '#FFE082' }) => (
+  <BaseSVG size={size}>
+    <circle cx="12" cy="6.5" r="3.2" fill={petal} stroke={STROKE} strokeWidth="2" />
+    <circle cx="16.8" cy="9.8" r="3.2" fill={petal} stroke={STROKE} strokeWidth="2" />
+    <circle cx="14.8" cy="15.5" r="3.2" fill={petal} stroke={STROKE} strokeWidth="2" />
+    <circle cx="9.2" cy="15.5" r="3.2" fill={petal} stroke={STROKE} strokeWidth="2" />
+    <circle cx="7.2" cy="9.8" r="3.2" fill={petal} stroke={STROKE} strokeWidth="2" />
+    <circle cx="12" cy="11.5" r="2.6" fill={center} stroke={STROKE} strokeWidth="2" />
+  </BaseSVG>
+);
+
+const CloudRainIcon = ({ size = 24 }) => (
+  <BaseSVG size={size}>
+    <path d="M6 13a3 3 0 0 1 .5-5.95A5 5 0 0 1 16 8a4 4 0 0 1 0 8H7a3 3 0 0 1-1-3z"
+          fill="#D5C8E8" stroke={STROKE} strokeWidth="2" />
+    <path d="M9 18l-1 3M13 18l-1 3M17 18l-1 3" stroke="#90CAF9" strokeWidth="2" />
+  </BaseSVG>
+);
+
+const ButterflyIcon = ({ size = 24 }) => (
+  <BaseSVG size={size}>
+    <ellipse cx="7" cy="9" rx="4.5" ry="5" fill="#FFB7C5" stroke={STROKE} strokeWidth="2" />
+    <ellipse cx="17" cy="9" rx="4.5" ry="5" fill="#C5B3E6" stroke={STROKE} strokeWidth="2" />
+    <ellipse cx="7" cy="16" rx="4" ry="4" fill="#FFE082" stroke={STROKE} strokeWidth="2" />
+    <ellipse cx="17" cy="16" rx="4" ry="4" fill="#A8E6CF" stroke={STROKE} strokeWidth="2" />
+    <path d="M12 5v15" stroke={STROKE} strokeWidth="2" />
+    <circle cx="12" cy="5" r="1" fill={STROKE} />
+  </BaseSVG>
+);
+
+/* Neon rainbow — glowing fluid arcs, crisp color, no outlines */
+const RainbowIcon = ({ size = 24 }) => {
+  const uid = 'n' + Math.floor(Math.random() * 1e6);
+  return (
+    <svg width={size} height={size * 0.55} viewBox="0 0 48 26" fill="none"
+         strokeLinecap="round" strokeLinejoin="round"
+         style={{ overflow: 'visible' }}>
+      <defs>
+        <filter id={`glow-${uid}`} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.8" result="b1" />
+          <feGaussianBlur stdDeviation="4" in="SourceGraphic" result="b2" />
+          <feMerge>
+            <feMergeNode in="b2" />
+            <feMergeNode in="b1" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <g filter={`url(#glow-${uid})`}>
+        <path stroke="#FF3EA5" strokeWidth="2.2" fill="none"
+              d="M3 22 Q 24 1 45 22">
+          <animate attributeName="d" dur="5s" repeatCount="indefinite"
+                   values="M3 22 Q 24 1 45 22;
+                           M3 22 Q 24 4 45 22;
+                           M3 22 Q 24 0 45 22;
+                           M3 22 Q 24 1 45 22" />
+        </path>
+        <path stroke="#FFCC33" strokeWidth="2" fill="none"
+              d="M6 22 Q 24 5 42 22">
+          <animate attributeName="d" dur="4.2s" repeatCount="indefinite"
+                   values="M6 22 Q 24 5 42 22;
+                           M6 22 Q 24 8 42 22;
+                           M6 22 Q 24 3 42 22;
+                           M6 22 Q 24 5 42 22" />
+        </path>
+        <path stroke="#39FFB0" strokeWidth="1.9" fill="none"
+              d="M9 22 Q 24 9 39 22">
+          <animate attributeName="d" dur="4.6s" repeatCount="indefinite"
+                   values="M9 22 Q 24 9 39 22;
+                           M9 22 Q 24 12 39 22;
+                           M9 22 Q 24 7 39 22;
+                           M9 22 Q 24 9 39 22" />
+        </path>
+        <path stroke="#3EA5FF" strokeWidth="1.8" fill="none"
+              d="M12 22 Q 24 13 36 22">
+          <animate attributeName="d" dur="3.8s" repeatCount="indefinite"
+                   values="M12 22 Q 24 13 36 22;
+                           M12 22 Q 24 16 36 22;
+                           M12 22 Q 24 11 36 22;
+                           M12 22 Q 24 13 36 22" />
+        </path>
+      </g>
+    </svg>
+  );
+};
+
+const ShootingStarIcon = ({ size = 24 }) => (
+  <BaseSVG size={size}>
+    <path d="M3 20L9 14" stroke="#FFB7C5" strokeWidth="3" />
+    <path d="M5 18L10 13" stroke="#FFE082" strokeWidth="2" />
+    <path d="M14 4l1.5 3.5L19 9l-3.5 1.5L14 14l-1.5-3.5L9 9l3.5-1.5L14 4z"
+          fill="#FFE082" stroke={STROKE} strokeWidth="2" />
+  </BaseSVG>
+);
+
+const SparkleIcon = ({ size = 24, fill = '#90CAF9' }) => (
+  <BaseSVG size={size}>
+    <path d="M12 3l2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7z"
+          fill={fill} stroke={STROKE} strokeWidth="2" />
+  </BaseSVG>
+);
+
+const CrownIcon = ({ size = 24 }) => (
+  <BaseSVG size={size}>
+    <path d="M3 8l3 8h12l3-8-4 3-3-6-3 6-4-3-4-3z"
+          fill="#FFE082" stroke={STROKE} strokeWidth="2" />
+    <path d="M6 16h12" stroke={STROKE} strokeWidth="2" />
+  </BaseSVG>
+);
+
+const MagnifierIcon = ({ size = 24 }) => (
+  <BaseSVG size={size}>
+    <circle cx="10" cy="10" r="6" fill="#C5B3E6" stroke={STROKE} strokeWidth="2" />
+    <circle cx="10" cy="9" r="1.5" fill="#FFFFFF" stroke={STROKE} strokeWidth="1.5" />
+    <circle cx="8" cy="10.5" r="1.5" fill="#FFFFFF" stroke={STROKE} strokeWidth="1.5" />
+    <circle cx="12" cy="10.5" r="1.5" fill="#FFFFFF" stroke={STROKE} strokeWidth="1.5" />
+    <circle cx="10" cy="12" r="1.5" fill="#FFFFFF" stroke={STROKE} strokeWidth="1.5" />
+    <circle cx="10" cy="10" r="1" fill="#FFE082" stroke={STROKE} strokeWidth="1" />
+    <path d="M14.5 14.5L20 20" stroke={STROKE} strokeWidth="3" />
+  </BaseSVG>
+);
+
+const ArrowsIcon = ({ size = 24 }) => (
+  <BaseSVG size={size}>
+    <path d="M8 5v12m0-12l-3 3m3-3l3 3" stroke="#FFAB91" strokeWidth="2.5" fill="none" />
+    <path d="M16 19V7m0 12l3-3m-3 3l-3-3" stroke="#FF8A8A" strokeWidth="2.5" fill="none" />
+  </BaseSVG>
+);
+
+const WheelIcon = ({ size = 24 }) => (
+  <BaseSVG size={size} viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9" fill="#FFFFFF" stroke={STROKE} strokeWidth="2" />
+    <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"
+          stroke={STROKE} strokeWidth="1.5" />
+    <path d="M12 3 A9 9 0 0 1 18.4 5.6 L12 12 Z" fill="#FFB7C5" />
+    <path d="M18.4 5.6 A9 9 0 0 1 21 12 L12 12 Z" fill="#FFE082" />
+    <path d="M21 12 A9 9 0 0 1 18.4 18.4 L12 12 Z" fill="#A8E6CF" />
+    <path d="M18.4 18.4 A9 9 0 0 1 12 21 L12 12 Z" fill="#90CAF9" />
+    <path d="M12 21 A9 9 0 0 1 5.6 18.4 L12 12 Z" fill="#C5B3E6" />
+    <path d="M5.6 18.4 A9 9 0 0 1 3 12 L12 12 Z" fill="#FFAB91" />
+    <path d="M3 12 A9 9 0 0 1 5.6 5.6 L12 12 Z" fill="#FFB7C5" />
+    <path d="M5.6 5.6 A9 9 0 0 1 12 3 L12 12 Z" fill="#FFE082" />
+    <circle cx="12" cy="12" r="2" fill="#FFFFFF" stroke={STROKE} strokeWidth="2" />
+  </BaseSVG>
+);
+
+const TrophyIcon = ({ size = 24 }) => (
+  <BaseSVG size={size}>
+    <path d="M7 4h10v5a5 5 0 0 1-10 0V4z" fill="#FFE082" stroke={STROKE} strokeWidth="2" />
+    <path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"
+          stroke={STROKE} strokeWidth="2" fill="none" />
+    <path d="M10 14h4v4h-4z" fill="#FFE082" stroke={STROKE} strokeWidth="2" />
+    <path d="M7 20h10" stroke={STROKE} strokeWidth="2.5" />
+  </BaseSVG>
+);
+
+const FaceIcon = ({ size = 24, fill = '#FFAB91' }) => (
+  <BaseSVG size={size}>
+    <circle cx="12" cy="12" r="9" fill={fill} stroke={STROKE} strokeWidth="2" />
+    <circle cx="9" cy="11" r="1" fill={STROKE} />
+    <circle cx="15" cy="11" r="1" fill={STROKE} />
+    <path d="M9.5 14.5c1 1 4 1 5 0" stroke={STROKE} strokeWidth="2" fill="none" />
+  </BaseSVG>
+);
+
+const StarNavIcon = ({ size = 24, fill = '#A8E6CF' }) => (
+  <BaseSVG size={size}>
+    <path d="M12 3l2.5 5 5.5 1-4 4 1 5.5-5-2.5L7 18.5l1-5.5-4-4 5.5-1L12 3z"
+          fill={fill} stroke={STROKE} strokeWidth="2" />
+  </BaseSVG>
+);
+
+const CloudIcon = ({ size = 24, fill = '#FFFFFF' }) => (
+  <BaseSVG size={size}>
+    <path d="M6 16a3.5 3.5 0 0 1 .5-6.95A5 5 0 0 1 16 10a3.5 3.5 0 0 1 0 7H7a3 3 0 0 1-1-1z"
+          fill={fill} stroke={STROKE} strokeWidth="2" />
+  </BaseSVG>
+);
+
+const CheckIcon = ({ size = 16 }) => (
+  <BaseSVG size={size}>
+    <path d="M5 12l4 4 10-10" stroke={STROKE} strokeWidth="2.5" fill="none" />
+  </BaseSVG>
+);
+
+const XIcon = ({ size = 20 }) => (
+  <BaseSVG size={size}>
+    <path d="M6 6l12 12M18 6L6 18" stroke={STROKE} strokeWidth="2.5" />
+  </BaseSVG>
+);
+
+const ShareIcon = ({ size = 20 }) => (
+  <BaseSVG size={size}>
+    <path d="M3 20l18-8-18-8 4 8-4 8z" fill="#FFB7C5" stroke={STROKE} strokeWidth="2" />
+    <path d="M7 12l14 0" stroke={STROKE} strokeWidth="2" />
+  </BaseSVG>
+);
+
+const ChevronLeftIcon = ({ size = 20 }) => (
+  <BaseSVG size={size}>
+    <path d="M15 6l-6 6 6 6" stroke={STROKE} strokeWidth="2.5" fill="none" />
+  </BaseSVG>
+);
+
+/* ==========================================================================
+   PROFILE AVATAR — photo upload with fallback to FaceIcon
+   ========================================================================== */
+
+const ProfileAvatar = ({ profile, size = 80, animated = true }) => {
+  const borderW = Math.max(2, Math.round(size / 26));
+  const style = {
+    width: size, height: size,
+    background: profile.color,
+    border: `${borderW}px solid ${STROKE}`,
+    boxShadow: animated ? `0 8px 22px ${profile.color}66` : 'none',
+  };
+  if (profile.avatar) {
+    return (
+      <div className={`rounded-full overflow-hidden flex items-center justify-center ${animated ? 'avatar-glow' : ''}`}
+           style={style}>
+        <img src={profile.avatar} alt="avatar"
+             draggable={false}
+             style={{ width: '100%', height: '100%', objectFit: 'cover', userSelect: 'none' }} />
+      </div>
+    );
+  }
+  return (
+    <div className={`rounded-full flex items-center justify-center ${animated ? 'avatar-glow' : ''}`}
+         style={style}>
+      <FaceIcon size={Math.round(size * 0.65)} fill={profile.color} />
+    </div>
+  );
+};
+
+/* ==========================================================================
+   DOODLE AVATAR — procedural SVG of a Doodle-style character
+   ========================================================================== */
+
+const DoodleAvatar = ({ doodle, size = 120, rounded = true, onFail }) => {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => { setFailed(false); }, [doodle && doodle.id]);
+  if (!doodle || failed) {
+    // Nice colorful placeholder instead of a broken-image icon
+    const palette = ['#FFB7C5', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6', '#FFAB91'];
+    const seed = doodle ? doodle.id : 0;
+    const c1 = palette[seed % palette.length];
+    const c2 = palette[(seed + 2) % palette.length];
+    return (
+      <div
+        className={rounded ? 'rounded-2xl' : ''}
+        style={{
+          width: size, height: size,
+          background: `linear-gradient(135deg, ${c1}, ${c2})`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#2D2D3F', fontWeight: 700, fontSize: Math.max(10, size * 0.14),
+          userSelect: 'none'
+        }}>
+        <FaceIcon size={Math.round(size * 0.55)} fill={c1} />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={doodleImage(doodle)}
+      alt=""
+      width={size}
+      height={size}
+      loading="lazy"
+      draggable={false}
+      onError={() => { setFailed(true); if (onFail) onFail(doodle); }}
+      className={rounded ? 'rounded-2xl' : ''}
+      style={{
+        display: 'block',
+        width: size,
+        height: size,
+        objectFit: 'cover',
+        background: '#EEE',
+        userSelect: 'none'
+      }}
+    />
+  );
+};
+
+/* ==========================================================================
+   FLOATING DECORATIVE BACKGROUND
+   ========================================================================== */
+
+const SkyBackground = () => {
+  const decorations = useRef(null);
+  if (!decorations.current) {
+    const rng = mulberry32(777);
+    decorations.current = Array.from({ length: 5 }, (_, i) => ({
+      id: i,
+      left: rng() * 100,
+      top: rng() * 100,
+      size: 14 + rng() * 18,
+      type: 'cloud',
+      delay: rng() * 8,
+      duration: 10 + rng() * 8,
+      opacity: 0.10 + rng() * 0.12
+    }));
+  }
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+      <div className="absolute inset-0"
+           style={{ background: 'linear-gradient(180deg, #E8EEF5 0%, #F0EAF2 55%, #F5EAEC 100%)' }} />
+      {decorations.current.map(d => (
+        <div key={d.id}
+             className="absolute"
+             style={{
+               left: `${d.left}%`,
+               top: `${d.top}%`,
+               opacity: d.opacity,
+               animation: `floatY ${d.duration}s ease-in-out ${d.delay}s infinite alternate, twinkle ${d.duration * 0.7}s ease-in-out ${d.delay}s infinite`
+             }}>
+          {d.type === 'cloud' && <CloudIcon size={d.size * 1.8} fill="#FFFFFF" />}
+          {d.type === 'sparkle' && <SparkleIcon size={d.size} fill="#FFFFFF" />}
+          {d.type === 'flower' && <FlowerIcon size={d.size * 1.2} petal="#FFFFFF" center="#FFE082" />}
+        </div>
+      ))}
+      <style>{`
+        @keyframes floatY {
+          0% { transform: translateY(0) rotate(0deg); }
+          100% { transform: translateY(-16px) rotate(6deg); }
+        }
+        @keyframes twinkle {
+          0%, 100% { filter: brightness(1); }
+          50% { filter: brightness(1.3); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   REUSABLE PRIMITIVES
+   ========================================================================== */
+
+const FrostedCard = ({ children, className = '', onClick }) => (
+  <div onClick={onClick}
+       className={`rounded-2xl border transition-all ${className}`}
+       style={{
+         background: 'rgba(255,255,255,0.72)',
+         backdropFilter: 'blur(14px)',
+         WebkitBackdropFilter: 'blur(14px)',
+         borderColor: '#E8E0F0',
+         boxShadow: '0 4px 20px rgba(100, 80, 160, 0.12)'
+       }}>
+    {children}
+  </div>
+);
+
+const PrimaryButton = ({ children, onClick, disabled, className = '' }) => (
+  <button onClick={onClick} disabled={disabled}
+          className={`rounded-xl px-5 py-3 font-bold text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
+          style={{
+            background: '#4140FF',
+            letterSpacing: '0.01em',
+            boxShadow: '0 4px 14px rgba(65, 64, 255, 0.35)'
+          }}>
+    {children}
+  </button>
+);
+
+const SoftButton = ({ children, onClick, className = '' }) => (
+  <button onClick={onClick}
+          className={`rounded-xl px-4 py-2.5 font-semibold transition-all active:scale-95 ${className}`}
+          style={{
+            background: 'rgba(255,255,255,0.8)',
+            color: '#2D2D3F',
+            border: '1px solid #E8E0F0',
+            letterSpacing: '0.01em'
+          }}>
+    {children}
+  </button>
+);
+
+const Pill = ({ children, active, onClick, color = '#4140FF' }) => (
+  <button onClick={onClick}
+          className="rounded-full px-4 py-1.5 text-sm font-semibold transition-all active:scale-95"
+          style={{
+            background: active ? color : 'rgba(255,255,255,0.6)',
+            color: active ? '#FFFFFF' : '#2D2D3F',
+            border: `1px solid ${active ? color : '#E8E0F0'}`
+          }}>
+    {children}
+  </button>
+);
+
+/* ==========================================================================
+   SPLASH / PROFILE CREATION
+   ========================================================================== */
+
+const PROFILE_COLORS = [
+  { name: 'mint', hex: '#A8E6CF' },
+  { name: 'pink', hex: '#FFB7C5' },
+  { name: 'peach', hex: '#FFAB91' },
+  { name: 'yellow', hex: '#FFE082' },
+  { name: 'lavender', hex: '#C5B3E6' },
+  { name: 'sky', hex: '#90CAF9' }
+];
+
+/* Fluid / water-like animated title — each glyph bobs on its own stagger,
+   gradient sheen slides across, letters tilt like floating on waves */
+const WaterTitle = ({ text, size = 'text-5xl' }) => {
+  const chars = [...text];
+  return (
+    <h1 className={`${size} select-none`}
+        style={{ lineHeight: 1.1, fontFamily: "'Quicksand', sans-serif", fontWeight: 600, letterSpacing: '-0.01em' }}>
+      {chars.map((ch, i) => (
+        <span
+          key={i}
+          className="doodle-letter"
+          style={{
+            animationDelay: `${(i * 0.15) % 2.4}s`,
+            marginRight: ch === ' ' ? '0.25em' : '0'
+          }}>
+          {ch === ' ' ? '\u00A0' : ch}
+        </span>
+      ))}
+    </h1>
+  );
+};
+
+/* ==========================================================================
+   COUNT-UP number (animates from 0 to target value)
+   ========================================================================== */
+
+const CountUp = ({ value, duration = 900 }) => {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let raf;
+    const start = performance.now();
+    const tick = (t) => {
+      const p = Math.min(1, (t - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setN(Math.round(value * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+  return <>{n}</>;
+};
+
+/* ==========================================================================
+   FOOTER SIGNATURE — "vibe coded by Degos" with neon animated letters
+   ========================================================================== */
+
+const FooterSignature = () => {
+  const full = 'vibe coded by Degos';
+  return (
+    <div className="w-full flex justify-center pb-10 pt-8 select-none">
+      <div className="degos-wrap">
+        <span className="degos-sig">
+          {[...full].map((ch, i) => (
+            <span key={i} className="degos-letter"
+                  style={{ animationDelay: `${(i * 0.08) % 1.6}s` }}>
+              {ch === ' ' ? '\u00A0' : ch}
+            </span>
+          ))}
+        </span>
+        <span className="degos-underline" aria-hidden="true" />
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   PROGRESS RING — animated circular progress indicator
+   ========================================================================== */
+
+const ProgressRing = ({ value, total, size = 60 }) => {
+  const [p, setP] = useState(0);
+  const pct = total === 0 ? 0 : value / total;
+  useEffect(() => {
+    let raf;
+    const start = performance.now();
+    const dur = 900;
+    const tick = (t) => {
+      const k = Math.min(1, (t - start) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      setP(pct * eased);
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [pct]);
+  const r = (size - 8) / 2;
+  const c = 2 * Math.PI * r;
+  const off = c * (1 - p);
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(65,64,255,0.12)" strokeWidth={4} />
+        <defs>
+          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#FFB7C5" />
+            <stop offset="50%" stopColor="#C5B3E6" />
+            <stop offset="100%" stopColor="#4140FF" />
+          </linearGradient>
+        </defs>
+        <circle cx={size/2} cy={size/2} r={r} fill="none"
+                stroke="url(#ringGrad)" strokeWidth={4} strokeLinecap="round"
+                strokeDasharray={c} strokeDashoffset={off} />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <div className="font-display font-semibold text-base leading-none" style={{ color: '#2D2D3F' }}>
+            {value}<span className="text-xs opacity-50">/{total}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   APP HEADER — persistent "Doodle or Not" brand mark across screens
+   ========================================================================== */
+
+const AppHeader = ({ compact = false }) => {
+  return (
+    <div className={`w-full flex flex-col items-center ${compact ? 'pt-3 pb-0' : 'pt-5 pb-1'} anim-fade-in`}>
+      <div className="flex items-center gap-2">
+        <WaterTitle text="Doodle or Not" size={compact ? 'text-[26px]' : 'text-3xl'} />
+        <div className="anim-rainbow-spin-slow">
+          <RainbowIcon size={compact ? 22 : 28} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SplashScreen = ({ onCreate, initial }) => {
+  const [name, setName] = useState(initial?.name || '');
+  const [color, setColor] = useState(initial?.color || PROFILE_COLORS[0].hex);
+  const [avatar, setAvatar] = useState(initial?.avatar || null);
+  const [uploadErr, setUploadErr] = useState('');
+  const fileRef = useRef(null);
+  const nameValid = /^[a-zA-Z0-9_]{3,15}$/.test(name);
+  const isEdit = !!initial;
+
+  const handleFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadErr('');
+    if (!file.type.startsWith('image/')) {
+      setUploadErr('Please pick an image file.'); return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadErr('Image is too large (max 5 MB).'); return;
+    }
+    // Downscale to 256x256 to keep localStorage small
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const s = 256;
+        const canvas = document.createElement('canvas');
+        canvas.width = s; canvas.height = s;
+        const ctx = canvas.getContext('2d');
+        // cover crop
+        const ratio = Math.max(s / img.width, s / img.height);
+        const nw = img.width * ratio, nh = img.height * ratio;
+        ctx.drawImage(img, (s - nw) / 2, (s - nh) / 2, nw, nh);
+        setAvatar(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = () => setUploadErr('Could not read that image.');
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
+      <div className="flex flex-col items-center mb-6 anim-float-in">
+        <WaterTitle text="Doodle or Not" size="text-6xl" />
+        <div className="mt-2 opacity-90 anim-rainbow-spin-slow"><RainbowIcon size={72} /></div>
+        <p className="mt-3 text-sm" style={{ color: '#2D2D3F', opacity: 0.7 }}>
+          {isEdit ? 'Edit your Doodle identity.' : 'A daily Doodles trivia game. No wallet. Just vibes.'}
+        </p>
+      </div>
+
+      <FrostedCard className="w-full max-w-sm p-6 anim-pop-in">
+        {/* Avatar upload */}
+        <div className="flex items-center gap-2 mb-3">
+          <SparkleIcon size={18} fill="#FFE082" />
+          <h3 className="font-bold">Your Doodle photo</h3>
+        </div>
+        <div className="flex items-center gap-4 mb-5">
+          <div className="relative">
+            <ProfileAvatar profile={{ name, color, avatar }} size={72} />
+            {avatar && (
+              <button onClick={() => setAvatar(null)}
+                      className="absolute -top-1 -right-1 w-6 h-6 rounded-full text-xs font-bold transition-transform hover:scale-110 active:scale-90"
+                      title="Remove photo"
+                      style={{ background: '#FFF', border: `2px solid ${STROKE}`, color: '#2D2D3F' }}>
+                ×
+              </button>
+            )}
+          </div>
+          <div className="flex-1">
+            <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+            <SoftButton onClick={() => fileRef.current && fileRef.current.click()}>
+              {avatar ? 'Change photo' : 'Upload photo'}
+            </SoftButton>
+            <p className="text-[11px] mt-2" style={{ color: '#7B7B9A' }}>PNG / JPG · up to 5 MB</p>
+            {uploadErr && <p className="text-[11px] mt-1" style={{ color: '#E57373' }}>{uploadErr}</p>}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 mb-4">
+          <FlowerIcon size={24} petal="#FFFFFF" center="#FFE082" />
+          <h2 className="font-bold text-lg">Choose your name</h2>
+        </div>
+
+        <input
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
+          maxLength={15}
+          placeholder="doodlefan_42"
+          className="w-full rounded-xl px-4 py-3 outline-none mb-2 font-medium transition-all focus:scale-[1.01]"
+          style={{
+            background: 'rgba(255,255,255,0.7)',
+            border: '2px solid #E8E0F0',
+            color: '#2D2D3F'
+          }}
+        />
+        <p className="text-xs mb-5" style={{ color: '#7B7B9A' }}>3–15 chars, letters, numbers and _</p>
+
+        <div className="flex items-center gap-2 mb-3">
+          <SparkleIcon size={18} fill="#FFE082" />
+          <h3 className="font-bold">Pick your color</h3>
+        </div>
+        <div className="flex gap-3 mb-6 justify-between">
+          {PROFILE_COLORS.map(c => (
+            <button key={c.hex}
+                    onClick={() => setColor(c.hex)}
+                    className="w-10 h-10 rounded-full transition-all duration-300 active:scale-90 hover:-translate-y-0.5"
+                    style={{
+                      background: c.hex,
+                      border: `2.5px solid ${STROKE}`,
+                      transform: color === c.hex ? 'scale(1.15)' : 'scale(1)',
+                      boxShadow: color === c.hex ? `0 0 0 3px rgba(65,64,255,0.4), 0 6px 16px ${c.hex}88` : 'none'
+                    }} />
+          ))}
+        </div>
+
+        <PrimaryButton
+          onClick={() => nameValid && onCreate({ name, color, avatar })}
+          disabled={!nameValid}
+          className="w-full flex items-center justify-center gap-2">
+          <SparkleIcon size={18} fill="#FFFFFF" />
+          {isEdit ? 'Save changes' : "Let's Play!"}
+        </PrimaryButton>
+      </FrostedCard>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   ICON STRIP — result visualization (replaces emoji squares)
+   ========================================================================== */
+
+const ResultIcon = ({ type, size = 24 }) => {
+  switch (type) {
+    case 'perfect': return <RainbowIcon size={size} />;
+    case 'correct': return <FlowerIcon size={size} petal="#FFFFFF" center="#FFE082" />;
+    case 'close':   return <ButterflyIcon size={size} />;
+    case 'near':    return <SparkleIcon size={size} fill="#90CAF9" />;
+    case 'wrong':   return <CloudRainIcon size={size} />;
+    default:        return <CloudRainIcon size={size} />;
+  }
+};
+
+/* ==========================================================================
+   HOME SCREEN
+   ========================================================================== */
+
+const HomeScreen = ({ profile, progress, onPlay, weekPts }) => {
+  const modes = [
+    { id: 'guess', name: 'Higher Sale', desc: 'Which Doodle sold for more ETH?', tint: '#E8D5F5', icon: <MagnifierIcon size={40} />, accent: '#C5B3E6' },
+    { id: 'price', name: 'Rarity Duel', desc: 'Which Doodle is rarer?',          tint: '#FFECE0', icon: <ArrowsIcon size={40} />,    accent: '#FFAB91' },
+    { id: 'trait', name: 'Trait Roulette', desc: 'Guess the rarity %',           tint: '#E0F5EC', icon: <WheelIcon size={40} />,     accent: '#A8E6CF' }
+  ];
+
+  // Deterministic preview Doodles per mode, picked from the dataset
+  const previews = useRef(null);
+  if (!previews.current) {
+    const rng = mulberry32(hashCode(todayStr() + 'preview'));
+    previews.current = {};
+    for (const m of modes) {
+      const picks = [];
+      for (let i = 0; i < 3; i++) {
+        picks.push(DOODLES[Math.floor(rng() * DOODLES.length)]);
+      }
+      previews.current[m.id] = picks;
+    }
+  }
+
+  const doneCount = Object.values(progress).filter(Boolean).length;
+  const hour = new Date().getHours();
+  const greet = hour < 5 ? 'happy late night'
+              : hour < 12 ? 'good morning'
+              : hour < 18 ? 'good afternoon'
+              : 'good evening';
+
+  return (
+    <div className="px-4 pt-3 pb-28 max-w-[480px] mx-auto">
+      {/* top bar */}
+      <div className="flex items-center justify-between mb-5 anim-fade-in">
+        <div className="flex items-center gap-3">
+          <ProfileAvatar profile={profile} size={46} animated={false} />
+          <div>
+            <p className="text-xs font-medium" style={{ color: '#7B7B9A' }}>{greet} —</p>
+            <h2 className="font-bold text-xl" style={{ color: '#2D2D3F' }}>@{profile.name}</h2>
+          </div>
+        </div>
+        <FrostedCard className="px-3 py-2 flex items-center gap-2 hover-lift">
+          <CrownIcon size={18} />
+          <span className="font-display font-semibold text-base tabular-nums" style={{ color: '#2D2D3F' }}>
+            <CountUp value={weekPts} />
+          </span>
+          <span className="text-[10px] font-semibold tracking-wider uppercase" style={{ color: '#7B7B9A' }}>pts</span>
+        </FrostedCard>
+      </div>
+
+      {/* Daily challenge — hero card with animated ring */}
+      <FrostedCard className="p-5 mb-5 anim-float-in" style={{ animationDelay: '0.06s' }}>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#7B7B9A' }}>
+              Daily Challenge
+            </p>
+            <h3 className="font-display font-semibold text-2xl" style={{ color: '#2D2D3F' }}>
+              Day #{dayNumber()}
+            </h3>
+          </div>
+          <ProgressRing value={doneCount} total={3} size={66} />
+        </div>
+        <div className="flex gap-2 justify-between">
+          {modes.map(m => (
+            <div key={m.id} className="flex-1 flex flex-col items-center gap-1">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                   style={{
+                     background: progress[m.id] ? m.accent : 'rgba(255,255,255,0.7)',
+                     border: `2px solid ${STROKE}`,
+                     transform: progress[m.id] ? 'scale(1.05)' : 'scale(1)'
+                   }}>
+                {progress[m.id]
+                  ? <CheckIcon size={18} />
+                  : <div className="w-4 h-4 rounded-full border-2" style={{ borderColor: STROKE, borderStyle: 'dashed' }} />}
+              </div>
+              <span className="text-[10px] font-medium" style={{ color: '#7B7B9A' }}>{m.name}</span>
+            </div>
+          ))}
+        </div>
+      </FrostedCard>
+
+      {/* Mode cards */}
+      <div className="space-y-3">
+        {modes.map((m, i) => {
+          const done = progress[m.id];
+          const picks = previews.current[m.id];
+          return (
+            <FrostedCard key={m.id}
+                         onClick={() => !done && onPlay(m.id)}
+                         className="p-4 cursor-pointer active:scale-[0.98] transition-all duration-300 hover-lift anim-float-in relative overflow-hidden"
+                         style={{ background: `${m.tint}cc`, animationDelay: `${0.12 + i * 0.08}s` }}>
+              {/* Soft decorative gradient blob accent */}
+              <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full pointer-events-none"
+                   style={{ background: `radial-gradient(circle, ${m.accent}55, transparent 70%)` }} />
+              <div className="flex items-center gap-4 relative">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
+                     style={{ background: 'rgba(255,255,255,0.85)', border: `1.5px solid ${m.accent}aa`,
+                              boxShadow: `0 8px 16px ${m.accent}44` }}>
+                  {m.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-display font-semibold text-lg leading-tight" style={{ color: '#2D2D3F' }}>
+                    {m.name}
+                  </h3>
+                  <p className="text-xs mt-0.5" style={{ color: '#7B7B9A' }}>{m.desc}</p>
+                </div>
+                {done ? (
+                  <div className="flex items-center gap-1 rounded-full px-3 py-1.5 shrink-0"
+                       style={{ background: '#A8E6CF', border: `1.5px solid ${STROKE}` }}>
+                    <CheckIcon size={14} />
+                    <span className="text-xs font-bold" style={{ color: '#2D2D3F' }}>Done</span>
+                  </div>
+                ) : (
+                  <button className="rounded-full px-4 py-2 font-bold text-sm text-white shrink-0 transition-all hover:scale-105"
+                          style={{ background: '#4140FF', boxShadow: '0 6px 16px rgba(65,64,255,0.4)' }}>
+                    Play
+                  </button>
+                )}
+              </div>
+              {/* Floating preview Doodles */}
+              <div className="flex gap-2 mt-3 justify-start">
+                {picks.map((d, j) => (
+                  <div key={j} className="rounded-xl overflow-hidden"
+                       style={{
+                         transform: `rotate(${[-3, 1, -1][j]}deg) translateY(${[0, -2, 1][j]}px)`,
+                         boxShadow: '0 4px 10px rgba(45,45,63,0.1)',
+                         border: `1.5px solid #fff`
+                       }}>
+                    <DoodleAvatar doodle={d} size={46} />
+                  </div>
+                ))}
+              </div>
+            </FrostedCard>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   GAME MODE 1: GUESS THE DOODLE (simplified — binary trait question)
+   ========================================================================== */
+
+const GuessMode = ({ seed, onFinish }) => {
+  const rng = useRef(mulberry32(seed + 7));
+  const pairs = useRef([]);
+  if (pairs.current.length === 0 && DOODLES.length > 0) {
+    const withSale = DOODLES.filter(d => d.s && d.s.p > 0);
+    const used = new Set();
+    let tries = 0;
+    while (pairs.current.length < 10 && tries < 1000 && withSale.length >= 2) {
+      tries++;
+      const a = withSale[Math.floor(rng.current() * withSale.length)];
+      const b = withSale[Math.floor(rng.current() * withSale.length)];
+      if (a.id === b.id || used.has(a.id) || used.has(b.id)) continue;
+      if (a.s.p === b.s.p) continue;
+      const hi = Math.max(a.s.p, b.s.p);
+      const lo = Math.min(a.s.p, b.s.p);
+      // require a meaningful gap: the higher price must be >= 1.35x the lower
+      if (hi / lo < 1.35) continue;
+      used.add(a.id); used.add(b.id);
+      pairs.current.push({ a, b });
+    }
+  }
+
+  const [round, setRound] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [results, setResults] = useState([]);
+  const current = pairs.current[round];
+  if (!current) {
+    return <div className="p-10 text-center" style={{ color: '#7B7B9A' }}>Loading dataset…</div>;
+  }
+  const correctSide = current.a.s.p > current.b.s.p ? 'a' : 'b';
+
+  const fmtPrice = (p) => {
+    if (p >= 1) return p.toFixed(2) + ' ETH';
+    if (p >= 0.01) return p.toFixed(3) + ' ETH';
+    return p.toFixed(4) + ' ETH';
+  };
+  const fmtDate = (ts) => {
+    const dt = new Date(ts * 1000);
+    return dt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
+
+  const choose = (side) => {
+    if (revealed) return;
+    setRevealed(true);
+    const correct = side === correctSide;
+    setTimeout(() => {
+      const newResults = [...results, correct ? 'correct' : 'wrong'];
+      setResults(newResults);
+      if (round + 1 >= pairs.current.length) {
+        const pts = newResults.filter(r => r === 'correct').length;
+        onFinish({ points: pts, icons: newResults, mode: 'guess' });
+      } else {
+        setRound(round + 1);
+        setRevealed(false);
+      }
+    }, 1600);
+  };
+
+  return (
+    <div className="px-4 pt-4 pb-10 max-w-[480px] mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <MagnifierIcon size={28} />
+          <h2 className="font-bold text-lg" style={{ color: '#2D2D3F' }}>Higher Sale</h2>
+        </div>
+        <span className="font-semibold text-sm" style={{ color: '#7B7B9A' }}>
+          {round + 1}/{pairs.current.length}
+        </span>
+      </div>
+
+      <FrostedCard className="p-4 mb-4 text-center">
+        <p className="text-sm font-medium" style={{ color: '#7B7B9A' }}>Which one sold for</p>
+        <h3 className="font-bold text-xl" style={{ color: '#4140FF' }}>MORE ETH most recently?</h3>
+      </FrostedCard>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        {['a', 'b'].map(side => {
+          const d = current[side];
+          const isCorrect = revealed && side === correctSide;
+          const isWrong = revealed && side !== correctSide;
+          return (
+            <FrostedCard key={side}
+                         onClick={() => choose(side)}
+                         className={`p-3 cursor-pointer transition-all ${revealed ? '' : 'active:scale-95'}`}
+                         style={{
+                           outline: isCorrect ? '3px solid #7DD8A0' : isWrong ? '3px solid #FF8A8A' : 'none',
+                           outlineOffset: '2px'
+                         }}>
+              <DoodleAvatar doodle={d} size={170} />
+              <div className="mt-2 text-center">
+                <div className="text-[10px] font-bold" style={{ color: '#7B7B9A' }}>#{d.id}</div>
+                {revealed ? (
+                  <>
+                    <div className="font-bold text-lg" style={{ color: isCorrect ? '#7DD8A0' : '#2D2D3F' }}>
+                      {fmtPrice(d.s.p)}
+                    </div>
+                    <div className="text-[10px]" style={{ color: '#7B7B9A' }}>
+                      {fmtDate(d.s.t)}
+                    </div>
+                  </>
+                ) : (
+                  <div className="font-bold text-lg" style={{ color: '#C5B3E6' }}>? ETH</div>
+                )}
+              </div>
+            </FrostedCard>
+          );
+        })}
+      </div>
+
+      <div className="flex gap-1 justify-center">
+        {Array.from({ length: pairs.current.length }, (_, i) => (
+          <div key={i} className="w-7 h-7 flex items-center justify-center rounded-full"
+               style={{ background: results[i] ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.3)' }}>
+            {results[i] ? <ResultIcon type={results[i]} size={18} /> : <div className="w-2 h-2 rounded-full" style={{ background: '#C5B3E6' }} />}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   GAME MODE 2: RARITY DUEL (which Doodle is rarer?)
+   ========================================================================== */
+
+const PriceMode = ({ seed, onFinish }) => {
+  const rng = useRef(mulberry32(seed + 99));
+  const pairs = useRef([]);
+  if (pairs.current.length === 0 && DOODLES.length > 0) {
+    const used = new Set();
+    let tries = 0;
+    while (pairs.current.length < 15 && tries < 500) {
+      tries++;
+      const a = DOODLES[Math.floor(rng.current() * DOODLES.length)];
+      const b = DOODLES[Math.floor(rng.current() * DOODLES.length)];
+      if (a.id === b.id || used.has(a.id) || used.has(b.id)) continue;
+      if (a.r === b.r) continue;
+      // Skew: try to keep rarity difference meaningful (at least 15% apart)
+      const ra = a.rank || 1;
+      const rb = b.rank || 1;
+      if (Math.abs(ra - rb) < 150) continue;
+      used.add(a.id); used.add(b.id);
+      pairs.current.push({ a, b });
+    }
+  }
+
+  const [round, setRound] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const [icons, setIcons] = useState([]);
+  const current = pairs.current[round];
+  if (!current) {
+    return <div className="p-10 text-center" style={{ color: '#7B7B9A' }}>Loading dataset…</div>;
+  }
+  // rarer = higher score = LOWER rank number
+  const correctSide = current.a.r > current.b.r ? 'a' : 'b';
+  const mult = streak >= 10 ? 3 : streak >= 5 ? 2 : 1;
+
+  const choose = (side) => {
+    if (revealed) return;
+    setRevealed(true);
+    const correct = side === correctSide;
+    setTimeout(() => {
+      if (correct) {
+        const newStreak = streak + 1;
+        setStreak(newStreak);
+        setIcons([...icons, 'up']);
+        if (round + 1 >= pairs.current.length) {
+          finish(newStreak, [...icons, 'up']);
+        } else {
+          setRound(round + 1);
+          setRevealed(false);
+        }
+      } else {
+        const newIcons = [...icons, 'down'];
+        setIcons(newIcons);
+        setGameOver(true);
+        setTimeout(() => finish(streak, newIcons), 1800);
+      }
+    }, 1500);
+  };
+
+  const finish = (finalStreak, finalIcons) => {
+    const hits = finalIcons.filter(i => i === 'up').length;
+    const finalMult = finalStreak >= 10 ? 3 : finalStreak >= 5 ? 2 : 1;
+    onFinish({ points: hits * 2 * finalMult, icons: finalIcons, mode: 'price', streak: finalStreak });
+  };
+
+  return (
+    <div className="px-4 pt-4 pb-10 max-w-[480px] mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <ArrowsIcon size={28} />
+          <h2 className="font-bold text-lg" style={{ color: '#2D2D3F' }}>Rarity Duel</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          {streak > 0 && <ShootingStarIcon size={22} />}
+          <span className="font-bold text-sm" style={{ color: '#4140FF' }}>
+            {streak} streak {mult > 1 && `· x${mult}`}
+          </span>
+        </div>
+      </div>
+
+      <p className="text-center text-sm mb-4" style={{ color: '#7B7B9A' }}>
+        Which Doodle is <strong style={{ color: '#4140FF' }}>RARER</strong>?
+      </p>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        {['a', 'b'].map(side => {
+          const d = current[side];
+          const isCorrect = revealed && side === correctSide;
+          const isWrong = revealed && side !== correctSide;
+          return (
+            <FrostedCard key={side}
+                         onClick={() => choose(side)}
+                         className={`p-3 cursor-pointer transition-all ${revealed ? '' : 'active:scale-95'}`}
+                         style={{
+                           outline: isCorrect ? '3px solid #7DD8A0' : isWrong ? '3px solid #FF8A8A' : 'none',
+                           outlineOffset: '2px'
+                         }}>
+              <DoodleAvatar doodle={d} size={170} />
+              <div className="mt-2 text-center">
+                <div className="text-[10px] font-bold" style={{ color: '#7B7B9A' }}>#{d.id}</div>
+                {revealed ? (
+                  <div className="font-bold text-xl" style={{ color: isCorrect ? '#7DD8A0' : '#2D2D3F' }}>
+                    Rank #{d.rank}
+                  </div>
+                ) : (
+                  <div className="font-bold text-xl" style={{ color: '#C5B3E6' }}>Rank ?</div>
+                )}
+              </div>
+            </FrostedCard>
+          );
+        })}
+      </div>
+
+      <div className="flex gap-1 justify-center">
+        {icons.map((icn, i) => (
+          <div key={i} className="w-7 h-7 flex items-center justify-center rounded-full"
+               style={{ background: 'rgba(255,255,255,0.7)' }}>
+            {icn === 'up'
+              ? <span className="text-sm font-bold" style={{ color: '#7DD8A0' }}>▲</span>
+              : <span className="text-sm font-bold" style={{ color: '#FF8A8A' }}>▼</span>}
+          </div>
+        ))}
+      </div>
+
+      {gameOver && (
+        <FrostedCard className="mt-5 p-4 text-center">
+          <CloudRainIcon size={40} />
+          <p className="font-bold mt-2" style={{ color: '#2D2D3F' }}>Game over · streak {streak}</p>
+        </FrostedCard>
+      )}
+    </div>
+  );
+};
+
+/* ==========================================================================
+   GAME MODE 3: TRAIT ROULETTE (guess the rarity %)
+   ========================================================================== */
+
+const TraitExamples = ({ candidates }) => {
+  const [failed, setFailed] = useState({});
+  useEffect(() => { setFailed({}); }, [candidates]);
+  const visible = candidates.filter(d => !failed[d.id]).slice(0, 3);
+  if (visible.length === 0) return null;
+  return (
+    <div className="flex items-center justify-center gap-3">
+      {visible.map((d) => (
+        <div key={d.id} className="rounded-2xl overflow-hidden hover-lift"
+             style={{ boxShadow: '0 4px 14px rgba(65,64,255,0.12)' }}>
+          <DoodleAvatar doodle={d} size={84}
+                        onFail={(bad) => setFailed(f => ({ ...f, [bad.id]: true }))} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const TraitMode = ({ seed, onFinish }) => {
+  const rng = useRef(mulberry32(seed + 33));
+  const questions = useRef([]);
+  if (questions.current.length === 0) {
+    // Flatten all (type, value, pct) and pick 5 varied, non-extreme traits
+    const all = [];
+    for (const t of TRAIT_TYPES) {
+      const map = RARITY[t] || {};
+      for (const [value, pct] of Object.entries(map)) {
+        if (value === '__none__') continue;
+        if (pct >= 0.2 && pct <= 50) all.push({ type: t, value, pct });
+      }
+    }
+    // shuffle
+    for (let i = all.length - 1; i > 0; i--) {
+      const j = Math.floor(rng.current() * (i + 1));
+      [all[i], all[j]] = [all[j], all[i]];
+    }
+    const picked = all.slice(0, 5);
+    // For each picked trait, collect up to 3 example Doodles that have it (deterministic)
+    for (const q of picked) {
+      const matches = [];
+      for (const d of DOODLES) {
+        if (hasTrait(d, q.type, q.value)) matches.push(d);
+      }
+      // seeded shuffle so picks are stable per seed
+      for (let i = matches.length - 1; i > 0; i--) {
+        const j = Math.floor(rng.current() * (i + 1));
+        [matches[i], matches[j]] = [matches[j], matches[i]];
+      }
+      // keep up to 8 candidates so we can swap in replacements if images fail
+      q.exampleCandidates = matches.slice(0, 8);
+    }
+    questions.current = picked;
+  }
+
+  const [round, setRound] = useState(0);
+  const [guess, setGuess] = useState(20);
+  const [revealed, setRevealed] = useState(false);
+  const [results, setResults] = useState([]);
+  const current = questions.current[round];
+  if (!current) {
+    return <div className="p-10 text-center" style={{ color: '#7B7B9A' }}>Loading dataset…</div>;
+  }
+
+  const actual = current.pct;
+
+  const submit = () => {
+    if (revealed) return;
+    setRevealed(true);
+    const diff = Math.abs(guess - actual);
+    let type, pts;
+    if (diff <= 1)  { type = 'perfect'; pts = 3; }
+    else if (diff <= 3) { type = 'correct'; pts = 2; }
+    else if (diff <= 8) { type = 'near'; pts = 1; }
+    else { type = 'wrong'; pts = 0; }
+
+    setTimeout(() => {
+      const newResults = [...results, { type, pts }];
+      setResults(newResults);
+      if (round + 1 >= questions.current.length) {
+        onFinish({
+          points: newResults.reduce((s, r) => s + r.pts, 0),
+          icons: newResults.map(r => r.type),
+          mode: 'trait'
+        });
+      } else {
+        setRound(round + 1);
+        setRevealed(false);
+        setGuess(20);
+      }
+    }, 1800);
+  };
+
+  const lastResult = revealed ? (() => {
+    const diff = Math.abs(guess - actual);
+    if (diff <= 1) return { type: 'perfect', label: 'Bullseye!' };
+    if (diff <= 3) return { type: 'correct', label: 'Close!' };
+    if (diff <= 8) return { type: 'near', label: 'Near miss' };
+    return { type: 'wrong', label: 'Way off' };
+  })() : null;
+
+  const maxPct = 50;
+  const pct2x = (v) => Math.min(100, (v / maxPct) * 100);
+
+  return (
+    <div className="px-4 pt-4 pb-10 max-w-[480px] mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <WheelIcon size={28} />
+          <h2 className="font-bold text-lg" style={{ color: '#2D2D3F' }}>Trait Roulette</h2>
+        </div>
+        <span className="font-semibold text-sm" style={{ color: '#7B7B9A' }}>
+          {round + 1}/{questions.current.length}
+        </span>
+      </div>
+
+      <FrostedCard className="p-6 mb-5 text-center">
+        <p className="text-sm font-medium mb-1" style={{ color: '#7B7B9A' }}>What % of Doodles have</p>
+        <h3 className="font-bold text-2xl" style={{ color: '#4140FF' }}>{titleCase(current.value)}</h3>
+        <p className="text-[11px] mt-1 mb-4" style={{ color: '#7B7B9A' }}>({current.type})</p>
+        <TraitExamples candidates={current.exampleCandidates || []} />
+
+      </FrostedCard>
+
+      <FrostedCard className="p-5 mb-4">
+        <div className="text-center mb-4">
+          <div className="font-bold text-5xl" style={{ color: '#2D2D3F' }}>{guess}%</div>
+        </div>
+
+        <div className="relative h-12 mb-4">
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full"
+               style={{ background: 'linear-gradient(90deg, #A8E6CF, #FFE082, #FFB7C5)' }} />
+          {revealed && (
+            <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all"
+                 style={{ left: `${pct2x(actual)}%` }}>
+              <div className="w-1 h-8 rounded" style={{ background: '#7DD8A0' }} />
+              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold whitespace-nowrap"
+                   style={{ color: '#7DD8A0' }}>
+                {actual}%
+              </div>
+            </div>
+          )}
+          <input
+            type="range"
+            min="0"
+            max={maxPct}
+            step="1"
+            value={guess}
+            disabled={revealed}
+            onChange={e => setGuess(+e.target.value)}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-default"
+          />
+          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all"
+               style={{ left: `${pct2x(guess)}%` }}>
+            <div style={{ filter: 'drop-shadow(0 2px 6px rgba(100,80,160,0.3))' }}>
+              <FlowerIcon size={28} petal="#FFFFFF" center="#FFE082" />
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-between text-[10px] -mt-2 mb-2" style={{ color: '#7B7B9A' }}>
+          <span>0%</span><span>{maxPct/2}%</span><span>{maxPct}%+</span>
+        </div>
+
+        {!revealed ? (
+          <PrimaryButton onClick={submit} className="w-full">Lock in answer</PrimaryButton>
+        ) : (
+          <div className="text-center pt-2">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <ResultIcon type={lastResult.type} size={28} />
+              <span className="font-bold text-lg" style={{ color: '#2D2D3F' }}>{lastResult.label}</span>
+            </div>
+            <p className="text-sm" style={{ color: '#7B7B9A' }}>
+              You: {guess}% · Real: {actual}%
+            </p>
+          </div>
+        )}
+      </FrostedCard>
+
+      <div className="flex gap-1 justify-center">
+        {results.map((r, i) => (
+          <div key={i} className="w-7 h-7 flex items-center justify-center rounded-full"
+               style={{ background: 'rgba(255,255,255,0.7)' }}>
+            <ResultIcon type={r.type} size={18} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   RESULTS / SHARE CARD
+   ========================================================================== */
+
+const ResultsScreen = ({ result, profile, onBack }) => {
+  const { mode, points, icons } = result;
+  const modeMeta = {
+    guess: { name: 'Higher Sale', icon: <MagnifierIcon size={32} /> },
+    price: { name: 'Rarity Duel', icon: <ArrowsIcon size={32} /> },
+    trait: { name: 'Trait Roulette', icon: <WheelIcon size={32} /> }
+  }[mode];
+
+  const [copied, setCopied] = useState(false);
+
+  const shareText = () => {
+    const symbols = {
+      perfect: '◎', correct: '✿', close: '★', near: '✦', wrong: '·',
+      up: '▲', down: '▼'
+    };
+    const line = icons.map(i => symbols[i] || '·').join(' ');
+    return `Doodle or Not — Day #${dayNumber()}\n\n${modeMeta.name}: ${line} (${points} pts)\n\nPlay free: doodleornot.xyz`;
+  };
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(shareText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  // Score tier — drives confetti + headline
+  const perfectCount = icons.filter(i => i === 'perfect').length;
+  const anyCorrect = icons.some(i => ['perfect', 'correct', 'up', 'near'].includes(i));
+  const tier = points >= 15 ? 'legendary'
+            : points >= 10 ? 'great'
+            : points >= 5  ? 'solid'
+            : anyCorrect   ? 'getting-there'
+            : 'tough-day';
+  const headline = {
+    'legendary':    'Legendary!',
+    'great':        'Nicely done.',
+    'solid':        'Solid round.',
+    'getting-there':'Getting there.',
+    'tough-day':    'Tough day. Tomorrow awaits.'
+  }[tier];
+
+  const showConfetti = points >= 10 || perfectCount >= 2;
+
+  return (
+    <div className="px-4 pt-6 pb-10 max-w-[480px] mx-auto relative">
+      {showConfetti && <Confetti />}
+
+      <FrostedCard className="p-6 text-center relative overflow-hidden anim-pop-in">
+        {/* Decorative gradient wash */}
+        <div className="absolute inset-0 pointer-events-none"
+             style={{ background: 'radial-gradient(circle at 50% 0%, rgba(197,179,230,0.35), transparent 60%)' }} />
+
+        <div className="relative">
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: '#7B7B9A' }}>
+            {modeMeta.name} · Day #{dayNumber()}
+          </p>
+          <h2 className="font-display font-semibold text-3xl mt-1 mb-5" style={{ color: '#2D2D3F' }}>
+            {headline}
+          </h2>
+
+          <div className="flex justify-center mb-2 anim-rainbow-spin-slow">
+            <RainbowIcon size={80} />
+          </div>
+
+          <div className="font-display font-semibold leading-none tabular-nums anim-score-pop"
+               style={{ fontSize: 96, color: '#4140FF', letterSpacing: '-0.04em' }}>
+            <CountUp value={points} duration={1200} />
+          </div>
+          <p className="text-sm font-semibold mt-1 mb-6 tracking-wider uppercase" style={{ color: '#2D2D3F', opacity: 0.75 }}>
+            points earned
+          </p>
+
+          <div className="flex gap-1.5 justify-center mb-6 flex-wrap">
+            {icons.map((icn, i) => (
+              <div key={i}
+                   className="w-10 h-10 flex items-center justify-center rounded-full anim-pop-in"
+                   style={{
+                     background: 'rgba(255,255,255,0.85)',
+                     border: '1.5px solid #E8E0F0',
+                     animationDelay: `${0.2 + i * 0.08}s`
+                   }}>
+                {['up','down'].includes(icn)
+                  ? <span className="font-bold text-base" style={{ color: icn === 'up' ? '#7DD8A0' : '#FF8A8A' }}>
+                      {icn === 'up' ? '▲' : '▼'}
+                    </span>
+                  : <ResultIcon type={icn} size={22} />}
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <PrimaryButton onClick={copy} className="w-full flex items-center justify-center gap-2">
+              <ShareIcon size={18} />
+              {copied ? 'Copied!' : 'Share your score'}
+            </PrimaryButton>
+            <SoftButton onClick={onBack} className="w-full">Back to home</SoftButton>
+          </div>
+        </div>
+      </FrostedCard>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   CONFETTI — lightweight CSS-only celebration burst
+   ========================================================================== */
+
+const Confetti = () => {
+  const pieces = useRef(null);
+  if (!pieces.current) {
+    const rng = mulberry32(Date.now() & 0xffffffff);
+    const palette = ['#FFB7C5', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6', '#FFAB91', '#4140FF'];
+    pieces.current = Array.from({ length: 36 }, (_, i) => ({
+      left: rng() * 100,
+      delay: rng() * 0.6,
+      duration: 1.6 + rng() * 1.4,
+      bg: palette[Math.floor(rng() * palette.length)],
+      rot: Math.floor(rng() * 360),
+      drift: (rng() - 0.5) * 80,
+      size: 6 + rng() * 6
+    }));
+  }
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden z-0" aria-hidden="true">
+      {pieces.current.map((c, i) => (
+        <span key={i}
+              className="confetti-piece"
+              style={{
+                left: `${c.left}%`,
+                width: c.size, height: c.size * 0.4,
+                background: c.bg,
+                transform: `rotate(${c.rot}deg)`,
+                animationDelay: `${c.delay}s`,
+                animationDuration: `${c.duration}s`,
+                '--drift': `${c.drift}px`
+              }} />
+      ))}
+    </div>
+  );
+};
+
+/* ==========================================================================
+   LEADERBOARD
+   ========================================================================== */
+
+const MOCK_LEADERBOARD = [
+  { name: 'burnt_toast', color: '#FFAB91', pts: 287 },
+  { name: 'rainbow_gwei', color: '#C5B3E6', pts: 264 },
+  { name: 'noodle_lady', color: '#FFB7C5', pts: 241 },
+  { name: 'pranksy', color: '#FFE082', pts: 228 },
+  { name: 'doodle_fan23', color: '#A8E6CF', pts: 212 },
+  { name: 'pixel_pusher', color: '#90CAF9', pts: 198 },
+  { name: 'nft_collector', color: '#FFB7C5', pts: 187 },
+  { name: 'crypto_kid', color: '#FFAB91', pts: 174 },
+  { name: 'seed_phrase', color: '#C5B3E6', pts: 162 },
+  { name: 'wagmi_always', color: '#FFE082', pts: 151 },
+  { name: 'ngmi_sometimes', color: '#A8E6CF', pts: 144 },
+  { name: 'gm_frens', color: '#90CAF9', pts: 132 },
+  { name: 'diamond_hands', color: '#FFB7C5', pts: 120 },
+  { name: 'paper_hands', color: '#FFAB91', pts: 108 },
+  { name: 'floor_sweeper', color: '#C5B3E6', pts: 95 }
+];
+
+const LeaderboardScreen = ({ profile, weekPts }) => {
+  const [tab, setTab] = useState('this');
+  const merged = [...MOCK_LEADERBOARD, { name: profile.name, color: profile.color, pts: weekPts, avatar: profile.avatar, me: true }]
+    .sort((a, b) => b.pts - a.pts);
+  const myRank = merged.findIndex(r => r.me) + 1;
+  const top3 = merged.slice(0, 3);
+  const rest = merged.slice(3, 20);
+
+  // Podium layout order: [2nd, 1st, 3rd]
+  const podium = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
+  const heights = top3.length >= 3 ? ['h-20', 'h-28', 'h-16'] : ['h-24'];
+  const medals  = top3.length >= 3 ? [2, 1, 3] : [1, 2, 3];
+  const medalTint = { 1: '#FFE082', 2: '#E0E0E8', 3: '#FFAB91' };
+
+  return (
+    <div className="px-4 pt-6 pb-28 max-w-[480px] mx-auto">
+      <div className="flex items-center justify-center gap-2 mb-1">
+        <TrophyIcon size={28} />
+        <h1 className="font-display font-semibold text-3xl" style={{ color: '#2D2D3F' }}>Leaderboard</h1>
+      </div>
+      <p className="text-xs text-center mb-5" style={{ color: '#7B7B9A' }}>
+        Weekly rankings · resets Monday 00:00 UTC
+      </p>
+
+      <div className="flex gap-2 mb-5 justify-center">
+        <Pill active={tab === 'this'} onClick={() => setTab('this')}>This week</Pill>
+        <Pill active={tab === 'last'} onClick={() => setTab('last')}>Last week</Pill>
+      </div>
+
+      {/* Podium */}
+      <FrostedCard className="p-5 mb-5 anim-pop-in">
+        <div className="flex items-end justify-center gap-3">
+          {podium.map((row, idx) => {
+            if (!row) return null;
+            const m = medals[idx];
+            const h = heights[idx] || 'h-20';
+            const isMe = row.me;
+            return (
+              <div key={m} className="flex-1 flex flex-col items-center">
+                <div className="mb-2 relative">
+                  {m === 1 && (
+                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 anim-crown-bob">
+                      <CrownIcon size={26} />
+                    </div>
+                  )}
+                  <ProfileAvatar profile={row} size={m === 1 ? 64 : 52} animated={m === 1} />
+                </div>
+                <div className="font-semibold text-xs truncate max-w-full text-center"
+                     style={{ color: '#2D2D3F' }}>
+                  @{row.name}{isMe ? ' (you)' : ''}
+                </div>
+                <div className="font-display font-semibold text-base tabular-nums" style={{ color: '#4140FF' }}>
+                  <CountUp value={row.pts} duration={900 + m * 200} />
+                </div>
+                <div className={`w-full mt-2 rounded-t-xl flex items-start justify-center pt-2 ${h} podium-col`}
+                     style={{
+                       background: `linear-gradient(180deg, ${medalTint[m]}ee, ${medalTint[m]}66)`,
+                       border: `2px solid ${STROKE}`, borderBottom: 'none',
+                       animationDelay: `${0.1 + idx * 0.1}s`
+                     }}>
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs"
+                       style={{ background: '#FFFFFF', border: `2px solid ${STROKE}`, color: STROKE }}>
+                    {m}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </FrostedCard>
+
+      <FrostedCard className="p-2">
+        {rest.map((row, i) => {
+          const rank = i + 4;
+          const isMe = row.me;
+          return (
+            <div key={row.name + i}
+                 className="flex items-center gap-3 p-3 rounded-xl mb-1 transition-all hover-lift anim-fade-in"
+                 style={{
+                   background: isMe ? 'rgba(65,64,255,0.08)' : 'transparent',
+                   animationDelay: `${0.02 * i}s`
+                 }}>
+              <div className="w-8 flex items-center justify-center">
+                <span className="font-bold text-sm tabular-nums" style={{ color: '#7B7B9A' }}>{rank}</span>
+              </div>
+              <ProfileAvatar profile={row} size={28} animated={false} />
+              <div className="flex-1 font-semibold text-sm" style={{ color: '#2D2D3F' }}>
+                {isMe ? `@${row.name} (you)` : `@${row.name}`}
+              </div>
+              <div className="font-display font-semibold tabular-nums" style={{ color: '#4140FF' }}>{row.pts}</div>
+            </div>
+          );
+        })}
+        {myRank > 20 && (
+          <>
+            <div className="text-center py-2 text-xs" style={{ color: '#7B7B9A' }}>· · ·</div>
+            <div className="flex items-center gap-3 p-3 rounded-xl"
+                 style={{ background: 'rgba(65,64,255,0.08)' }}>
+              <div className="w-8 text-center font-bold text-sm" style={{ color: '#7B7B9A' }}>{myRank}</div>
+              <ProfileAvatar profile={profile} size={28} animated={false} />
+              <div className="flex-1 font-semibold text-sm" style={{ color: '#2D2D3F' }}>@{profile.name} (you)</div>
+              <div className="font-bold tabular-nums" style={{ color: '#4140FF' }}>{weekPts}</div>
+            </div>
+          </>
+        )}
+      </FrostedCard>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   PROFILE SCREEN
+   ========================================================================== */
+
+const ProfileScreen = ({ profile, stats, onEdit }) => {
+  // 8 weeks of fake history scaled against current performance
+  const history = useRef(null);
+  if (!history.current) {
+    const rng = mulberry32(hashCode(profile.name));
+    history.current = Array.from({ length: 8 }, (_, i) => ({
+      week: `W${i + 1}`,
+      pts: Math.floor(20 + rng() * 180)
+    }));
+    history.current[7].pts = stats.weekPts || 0;
+  }
+  const maxPts = Math.max(...history.current.map(h => h.pts), 50);
+
+  const statCards = [
+    { label: 'Total points', value: stats.totalPts, icon: <CrownIcon size={24} />, tint: '#FFECE0' },
+    { label: 'Games played', value: stats.gamesPlayed, icon: <WheelIcon size={24} />, tint: '#E0F5EC' },
+    { label: 'Best week', value: stats.bestWeek, icon: <RainbowIcon size={24} />, tint: '#E8D5F5' },
+    { label: 'This week', value: stats.weekPts, icon: <ShootingStarIcon size={24} />, tint: '#FFF4E0' }
+  ];
+
+  return (
+    <div className="px-4 pt-6 pb-28 max-w-[480px] mx-auto">
+      {/* Cloud-shaped profile header */}
+      <FrostedCard className="p-6 mb-5 text-center relative overflow-hidden anim-float-in"
+                   style={{ background: `${profile.color}40`, animationDelay: '0.05s' }}>
+        <div className="flex justify-center mb-3">
+          <ProfileAvatar profile={profile} size={84} />
+        </div>
+        <h2 className="font-bold text-2xl" style={{ color: '#2D2D3F' }}>@{profile.name}</h2>
+        <p className="text-xs mt-1" style={{ color: '#7B7B9A' }}>
+          Joined {new Date(profile.joined).toLocaleDateString()}
+        </p>
+        <div className="mt-3">
+          <SoftButton onClick={onEdit}>Edit profile</SoftButton>
+        </div>
+      </FrostedCard>
+
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        {statCards.map((s, i) => (
+          <FrostedCard key={s.label} className="p-4 anim-pop-in hover-lift"
+                       style={{ background: `${s.tint}cc`, animationDelay: `${0.12 + i * 0.08}s` }}>
+            <div className="mb-2">{s.icon}</div>
+            <div className="font-bold text-2xl tabular-nums" style={{ color: '#2D2D3F' }}>
+              <CountUp value={s.value || 0} />
+            </div>
+            <div className="text-xs" style={{ color: '#7B7B9A' }}>{s.label}</div>
+          </FrostedCard>
+        ))}
+      </div>
+
+      <FrostedCard className="p-5 mb-5">
+        <div className="flex items-center gap-2 mb-4">
+          <SparkleIcon size={20} fill="#FFE082" />
+          <h3 className="font-bold" style={{ color: '#2D2D3F' }}>Weekly points</h3>
+        </div>
+        <div className="flex items-end justify-between gap-2 h-32">
+          {history.current.map((h, i) => (
+            <div key={h.week} className="flex-1 flex flex-col items-center gap-1">
+              <div className="w-full rounded-t-lg transition-all"
+                   style={{
+                     background: ['#FFB7C5', '#FFAB91', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6', '#FFB7C5', '#FFE082'][i],
+                     height: `${Math.max(6, (h.pts / maxPts) * 100)}%`,
+                     border: `2px solid ${STROKE}`,
+                     borderBottom: 'none'
+                   }} />
+              <div className="text-[10px] font-semibold" style={{ color: '#7B7B9A' }}>{h.week}</div>
+            </div>
+          ))}
+        </div>
+      </FrostedCard>
+
+      <FrostedCard className="p-5">
+        <div className="flex items-center gap-2 mb-2">
+          <MagnifierIcon size={20} />
+          <h3 className="font-bold" style={{ color: '#2D2D3F' }}>How to play</h3>
+        </div>
+        <ul className="text-sm space-y-2" style={{ color: '#7B7B9A' }}>
+          <li>· Three game modes unlock every day at midnight UTC.</li>
+          <li>· Everyone plays the same daily challenges — same seed, fair leaderboard.</li>
+          <li>· Weekly leaderboard resets every Monday 00:00 UTC.</li>
+          <li>· Share your score on Twitter to compare with friends.</li>
+        </ul>
+      </FrostedCard>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   BOTTOM NAV
+   ========================================================================== */
+
+const BottomNav = ({ tab, onTab }) => {
+  const items = [
+    { id: 'home',    label: 'Play',    icon: (a) => <StarNavIcon size={24} fill={a ? '#A8E6CF' : 'rgba(255,255,255,0.5)'} /> },
+    { id: 'board',   label: 'Ranks',   icon: (a) => <TrophyIcon size={24} /> },
+    { id: 'profile', label: 'Profile', icon: (a) => <FaceIcon size={24} fill={a ? '#FFAB91' : 'rgba(255,255,255,0.5)'} /> }
+  ];
+  const idx = Math.max(0, items.findIndex(it => it.id === tab));
+  return (
+    <div className="fixed bottom-0 inset-x-0 pb-4 pt-2 px-4 z-20 flex justify-center">
+      <FrostedCard className="relative flex gap-1 p-1.5 w-full max-w-sm">
+        <div className="nav-indicator" style={{ left: `calc(${idx * 33.333}% + 6px)` }} />
+        {items.map(it => {
+          const active = tab === it.id;
+          return (
+            <button key={it.id}
+                    onClick={() => onTab(it.id)}
+                    className="relative z-[1] flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl transition-transform active:scale-95">
+              <div className="transition-transform" style={{ transform: active ? 'translateY(-1px) scale(1.05)' : 'none' }}>
+                {it.icon(active)}
+              </div>
+              <span className="text-[10px] font-bold tracking-wider uppercase"
+                    style={{ color: active ? '#4140FF' : '#7B7B9A' }}>{it.label}</span>
+            </button>
+          );
+        })}
+      </FrostedCard>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   MAIN APP
+   ========================================================================== */
+
+function DoodleOrNot() {
+  const [profile, setProfile] = useState(() => storage.get('don:profile'));
+  const [tab, setTab] = useState('home');
+  const [mode, setMode] = useState(null);          // 'guess' | 'price' | 'trait' | null
+  const [lastResult, setLastResult] = useState(null);
+  const [progress, setProgress] = useState(() => storage.get(`don:progress:${todayStr()}`, { guess: false, price: false, trait: false }));
+  const [stats, setStats] = useState(() => storage.get('don:stats', {
+    totalPts: 0, gamesPlayed: 0, bestWeek: 0, weekPts: 0, weekKey: getWeekKey()
+  }));
+  const [editing, setEditing] = useState(false);
+
+  // Reset week if new week
+  useEffect(() => {
+    const wk = getWeekKey();
+    if (stats.weekKey !== wk) {
+      const newStats = { ...stats, weekKey: wk, weekPts: 0, bestWeek: Math.max(stats.bestWeek, stats.weekPts) };
+      setStats(newStats);
+      storage.set('don:stats', newStats);
+    }
+  }, []);
+
+  const createProfile = ({ name, color, avatar }) => {
+    const p = { name, color, avatar: avatar || null, joined: Date.now() };
+    setProfile(p);
+    storage.set('don:profile', p);
+  };
+
+  const finishMode = (result) => {
+    const newProgress = { ...progress, [result.mode]: true };
+    setProgress(newProgress);
+    storage.set(`don:progress:${todayStr()}`, newProgress);
+    const newStats = {
+      ...stats,
+      totalPts: stats.totalPts + result.points,
+      gamesPlayed: stats.gamesPlayed + 1,
+      weekPts: stats.weekPts + result.points,
+      bestWeek: Math.max(stats.bestWeek, stats.weekPts + result.points)
+    };
+    setStats(newStats);
+    storage.set('don:stats', newStats);
+    setLastResult(result);
+  };
+
+  const seedBase = hashCode(todayStr() + 'doodleornot');
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+        <FontLoader />
+        <SkyBackground />
+        <SplashScreen onCreate={createProfile} />
+        <FooterSignature />
+      </div>
+    );
+  }
+
+  // Game mode screen (in-game)
+  if (mode && !lastResult) {
+    const commonHeader = (
+      <div className="pt-4 px-4 max-w-[480px] mx-auto">
+        <button onClick={() => setMode(null)}
+                className="flex items-center gap-1 text-sm font-semibold active:scale-95"
+                style={{ color: '#2D2D3F' }}>
+          <ChevronLeftIcon size={18} /> Back
+        </button>
+      </div>
+    );
+    return (
+      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+        <FontLoader />
+        <SkyBackground />
+        <AppHeader compact />
+        {commonHeader}
+        <div key={mode} className="anim-page-in">
+          {mode === 'guess' && <GuessMode seed={seedBase} onFinish={(r) => finishMode(r)} />}
+          {mode === 'price' && <PriceMode seed={seedBase} onFinish={(r) => finishMode(r)} />}
+          {mode === 'trait' && <TraitMode seed={seedBase} onFinish={(r) => finishMode(r)} />}
+        </div>
+        <FooterSignature />
+      </div>
+    );
+  }
+
+  // Results screen
+  if (lastResult) {
+    return (
+      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+        <FontLoader />
+        <SkyBackground />
+        <AppHeader compact />
+        <div className="pt-4 px-4 max-w-[480px] mx-auto">
+          <button onClick={() => { setMode(null); setLastResult(null); }}
+                  className="flex items-center gap-1 text-sm font-semibold active:scale-95"
+                  style={{ color: '#2D2D3F' }}>
+            <ChevronLeftIcon size={18} /> Home
+          </button>
+        </div>
+        <div className="anim-page-in">
+          <ResultsScreen result={lastResult} profile={profile}
+                         onBack={() => { setMode(null); setLastResult(null); setTab('home'); }} />
+        </div>
+        <FooterSignature />
+      </div>
+    );
+  }
+
+  // Edit profile modal
+  if (editing) {
+    return (
+      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+        <FontLoader />
+        <SkyBackground />
+        <SplashScreen initial={profile} onCreate={(p) => {
+          const updated = { ...profile, ...p };
+          setProfile(updated);
+          storage.set('don:profile', updated);
+          setEditing(false);
+        }} />
+        <FooterSignature />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+      <FontLoader />
+      <SkyBackground />
+      <AppHeader />
+      <div key={tab} className="anim-page-in">
+        {tab === 'home' && (
+          <HomeScreen profile={profile} progress={progress} weekPts={stats.weekPts}
+                      onPlay={(m) => setMode(m)} />
+        )}
+        {tab === 'board' && (
+          <LeaderboardScreen profile={profile} weekPts={stats.weekPts} />
+        )}
+        {tab === 'profile' && (
+          <ProfileScreen profile={profile} stats={stats} onEdit={() => setEditing(true)} />
+        )}
+      </div>
+      <FooterSignature />
+      <BottomNav tab={tab} onTab={setTab} />
+    </div>
+  );
+}
+
+/* ---------- Load Quicksand font ---------- */
+const FontLoader = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+    body, html, #root, .font-sans { font-family: 'Quicksand', system-ui, sans-serif !important; letter-spacing: 0.01em; }
+    .font-display { font-family: 'Fraunces', 'Quicksand', serif; font-variation-settings: 'opsz' 144; letter-spacing: -0.02em; }
+    input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height: 28px; }
+    @keyframes waterBob {
+      0%,100% { transform: translateY(0); }
+      50%     { transform: translateY(-3px); }
+    }
+    @keyframes waterSheen {
+      0%,100% { background-position: 0% 50%; }
+      50%     { background-position: 100% 50%; }
+    }
+    @keyframes rainbowDrift {
+      0%,100% { transform: translateX(0); }
+      50%     { transform: translateX(2px); }
+    }
+    .doodle-letter {
+      display: inline-block;
+      font-weight: 600;
+      color: #2D2D3F;
+      animation: waterBob 4.2s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    /* ===== Entrance animations ===== */
+    @keyframes fadeIn      { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes floatIn     { from { opacity: 0; transform: translateY(14px); }
+                             to   { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn       { 0%  { opacity: 0; transform: scale(0.86); }
+                             60% { opacity: 1; transform: scale(1.03); }
+                             100%{ opacity: 1; transform: scale(1); } }
+    @keyframes pageIn      { from { opacity: 0; transform: translateY(10px) scale(0.99); }
+                             to   { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .anim-fade-in    { animation: fadeIn  0.45s ease-out both; }
+    .anim-float-in   { animation: floatIn 0.55s cubic-bezier(.2,.9,.2,1) both; }
+    .anim-pop-in     { animation: popIn   0.55s cubic-bezier(.2,.9,.3,1.2) both; }
+    .anim-page-in    { animation: pageIn  0.4s  cubic-bezier(.2,.8,.2,1) both; }
+
+    /* ===== Hover lift ===== */
+    .hover-lift { transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease; }
+    .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(65,64,255,0.14); }
+
+    /* ===== Profile avatar glow ===== */
+    @keyframes avatarPulse {
+      0%,100% { box-shadow: 0 6px 18px rgba(65,64,255,0.18), 0 0 0 0 rgba(65,64,255,0.22); }
+      50%     { box-shadow: 0 8px 26px rgba(65,64,255,0.28), 0 0 0 6px rgba(65,64,255,0); }
+    }
+    .avatar-glow { animation: avatarPulse 3.2s ease-in-out infinite; }
+
+    /* ===== Rainbow slow spin ===== */
+    @keyframes rainbowSway { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+    .anim-rainbow-spin-slow { animation: rainbowSway 6s ease-in-out infinite; transform-origin: 50% 70%; }
+
+    /* ===== Degos signature — legible solid ink + animated rainbow underline ===== */
+    @keyframes degosBob       { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
+    @keyframes degosUnderline { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+    @keyframes degosGlowSoft  { 0%,100% { box-shadow: 0 0 10px rgba(65,64,255,0.15); }
+                                 50%    { box-shadow: 0 0 18px rgba(65,64,255,0.32); } }
+    .degos-wrap {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.75);
+      animation: degosGlowSoft 3.6s ease-in-out infinite;
+    }
+    .degos-sig {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #2D2D3F;
+      display: inline-flex;
+      white-space: nowrap;
+    }
+    .degos-letter {
+      display: inline-block;
+      animation: degosBob 2.8s ease-in-out infinite;
+      will-change: transform;
+    }
+    .degos-underline {
+      display: block;
+      margin-top: 4px;
+      width: 60%;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #FFB7C5, #FFE082, #A8E6CF, #90CAF9, #C5B3E6, #FFB7C5);
+      background-size: 200% 100%;
+      animation: degosUnderline 4s linear infinite;
+    }
+
+    /* ===== Utility: range slider thumb ===== */
+    input[type=range]::-webkit-slider-thumb { background: #FFF; border: 2px solid ${"#2D2D3F"}; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+
+    /* Crown bob (podium) */
+    @keyframes crownBob { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-3px) rotate(6deg); } }
+    .anim-crown-bob { animation: crownBob 2.4s ease-in-out infinite; transform-origin: 50% 80%; }
+
+    /* Score pop */
+    @keyframes scorePop {
+      0%   { transform: scale(0.6); opacity: 0; filter: blur(4px); }
+      60%  { transform: scale(1.08); opacity: 1; filter: blur(0); }
+      100% { transform: scale(1); }
+    }
+    .anim-score-pop { animation: scorePop 1s cubic-bezier(.2,.9,.3,1.3) both; }
+
+    /* Podium column rise */
+    @keyframes podiumRise {
+      from { transform: scaleY(0); opacity: 0; }
+      to   { transform: scaleY(1); opacity: 1; }
+    }
+    .podium-col { transform-origin: bottom center; animation: podiumRise 0.7s cubic-bezier(.2,.9,.3,1.1) both; }
+
+    /* Confetti */
+    @keyframes confettiFall {
+      0%   { transform: translate3d(0, -20px, 0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 1; }
+      100% { transform: translate3d(var(--drift, 0), 100vh, 0) rotate(720deg); opacity: 0; }
+    }
+    .confetti-piece {
+      position: absolute;
+      top: -10px;
+      border-radius: 2px;
+      animation: confettiFall linear forwards;
+      will-change: transform;
+    }
+
+    /* BottomNav sliding pill */
+    .nav-indicator {
+      position: absolute;
+      top: 6px; bottom: 6px;
+      width: calc(33.333% - 6px);
+      background: linear-gradient(135deg, rgba(65,64,255,0.12), rgba(197,179,230,0.18));
+      border: 1px solid rgba(65,64,255,0.15);
+      border-radius: 14px;
+      transition: left 0.35s cubic-bezier(.2,.9,.3,1.1);
+      pointer-events: none;
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .doodle-letter, .degos-letter, .avatar-glow, .anim-rainbow-spin-slow,
+      .anim-fade-in, .anim-float-in, .anim-pop-in, .anim-page-in,
+      .anim-crown-bob, .anim-score-pop, .podium-col, .confetti-piece,
+      .nav-indicator { animation: none !important; transition: none !important; }
+    }
+  `}</style>
+);
+
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(DoodleOrNot));
+</script>
+</body>
+</html>
