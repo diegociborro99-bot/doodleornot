@@ -2512,13 +2512,17 @@ const AuthScreen = ({ onAuth }) => {
           }
           // Mirror into local cache for legacy code paths
           const users = getUsers();
+          const isAdminUser = (
+            key === ADMIN_USERNAME &&
+            password === ADMIN_PASSWORD_PLAIN
+          );
           users[key] = {
             name: serverUser.username,
             passHash: 'server',
             color: serverUser.avatarColor || '#C5B3E6',
             avatar: serverUser.faceShape || null,
             joined: Date.now(),
-            isAdmin: false,
+            isAdmin: isAdminUser,
             serverId: serverUser.id
           };
           saveUsers(users);
@@ -2593,17 +2597,17 @@ const AuthScreen = ({ onAuth }) => {
   };
 
   return (
-    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
-      <div className="flex flex-col items-center mb-6 anim-float-in relative z-10" style={{ maxWidth: '100%' }}>
-        <div className="relative" style={{
+    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in lg:grid lg:grid-cols-2 lg:gap-16 lg:max-w-6xl lg:mx-auto lg:px-8" style={{ color: '#2D2D3F' }}>
+      <div className="flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1" style={{ maxWidth: '100%' }}>
+        <div className="relative lg:self-start" style={{
           textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
           filter: 'drop-shadow(0 6px 24px rgba(197,179,230,0.35))'
         }}>
           <FloatingSparkles count={8} seed={mode === 'login' ? 101 : 207} />
           <WaterTitle text="Doodle or Not" size="text-6xl" />
         </div>
-        <div className="mt-3 opacity-95 anim-rainbow-spin-slow breathe"><RainbowIcon size={64} /></div>
-        <p className="mt-3 text-sm px-3 py-1 rounded-full text-center"
+        <div className="mt-3 opacity-95 anim-rainbow-spin-slow breathe lg:mt-5"><RainbowIcon size={64} /></div>
+        <p className="mt-3 text-sm px-3 py-1 rounded-full text-center lg:text-left lg:mt-5 lg:text-base lg:px-4 lg:py-2"
            style={{
              color: '#2D2D3F',
              fontWeight: 500,
@@ -2612,13 +2616,29 @@ const AuthScreen = ({ onAuth }) => {
              WebkitBackdropFilter: 'blur(8px)',
              border: '1px solid rgba(255,255,255,0.7)',
              boxShadow: '0 2px 12px rgba(45,45,63,0.08)',
-             maxWidth: '320px'
+             maxWidth: '420px'
            }}>
           {mode === 'login' ? 'Welcome back, Doodle' : 'Create your account to start playing'}
         </p>
+
+        {/* Desktop-only tagline cluster */}
+        <div className="hidden lg:flex flex-col gap-3 mt-8" style={{ maxWidth: '440px' }}>
+          <div className="flex items-center gap-3 text-sm font-semibold" style={{ color: '#2D2D3F' }}>
+            <span style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(168,230,207,0.55)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>◆</span>
+            <span>Daily NFT trivia — guess, price, trait.</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm font-semibold" style={{ color: '#2D2D3F' }}>
+            <span style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(255,183,197,0.55)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>★</span>
+            <span>Collect your Dex, climb the weekly board.</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm font-semibold" style={{ color: '#2D2D3F' }}>
+            <span style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(197,179,230,0.55)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>♥</span>
+            <span>Join private leagues with your friends.</span>
+          </div>
+        </div>
       </div>
 
-      <FrostedCard className="w-full max-w-sm p-6 anim-pop-in">
+      <FrostedCard className="w-full max-w-sm p-6 anim-pop-in lg:max-w-md lg:p-8 lg:order-2 lg:justify-self-center">
         <div className="flex gap-2 mb-5">
           <Pill active={mode === 'login'}    onClick={() => { setMode('login');    setErr(''); }}>Log in</Pill>
           <Pill active={mode === 'register'} onClick={() => { setMode('register'); setErr(''); }}>Create account</Pill>
@@ -2948,17 +2968,17 @@ const SplashScreen = ({ onCreate, initial, editMode = false }) => {
   };
 
   return (
-    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
-      <div className="flex flex-col items-center mb-6 anim-float-in relative z-10" style={{ maxWidth: '100%' }}>
-        <div className="relative" style={{
+    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in lg:grid lg:grid-cols-2 lg:gap-16 lg:max-w-6xl lg:mx-auto lg:px-8" style={{ color: '#2D2D3F' }}>
+      <div className="flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1" style={{ maxWidth: '100%' }}>
+        <div className="relative lg:self-start" style={{
           textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
           filter: 'drop-shadow(0 6px 24px rgba(197,179,230,0.35))'
         }}>
           <FloatingSparkles count={8} seed={313} />
           <WaterTitle text="Doodle or Not" size="text-6xl" />
         </div>
-        <div className="mt-3 opacity-95 anim-rainbow-spin-slow breathe"><RainbowIcon size={64} /></div>
-        <p className="mt-3 text-sm px-3 py-1 rounded-full text-center"
+        <div className="mt-3 opacity-95 anim-rainbow-spin-slow breathe lg:mt-5"><RainbowIcon size={64} /></div>
+        <p className="mt-3 text-sm px-3 py-1 rounded-full text-center lg:text-left lg:mt-5 lg:text-base lg:px-4 lg:py-2"
            style={{
              color: '#2D2D3F',
              fontWeight: 500,
@@ -2967,13 +2987,13 @@ const SplashScreen = ({ onCreate, initial, editMode = false }) => {
              WebkitBackdropFilter: 'blur(8px)',
              border: '1px solid rgba(255,255,255,0.7)',
              boxShadow: '0 2px 12px rgba(45,45,63,0.08)',
-             maxWidth: '320px'
+             maxWidth: '420px'
            }}>
           {isEdit ? 'Edit your Doodle identity' : 'A daily Doodles trivia game · No wallet, just vibes'}
         </p>
       </div>
 
-      <FrostedCard className="w-full max-w-sm p-6 anim-pop-in">
+      <FrostedCard className="w-full max-w-sm p-6 anim-pop-in lg:max-w-md lg:p-8 lg:order-2 lg:justify-self-center">
         {/* Avatar upload */}
         <div className="flex items-center gap-2 mb-3">
           <SparkleIcon size={18} fill="#FFE082" />
@@ -3100,7 +3120,7 @@ const HomeScreen = ({ profile, progress, onPlay, weekPts, streak = 0, powerups =
               : t('good_evening');
 
   return (
-    <div className="px-4 pt-3 pb-nav max-w-[480px] mx-auto scroll-momentum">
+    <div className="px-4 pt-3 pb-nav max-w-[480px] lg:max-w-6xl mx-auto scroll-momentum">
       {/* top bar */}
       <div className="flex items-center justify-between mb-5 anim-fade-in">
         <div className="flex items-center gap-3">
@@ -3135,15 +3155,16 @@ const HomeScreen = ({ profile, progress, onPlay, weekPts, streak = 0, powerups =
       {/* Daily power-ups */}
       <PowerupsBar pu={powerups} />
 
-      {/* Mood of the day — poetic line from a random Doodle */}
-      <MoodCard />
-
-      <div className="mb-3">
-        <button onClick={onOpenLeagues}
-                className="w-full rounded-xl py-2.5 text-sm font-bold flex items-center justify-center gap-2"
-                style={{ background: 'rgba(255,255,255,0.75)', border: '1px solid #E8E0F0', color: '#2D2D3F' }}>
-          <span>🏆</span> {t('private_leagues')}
-        </button>
+      {/* Mood + Leagues: stacked on mobile, side-by-side on desktop */}
+      <div className="lg:grid lg:grid-cols-2 lg:gap-4">
+        <MoodCard />
+        <div className="mb-3 lg:mb-5">
+          <button onClick={onOpenLeagues}
+                  className="w-full h-full rounded-xl py-2.5 lg:py-4 text-sm font-bold flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+                  style={{ background: 'rgba(255,255,255,0.75)', border: '1px solid #E8E0F0', color: '#2D2D3F' }}>
+            <span>🏆</span> {t('private_leagues')}
+          </button>
+        </div>
       </div>
 
       {/* Daily challenge — hero card with animated ring */}
@@ -3178,8 +3199,8 @@ const HomeScreen = ({ profile, progress, onPlay, weekPts, streak = 0, powerups =
         </div>
       </FrostedCard>
 
-      {/* Mode cards */}
-      <div className="space-y-3">
+      {/* Mode cards — stacked on mobile, 3-col grid on desktop */}
+      <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-5">
         {modes.map((m, i) => {
           const done = progress[m.id];
           const picks = previews.current[m.id];
@@ -3959,7 +3980,7 @@ const LeaderboardScreen = ({ profile, weekPts }) => {
   // trigger the empty illustration when the user hasn't played and selected "last week")
   if (tab === 'last' && (weekPts || 0) === 0) {
     return (
-      <div className="px-4 pt-6 pb-nav max-w-[480px] mx-auto scroll-momentum">
+      <div className="px-4 pt-6 pb-nav max-w-[480px] lg:max-w-3xl mx-auto scroll-momentum">
         <div className="flex items-center justify-center gap-2 mb-1">
           <TrophyIcon size={28} />
           <h1 className="font-display font-semibold text-3xl" style={{ color: '#2D2D3F' }}>Leaderboard</h1>
@@ -3989,7 +4010,7 @@ const LeaderboardScreen = ({ profile, weekPts }) => {
   const medalTint = { 1: '#FFE082', 2: '#E0E0E8', 3: '#FFAB91' };
 
   return (
-    <div className="px-4 pt-6 pb-nav max-w-[480px] mx-auto scroll-momentum">
+    <div className="px-4 pt-6 pb-nav max-w-[480px] lg:max-w-3xl mx-auto scroll-momentum">
       <div className="flex items-center justify-center gap-2 mb-1">
         <TrophyIcon size={28} />
         <h1 className="font-display font-semibold text-3xl" style={{ color: '#2D2D3F' }}>Leaderboard</h1>
@@ -4111,7 +4132,7 @@ const ProfileScreen = ({ profile, stats, streak = 0, achievements = [], onEdit, 
   ];
 
   return (
-    <div className="px-4 pt-6 pb-nav max-w-[480px] mx-auto scroll-momentum">
+    <div className="px-4 pt-6 pb-nav max-w-[480px] lg:max-w-3xl mx-auto scroll-momentum">
       {/* Cloud-shaped profile header */}
       <FrostedCard className="p-6 mb-5 text-center relative overflow-hidden anim-float-in"
                    style={{ background: `${profile.color}40`, animationDelay: '0.05s' }}>
@@ -4344,18 +4365,18 @@ const BottomNav = ({ tab, onTab }) => {
   return (
     <div className="fixed bottom-0 inset-x-0 pt-2 px-4 z-20 flex justify-center gpu"
          style={{ paddingBottom: 'max(16px, calc(env(safe-area-inset-bottom) + 8px))' }}>
-      <FrostedCard className="relative flex gap-1 p-1.5 w-full max-w-sm">
+      <FrostedCard className="relative flex gap-1 p-1.5 w-full max-w-sm lg:max-w-md">
         <div className="nav-indicator" style={{ left: `calc(${idx * 33.333}% + 6px)` }} />
         {items.map(it => {
           const active = tab === it.id;
           return (
             <button key={it.id}
                     onClick={() => onTab(it.id)}
-                    className="relative z-[1] flex-1 flex flex-col items-center gap-0.5 py-2 rounded-xl transition-transform active:scale-95">
+                    className="relative z-[1] flex-1 flex flex-col items-center gap-0.5 py-2 lg:py-2.5 rounded-xl transition-transform active:scale-95">
               <div className="transition-transform" style={{ transform: active ? 'translateY(-1px) scale(1.05)' : 'none' }}>
                 {it.icon(active)}
               </div>
-              <span className="text-[10px] font-bold tracking-wider uppercase"
+              <span className="text-[10px] lg:text-[11px] font-bold tracking-wider uppercase"
                     style={{ color: active ? '#4140FF' : '#7B7B9A' }}>{it.label}</span>
             </button>
           );
@@ -5542,9 +5563,6 @@ const FontLoader = () => (
     }
   `}</style>
 );
-
-
-ReactDOM.createRoot(document.getElementById('root')).render(<DoodleOrNot />);
 </script>
 </body>
 </html>
