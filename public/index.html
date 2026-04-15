@@ -1468,21 +1468,44 @@ const PROFILE_COLORS = [
 ];
 
 /* Fluid / water-like animated title — each glyph bobs on its own stagger,
-   gradient sheen slides across, letters tilt like floating on waves */
+   gradient sheen slides across, letters tilt like floating on waves.
+   Words are grouped so they never break mid-word; font-size uses clamp()
+   so the hero title scales smoothly on small viewports. */
 const WaterTitle = ({ text, size = 'text-5xl' }) => {
-  const chars = [...text];
+  const words = text.split(' ');
+  // Map tailwind size class → responsive clamp() so it looks great on mobile
+  const clampMap = {
+    'text-6xl':      'clamp(2.25rem, 11vw, 3.75rem)',   // hero (auth, mood full)
+    'text-5xl':      'clamp(2rem, 9vw, 3rem)',
+    'text-4xl':      'clamp(1.75rem, 7.5vw, 2.25rem)',
+    'text-3xl':      'clamp(1.5rem, 6vw, 1.875rem)',
+    'text-[26px]':   'clamp(1.35rem, 5.5vw, 1.625rem)'
+  };
+  const fontSize = clampMap[size];
+  let idx = 0;
   return (
-    <h1 className={`${size} select-none`}
-        style={{ lineHeight: 1.1, fontFamily: "'Quicksand', sans-serif", fontWeight: 600, letterSpacing: '-0.01em' }}>
-      {chars.map((ch, i) => (
-        <span
-          key={i}
-          className="doodle-letter"
-          style={{
-            animationDelay: `${(i * 0.15) % 2.4}s`,
-            marginRight: ch === ' ' ? '0.25em' : '0'
-          }}>
-          {ch === ' ' ? '\u00A0' : ch}
+    <h1 className="select-none"
+        style={{
+          fontSize: fontSize || undefined,
+          lineHeight: 1.05,
+          fontFamily: "'Quicksand', sans-serif",
+          fontWeight: 600,
+          letterSpacing: '-0.015em',
+          textAlign: 'center',
+          wordBreak: 'keep-all',
+          hyphens: 'none',
+          maxWidth: '100%'
+        }}>
+      {words.map((word, wi) => (
+        <span key={wi} style={{ display: 'inline-block', whiteSpace: 'nowrap', marginRight: wi < words.length - 1 ? '0.28em' : 0 }}>
+          {[...word].map((ch) => {
+            const delay = `${(idx++ * 0.15) % 2.4}s`;
+            return (
+              <span key={idx} className="doodle-letter" style={{ animationDelay: delay, display: 'inline-block' }}>
+                {ch}
+              </span>
+            );
+          })}
         </span>
       ))}
     </h1>
