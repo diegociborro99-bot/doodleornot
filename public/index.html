@@ -23,10 +23,163 @@
 <style>
   html, body, #root { height: 100%; margin: 0; }
   body { font-family: 'Quicksand', system-ui, sans-serif; color: #2D2D3F; }
+
+  /* ---------- BOOT SPLASH (visible before React mounts) ---------- */
+  #boot-splash {
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(180deg,#B8E0F5 0%,#D9C9ED 55%,#FFD6E0 100%);
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    overflow: hidden;
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  #boot-splash.hiding { opacity: 0; transform: scale(1.04); pointer-events: none; }
+
+  /* floating clouds */
+  #boot-splash .b-cloud {
+    position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,.85);
+    filter: blur(.5px);
+    animation: bsDrift linear infinite;
+  }
+  @keyframes bsDrift {
+    0%   { transform: translate(-30vw,0); }
+    100% { transform: translate(130vw,0); }
+  }
+
+  /* rainbow ring */
+  #boot-splash .b-rainbow {
+    width: 140px; height: 140px; position: relative;
+    animation: bsBounce 2.4s ease-in-out infinite;
+    filter: drop-shadow(0 8px 24px rgba(45,45,63,.18));
+  }
+  @keyframes bsBounce {
+    0%,100% { transform: translateY(0) rotate(-4deg); }
+    50%     { transform: translateY(-10px) rotate(4deg); }
+  }
+  #boot-splash .b-rainbow svg { width:100%; height:100%; animation: bsSpin 8s linear infinite; }
+  @keyframes bsSpin { to { transform: rotate(360deg); } }
+
+  /* title */
+  #boot-splash .b-title {
+    margin-top: 22px;
+    font-family: 'Fraunces', 'Georgia', serif;
+    font-weight: 600;
+    color: #2D2D3F;
+    font-size: clamp(2rem, 8vw, 3rem);
+    letter-spacing: -0.01em;
+    text-shadow: 0 2px 18px rgba(255,255,255,.5);
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    padding: 0 16px;
+  }
+  #boot-splash .b-title span {
+    display: inline-block;
+    opacity: 0; transform: translateY(14px);
+    animation: bsWordIn .7s cubic-bezier(.2,.9,.3,1.3) forwards;
+  }
+  #boot-splash .b-title span:nth-child(1){ animation-delay:.05s; }
+  #boot-splash .b-title span:nth-child(2){ animation-delay:.18s; }
+  #boot-splash .b-title span:nth-child(3){ animation-delay:.31s; }
+  @keyframes bsWordIn { to { opacity:1; transform: translateY(0); } }
+
+  /* dots */
+  #boot-splash .b-dots {
+    margin-top: 18px;
+    display: flex; gap: 10px; align-items: center; justify-content: center;
+  }
+  #boot-splash .b-dots i {
+    width: 10px; height: 10px; border-radius: 50%; display: block;
+    animation: bsDot 1.2s ease-in-out infinite;
+  }
+  #boot-splash .b-dots i:nth-child(1){ background:#FFB7C5; animation-delay:0s; }
+  #boot-splash .b-dots i:nth-child(2){ background:#A8E6CF; animation-delay:.15s; }
+  #boot-splash .b-dots i:nth-child(3){ background:#FFE082; animation-delay:.30s; }
+  #boot-splash .b-dots i:nth-child(4){ background:#C5B3E6; animation-delay:.45s; }
+  #boot-splash .b-dots i:nth-child(5){ background:#90CAF9; animation-delay:.60s; }
+  @keyframes bsDot {
+    0%,100% { transform: translateY(0) scale(.85); opacity:.6; }
+    50%     { transform: translateY(-8px) scale(1.1); opacity:1; }
+  }
+
+  /* sparkles */
+  #boot-splash .b-spark {
+    position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 12px 2px rgba(255,255,255,.85);
+    animation: bsSpark 2.2s ease-in-out infinite;
+  }
+  @keyframes bsSpark {
+    0%,100% { opacity: 0; transform: scale(.6); }
+    50%     { opacity: 1; transform: scale(1.2); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #boot-splash .b-cloud, #boot-splash .b-rainbow, #boot-splash .b-rainbow svg,
+    #boot-splash .b-title span, #boot-splash .b-dots i, #boot-splash .b-spark {
+      animation: none !important;
+    }
+    #boot-splash .b-title span { opacity:1; transform:none; }
+  }
 </style>
 </head>
 <body>
 <div id="root"></div>
+
+<!-- Boot splash: visible while Babel compiles + React mounts -->
+<div id="boot-splash" role="status" aria-label="Loading Doodle or Not">
+  <div class="b-cloud" style="width:220px;height:120px;top:14%;left:-25vw;animation-duration:38s;"></div>
+  <div class="b-cloud" style="width:160px;height:90px;top:62%;left:-25vw;animation-duration:52s;animation-delay:-8s;"></div>
+  <div class="b-cloud" style="width:280px;height:150px;top:35%;left:-25vw;animation-duration:64s;animation-delay:-20s;opacity:.7;"></div>
+  <div class="b-spark" style="top:22%;left:18%;"></div>
+  <div class="b-spark" style="top:30%;right:20%;animation-delay:.4s;"></div>
+  <div class="b-spark" style="bottom:28%;left:24%;animation-delay:.9s;"></div>
+  <div class="b-spark" style="bottom:18%;right:18%;animation-delay:1.3s;"></div>
+
+  <div class="b-rainbow">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 70 A40 40 0 0 1 90 70" stroke="#FFB7C5" stroke-width="8" stroke-linecap="round"/>
+      <path d="M18 70 A32 32 0 0 1 82 70" stroke="#FFAB91" stroke-width="8" stroke-linecap="round"/>
+      <path d="M26 70 A24 24 0 0 1 74 70" stroke="#FFE082" stroke-width="8" stroke-linecap="round"/>
+      <path d="M34 70 A16 16 0 0 1 66 70" stroke="#A8E6CF" stroke-width="8" stroke-linecap="round"/>
+      <path d="M42 70 A8 8 0 0 1 58 70"   stroke="#C5B3E6" stroke-width="8" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="b-title" aria-hidden="true">
+    <span>Doodle</span><span>or</span><span>Not</span>
+  </div>
+
+  <div class="b-dots" aria-hidden="true">
+    <i></i><i></i><i></i><i></i><i></i>
+  </div>
+</div>
+
+<script>
+  // Hide splash once React has painted the app (or after a hard max timeout)
+  (function(){
+    var splash = document.getElementById('boot-splash');
+    if (!splash) return;
+    var root = document.getElementById('root');
+    var hidden = false;
+    function hide(){
+      if (hidden) return; hidden = true;
+      splash.classList.add('hiding');
+      setTimeout(function(){ splash && splash.parentNode && splash.parentNode.removeChild(splash); }, 750);
+    }
+    // Poll for React mount: #root getting any child = app rendered
+    var tries = 0;
+    var iv = setInterval(function(){
+      tries++;
+      if (root && root.children && root.children.length > 0) {
+        clearInterval(iv);
+        // Small grace period so the first-paint animations can start underneath
+        setTimeout(hide, 220);
+      } else if (tries > 120) { // ~12s hard cap
+        clearInterval(iv);
+        hide();
+      }
+    }, 100);
+  })();
+</script>
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef } = React;
 
