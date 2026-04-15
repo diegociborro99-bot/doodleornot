@@ -1467,6 +1467,47 @@ const PROFILE_COLORS = [
   { name: 'sky', hex: '#90CAF9' }
 ];
 
+/* Floating sparkles overlay — absolute-positioned twinkles around hero elements.
+   Random deterministic seeds keep them stable between renders. */
+const FloatingSparkles = ({ count = 10, seed = 42 }) => {
+  const items = useRef(null);
+  if (!items.current) {
+    const rng = mulberry32(seed);
+    items.current = Array.from({ length: count }, (_, i) => ({
+      id: i,
+      left: `${Math.round(rng() * 100)}%`,
+      top: `${Math.round(rng() * 100)}%`,
+      sx: `${Math.round((rng() - 0.5) * 30)}px`,
+      sy: `${-6 - Math.round(rng() * 20)}px`,
+      delay: `${(rng() * 3).toFixed(2)}s`,
+      duration: `${(2.8 + rng() * 2.4).toFixed(2)}s`,
+      size: 6 + Math.round(rng() * 10)
+    }));
+  }
+  return (
+    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+      {items.current.map(s => (
+        <span key={s.id} className="sparkle" style={{
+          left: s.left, top: s.top,
+          width: s.size, height: s.size,
+          animationDelay: s.delay,
+          animationDuration: s.duration,
+          '--sx': s.sx, '--sy': s.sy
+        }} />
+      ))}
+    </div>
+  );
+};
+
+/* Decorative morphing blobs — soft pastel shapes that drift behind content */
+const MorphBlobs = () => (
+  <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div className="blob blob-a" style={{ width: 260, height: 260, top: '-8%', left: '-12%', animationDelay: '0s' }} />
+    <div className="blob blob-b" style={{ width: 320, height: 320, top: '20%', right: '-18%', animationDelay: '-4s' }} />
+    <div className="blob blob-c" style={{ width: 240, height: 240, bottom: '-10%', left: '25%', animationDelay: '-8s' }} />
+  </div>
+);
+
 /* Fluid / water-like animated title — each glyph bobs on its own stagger,
    gradient sheen slides across, letters tilt like floating on waves.
    Words are grouped so they never break mid-word; font-size uses clamp()
@@ -2542,14 +2583,15 @@ const AuthScreen = ({ onAuth }) => {
   return (
     <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
       <div className="flex flex-col items-center mb-6 anim-float-in relative z-10" style={{ maxWidth: '100%' }}>
-        <div style={{
+        <div className="relative" style={{
           textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
           filter: 'drop-shadow(0 6px 24px rgba(197,179,230,0.35))'
         }}>
+          <FloatingSparkles count={8} seed={mode === 'login' ? 101 : 207} />
           <WaterTitle text="Doodle or Not" size="text-6xl" />
         </div>
-        <div className="mt-3 opacity-95 anim-rainbow-spin-slow"><RainbowIcon size={64} /></div>
-        <p className="mt-3 text-sm px-3 py-1 rounded-full"
+        <div className="mt-3 opacity-95 anim-rainbow-spin-slow breathe"><RainbowIcon size={64} /></div>
+        <p className="mt-3 text-sm px-3 py-1 rounded-full text-center"
            style={{
              color: '#2D2D3F',
              fontWeight: 500,
@@ -2557,7 +2599,8 @@ const AuthScreen = ({ onAuth }) => {
              backdropFilter: 'blur(8px)',
              WebkitBackdropFilter: 'blur(8px)',
              border: '1px solid rgba(255,255,255,0.7)',
-             boxShadow: '0 2px 12px rgba(45,45,63,0.08)'
+             boxShadow: '0 2px 12px rgba(45,45,63,0.08)',
+             maxWidth: '320px'
            }}>
           {mode === 'login' ? 'Welcome back, Doodle' : 'Create your account to start playing'}
         </p>
@@ -2895,13 +2938,14 @@ const SplashScreen = ({ onCreate, initial, editMode = false }) => {
   return (
     <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
       <div className="flex flex-col items-center mb-6 anim-float-in relative z-10" style={{ maxWidth: '100%' }}>
-        <div style={{
+        <div className="relative" style={{
           textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
           filter: 'drop-shadow(0 6px 24px rgba(197,179,230,0.35))'
         }}>
+          <FloatingSparkles count={8} seed={313} />
           <WaterTitle text="Doodle or Not" size="text-6xl" />
         </div>
-        <div className="mt-3 opacity-95 anim-rainbow-spin-slow"><RainbowIcon size={64} /></div>
+        <div className="mt-3 opacity-95 anim-rainbow-spin-slow breathe"><RainbowIcon size={64} /></div>
         <p className="mt-3 text-sm px-3 py-1 rounded-full text-center"
            style={{
              color: '#2D2D3F',
@@ -5154,12 +5198,221 @@ const FontLoader = () => (
       color: #E8E0F0 !important;
     }
 
+    /* ==========================================================
+       PREMIUM POLISH LAYER — spring buttons, shimmer, sparkles,
+       input glow, card tilt, stagger, morph blobs
+       ========================================================== */
+
+    /* Spring-eased global button press — applied to every <button> */
+    button, [role="button"] {
+      transition:
+        transform .18s cubic-bezier(.2,.9,.3,1.4),
+        box-shadow .22s ease,
+        filter .22s ease;
+      will-change: transform;
+    }
+    button:active:not(:disabled), [role="button"]:active {
+      transform: scale(0.955);
+      filter: brightness(0.97);
+    }
+    button:disabled { cursor: not-allowed; opacity: 0.55; }
+
+    /* Elastic primary CTA — use class .btn-elastic on primary actions */
+    @keyframes btnElasticTap {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(0.94); }
+      70%  { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    .btn-elastic { transition: box-shadow .25s ease; }
+    .btn-elastic:active:not(:disabled) {
+      animation: btnElasticTap .35s cubic-bezier(.2,.9,.3,1.4);
+    }
+
+    /* Shimmer bar (progress + skeletons) */
+    @keyframes shimmerSweep {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
+    }
+    .shimmer {
+      background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.35) 50%,
+        rgba(255,255,255,0) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmerSweep 2.2s linear infinite;
+    }
+    .skel {
+      background: linear-gradient(
+        90deg,
+        rgba(45,45,63,0.06) 0%,
+        rgba(45,45,63,0.12) 50%,
+        rgba(45,45,63,0.06) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmerSweep 1.6s linear infinite;
+      border-radius: 8px;
+    }
+
+    /* Floating sparkles behind hero titles */
+    @keyframes sparkleFloat {
+      0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+      25%  { opacity: 1; }
+      50%  { transform: translate(var(--sx, 8px), var(--sy, -10px)) scale(1); opacity: 0.9; }
+      75%  { opacity: 0.6; }
+      100% { transform: translate(calc(var(--sx, 8px) * 2), calc(var(--sy, -10px) * 2)) scale(0.6); opacity: 0; }
+    }
+    .sparkle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      border-radius: 50%;
+      animation: sparkleFloat 3.6s ease-in-out infinite;
+      will-change: transform, opacity;
+      background: radial-gradient(circle, #FFF 0%, rgba(255,255,255,0.6) 40%, transparent 70%);
+      box-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 18px rgba(255,231,170,0.7);
+    }
+
+    /* Input focus glow — applied to all inputs/textareas */
+    input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+    textarea {
+      transition: box-shadow .2s ease, border-color .2s ease, background .2s ease;
+    }
+    input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):focus,
+    textarea:focus {
+      outline: none;
+      box-shadow:
+        0 0 0 3px rgba(65,64,255,0.14),
+        0 6px 18px rgba(65,64,255,0.10);
+    }
+
+    /* Card press — wraps .pressable elements for tactile feel */
+    .pressable {
+      transition:
+        transform .22s cubic-bezier(.2,.9,.3,1.3),
+        box-shadow .22s ease,
+        background .2s ease;
+      will-change: transform;
+    }
+    .pressable:active {
+      transform: scale(0.98) translateY(1px);
+    }
+    .pressable.hover-lift:hover {
+      transform: translateY(-3px) scale(1.01);
+    }
+
+    /* List stagger — automatic fade+slide for first 8 children */
+    @keyframes staggerIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .stagger > * {
+      animation: staggerIn 0.5s cubic-bezier(.2,.9,.2,1) both;
+    }
+    .stagger > *:nth-child(1) { animation-delay: 0.04s; }
+    .stagger > *:nth-child(2) { animation-delay: 0.09s; }
+    .stagger > *:nth-child(3) { animation-delay: 0.14s; }
+    .stagger > *:nth-child(4) { animation-delay: 0.19s; }
+    .stagger > *:nth-child(5) { animation-delay: 0.24s; }
+    .stagger > *:nth-child(6) { animation-delay: 0.29s; }
+    .stagger > *:nth-child(7) { animation-delay: 0.34s; }
+    .stagger > *:nth-child(8) { animation-delay: 0.39s; }
+
+    /* Morphing background blob — decorative, for hero/empty states */
+    @keyframes blobMorph {
+      0%,100% { border-radius: 42% 58% 63% 37% / 42% 44% 56% 58%; transform: rotate(0deg) scale(1); }
+      33%     { border-radius: 58% 42% 37% 63% / 56% 65% 35% 44%; transform: rotate(60deg) scale(1.04); }
+      66%     { border-radius: 63% 37% 58% 42% / 38% 53% 47% 62%; transform: rotate(-40deg) scale(0.97); }
+    }
+    .blob {
+      position: absolute;
+      pointer-events: none;
+      filter: blur(28px);
+      opacity: 0.45;
+      animation: blobMorph 14s ease-in-out infinite;
+      will-change: transform, border-radius;
+    }
+    .blob-a { background: radial-gradient(circle at 30% 30%, #FFB7C5 0%, transparent 70%); }
+    .blob-b { background: radial-gradient(circle at 70% 50%, #C5B3E6 0%, transparent 70%); }
+    .blob-c { background: radial-gradient(circle at 50% 70%, #A8E6CF 0%, transparent 70%); }
+
+    /* Glow ring — for featured elements */
+    @keyframes glowRing {
+      0%,100% { box-shadow: 0 0 0 0 rgba(65,64,255,0.20), 0 6px 20px rgba(65,64,255,0.15); }
+      50%     { box-shadow: 0 0 0 8px rgba(65,64,255,0), 0 8px 28px rgba(65,64,255,0.28); }
+    }
+    .glow-ring { animation: glowRing 2.6s ease-in-out infinite; }
+
+    /* Icon wiggle on hover/tap */
+    @keyframes iconWiggle {
+      0%,100% { transform: rotate(0deg); }
+      25%     { transform: rotate(-6deg); }
+      75%     { transform: rotate(6deg); }
+    }
+    .wiggle-on-hover:hover svg,
+    .wiggle-on-hover:active svg { animation: iconWiggle 0.5s ease-in-out; }
+
+    /* Gradient text — shimmering rainbow for special values */
+    @keyframes gradientShift {
+      0%,100% { background-position: 0% 50%; }
+      50%     { background-position: 100% 50%; }
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, #FFB7C5, #FFE082, #A8E6CF, #90CAF9, #C5B3E6, #FFB7C5);
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: gradientShift 5s ease-in-out infinite;
+    }
+
+    /* Breathing — subtle scale pulse for featured CTA / hero icon */
+    @keyframes breathe {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.035); }
+    }
+    .breathe { animation: breathe 3.8s ease-in-out infinite; will-change: transform; }
+
+    /* Floating arrow nudge */
+    @keyframes nudgeRight {
+      0%,100% { transform: translateX(0); }
+      50%     { transform: translateX(3px); }
+    }
+    .nudge-right { animation: nudgeRight 1.6s ease-in-out infinite; }
+
+    /* Ripple on tap (requires .ripple-target wrapper) */
+    @keyframes rippleOut {
+      from { transform: scale(0); opacity: 0.45; }
+      to   { transform: scale(3.2); opacity: 0; }
+    }
+    .ripple-target { position: relative; overflow: hidden; }
+    .ripple-target::after {
+      content: '';
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 20px; height: 20px;
+      margin-left: -10px; margin-top: -10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ripple-target:active::after {
+      animation: rippleOut 0.6s ease-out;
+    }
+
     /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce) {
       .doodle-letter, .degos-letter, .avatar-glow, .anim-rainbow-spin-slow,
       .anim-fade-in, .anim-float-in, .anim-pop-in, .anim-page-in,
       .anim-crown-bob, .anim-score-pop, .podium-col, .confetti-piece,
-      .nav-indicator { animation: none !important; transition: none !important; }
+      .nav-indicator, .sparkle, .blob, .glow-ring, .breathe, .nudge-right,
+      .gradient-text, .shimmer, .skel, .stagger > *, .wiggle-on-hover svg,
+      .btn-elastic, .pressable, .ripple-target::after
+        { animation: none !important; transition: none !important; }
     }
   `}</style>
 );
