@@ -29,12 +29,27 @@
   /* ---------- BOOT SPLASH (visible before React mounts) ---------- */
   #boot-splash {
     position: fixed; inset: 0; z-index: 9999;
-    background: linear-gradient(180deg,#B8E0F5 0%,#D9C9ED 55%,#FFD6E0 100%);
+    background: radial-gradient(ellipse at 50% 20%, #FFF5D6 0%, #FFD6E0 32%, #D9C9ED 66%, #B8E0F5 100%);
     display: flex; align-items: center; justify-content: center; flex-direction: column;
     overflow: hidden;
-    transition: opacity .7s ease, transform .7s ease;
+    transition: opacity .35s ease, transform .35s ease;
   }
-  #boot-splash.hiding { opacity: 0; transform: scale(1.04); pointer-events: none; }
+  #boot-splash.hiding { opacity: 0; transform: scale(1.06); pointer-events: none; }
+
+  /* soft aurora glow */
+  #boot-splash::before {
+    content: ''; position: absolute; inset: -20%;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255,183,197,.45), transparent 45%),
+      radial-gradient(circle at 80% 60%, rgba(168,230,207,.45), transparent 45%),
+      radial-gradient(circle at 50% 85%, rgba(197,179,230,.45), transparent 45%);
+    animation: bsAurora 6s ease-in-out infinite alternate;
+    filter: blur(20px);
+  }
+  @keyframes bsAurora {
+    0%   { transform: translate(-2%, -1%) scale(1); }
+    100% { transform: translate(2%,  1%) scale(1.04); }
+  }
 
   /* floating clouds */
   #boot-splash .b-cloud {
@@ -50,38 +65,68 @@
 
   /* rainbow ring */
   #boot-splash .b-rainbow {
-    width: 140px; height: 140px; position: relative;
-    animation: bsBounce 2.4s ease-in-out infinite;
-    filter: drop-shadow(0 8px 24px rgba(45,45,63,.18));
+    width: 160px; height: 160px; position: relative;
+    animation: bsBounce 1.6s ease-in-out infinite;
+    filter: drop-shadow(0 10px 28px rgba(65,64,255,.22));
   }
   @keyframes bsBounce {
-    0%,100% { transform: translateY(0) rotate(-4deg); }
-    50%     { transform: translateY(-10px) rotate(4deg); }
+    0%,100% { transform: translateY(0)   rotate(-6deg) scale(1); }
+    50%     { transform: translateY(-14px) rotate(6deg) scale(1.04); }
   }
-  #boot-splash .b-rainbow svg { width:100%; height:100%; animation: bsSpin 8s linear infinite; }
-  @keyframes bsSpin { to { transform: rotate(360deg); } }
+  #boot-splash .b-rainbow svg { width:100%; height:100%; }
+  #boot-splash .b-rainbow svg path {
+    stroke-dasharray: 140;
+    stroke-dashoffset: 140;
+    animation: bsDraw 1.4s cubic-bezier(.5,.1,.2,1) forwards;
+  }
+  #boot-splash .b-rainbow svg path:nth-child(1) { animation-delay: 0s; }
+  #boot-splash .b-rainbow svg path:nth-child(2) { animation-delay: .08s; }
+  #boot-splash .b-rainbow svg path:nth-child(3) { animation-delay: .16s; }
+  #boot-splash .b-rainbow svg path:nth-child(4) { animation-delay: .24s; }
+  #boot-splash .b-rainbow svg path:nth-child(5) { animation-delay: .32s; }
+  @keyframes bsDraw {
+    to { stroke-dashoffset: 0; }
+  }
+  /* Orbiting pulse ring around rainbow */
+  #boot-splash .b-orbit {
+    position: absolute; inset: -12%;
+    border-radius: 50%;
+    border: 2px dashed rgba(65,64,255,.35);
+    animation: bsOrbit 6s linear infinite;
+  }
+  @keyframes bsOrbit { to { transform: rotate(360deg); } }
 
   /* title */
   #boot-splash .b-title {
-    margin-top: 22px;
+    margin-top: 28px;
     font-family: 'Fraunces', 'Georgia', serif;
     font-weight: 600;
     color: #2D2D3F;
     font-size: clamp(2rem, 8vw, 3rem);
     letter-spacing: -0.01em;
-    text-shadow: 0 2px 18px rgba(255,255,255,.5);
+    text-shadow: 0 2px 18px rgba(255,255,255,.65);
     display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
     padding: 0 16px;
+    background: linear-gradient(90deg,#FFB7C5,#FFE082,#A8E6CF,#90CAF9,#C5B3E6);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: bsShine 4s linear infinite;
+  }
+  @keyframes bsShine {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
   }
   #boot-splash .b-title span {
     display: inline-block;
-    opacity: 0; transform: translateY(14px);
-    animation: bsWordIn .7s cubic-bezier(.2,.9,.3,1.3) forwards;
+    opacity: 0; transform: translateY(18px) scale(.95);
+    animation: bsWordIn .45s cubic-bezier(.2,.9,.3,1.3) forwards;
   }
   #boot-splash .b-title span:nth-child(1){ animation-delay:.05s; }
-  #boot-splash .b-title span:nth-child(2){ animation-delay:.18s; }
-  #boot-splash .b-title span:nth-child(3){ animation-delay:.31s; }
-  @keyframes bsWordIn { to { opacity:1; transform: translateY(0); } }
+  #boot-splash .b-title span:nth-child(2){ animation-delay:.15s; }
+  #boot-splash .b-title span:nth-child(3){ animation-delay:.25s; }
+  @keyframes bsWordIn { to { opacity:1; transform: translateY(0) scale(1); } }
 
   /* dots */
   #boot-splash .b-dots {
@@ -137,6 +182,7 @@
   <div class="b-spark" style="bottom:18%;right:18%;animation-delay:1.3s;"></div>
 
   <div class="b-rainbow">
+    <div class="b-orbit"></div>
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M10 70 A40 40 0 0 1 90 70" stroke="#FFB7C5" stroke-width="8" stroke-linecap="round"/>
       <path d="M18 70 A32 32 0 0 1 82 70" stroke="#FFAB91" stroke-width="8" stroke-linecap="round"/>
@@ -165,7 +211,7 @@
     function hide(){
       if (hidden) return; hidden = true;
       splash.classList.add('hiding');
-      setTimeout(function(){ splash && splash.parentNode && splash.parentNode.removeChild(splash); }, 750);
+      setTimeout(function(){ splash && splash.parentNode && splash.parentNode.removeChild(splash); }, 380);
     }
     // Poll for React mount: #root getting any child = app rendered
     var tries = 0;
@@ -173,13 +219,14 @@
       tries++;
       if (root && root.children && root.children.length > 0) {
         clearInterval(iv);
-        // Small grace period so the first-paint animations can start underneath
-        setTimeout(hide, 220);
-      } else if (tries > 120) { // ~12s hard cap
+        setTimeout(hide, 120);
+      } else if (tries > 40) { // ~4s hard cap so it never hangs
         clearInterval(iv);
         hide();
       }
     }, 100);
+    // Absolute safety net: always gone within 5s
+    setTimeout(function(){ hide(); }, 5000);
   })();
 </script>
 <script type="text/babel" data-presets="react">
@@ -580,6 +627,27 @@ const SKIPS_PER_DAY = 1;
 const getPowerups = (u) => storage.get(POWERUPS_KEY(u, todayStr()),
   { hints: HINTS_PER_DAY, skips: SKIPS_PER_DAY });
 const savePowerups = (u, pu) => storage.set(POWERUPS_KEY(u, todayStr()), pu);
+/* Helpers for consuming powerups from inside game modes. Server-side sync is
+   attempted best-effort; local state is the source of truth for the UI. */
+const getActiveUsername = () => {
+  try { return (storage.get('don:session', {}) || {}).username || null; } catch { return null; }
+};
+const consumePowerup = (kind) => {
+  const u = getActiveUsername();
+  if (!u) return false;
+  const pu = getPowerups(u);
+  if ((pu[kind] || 0) <= 0) return false;
+  pu[kind] = Math.max(0, (pu[kind] || 0) - 1);
+  savePowerups(u, pu);
+  if (window.DON_API && window.DON_API.usePowerup) {
+    try { window.DON_API.usePowerup({ kind }); } catch (_) {}
+  }
+  return true;
+};
+const currentPowerups = () => {
+  const u = getActiveUsername();
+  return u ? getPowerups(u) : { hints: 0, skips: 0 };
+};
 
 /* ---------- Private leagues (local-only, code-based) ---------- */
 const LEAGUES_KEY = 'don:leagues';
@@ -1194,15 +1262,15 @@ const ParticleOverlay = () => {
 /* Dynamic sky: color phases interpolate based on local hour. Night shows stars,
    day shows clouds, dawn/dusk show a soft sun glow. Updates every 60s. */
 const SKY_PHASES = [
-  { t: 0,  top: '#0F0D2E', mid: '#1D1A4A', bot: '#2B2660' },  // deep night
-  { t: 5,  top: '#33336B', mid: '#6A5E95', bot: '#B5849B' },  // pre-dawn
+  { t: 0,  top: '#2B2870', mid: '#3D3894', bot: '#554EB8' },  // deep night (lighter)
+  { t: 5,  top: '#5B5499', mid: '#8A75B5', bot: '#C89BB3' },  // pre-dawn
   { t: 7,  top: '#F4C6D4', mid: '#FFD9B8', bot: '#FFE6C5' },  // sunrise
   { t: 10, top: '#BFE3FF', mid: '#D8EEFF', bot: '#F2F8FF' },  // morning
   { t: 14, top: '#A6D8FF', mid: '#CFE8FF', bot: '#EDF5FF' },  // noon
   { t: 18, top: '#FFB785', mid: '#FFA0B5', bot: '#E08BB6' },  // sunset
-  { t: 20, top: '#6A42A0', mid: '#8A4F96', bot: '#A1608C' },  // dusk
-  { t: 22, top: '#1F1C50', mid: '#2B2866', bot: '#3D3680' },  // early night
-  { t: 24, top: '#0F0D2E', mid: '#1D1A4A', bot: '#2B2660' }
+  { t: 20, top: '#7A4FB5', mid: '#9A5FA8', bot: '#B070A0' },  // dusk
+  { t: 22, top: '#3A3580', mid: '#4A4499', bot: '#5D52B0' },  // early night
+  { t: 24, top: '#2B2870', mid: '#3D3894', bot: '#554EB8' }
 ];
 const _hexToRgb = (h) => {
   const p = parseInt(h.slice(1), 16);
@@ -1225,12 +1293,27 @@ const skyAt = (h) => {
 
 const SkyBackground = () => {
   const [tick, setTick] = useState(0);
+  const [themeOverride, setThemeOverride] = useState(() =>
+    (typeof document !== 'undefined' && document.documentElement.dataset.theme) || ''
+  );
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 60000);
+    // Watch <html data-theme> changes so Day/Night toggle takes effect instantly
+    if (typeof MutationObserver !== 'undefined') {
+      const mo = new MutationObserver(() => {
+        setThemeOverride(document.documentElement.dataset.theme || '');
+      });
+      mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      return () => { clearInterval(id); mo.disconnect(); };
+    }
     return () => clearInterval(id);
   }, []);
   const now = new Date();
-  const h = now.getHours() + now.getMinutes() / 60;
+  const realH = now.getHours() + now.getMinutes() / 60;
+  // If user pinned light → noon; dark → 23h; else use real hour
+  const h = themeOverride === 'light' ? 12
+          : themeOverride === 'dark'  ? 23
+          : realH;
   const { top, mid, bot } = skyAt(h);
   const isNight = h < 5.5 || h >= 20.5;
   const isDawn  = h >= 5.5 && h < 8;
@@ -2633,14 +2716,14 @@ const EmptyState = ({ title, subtitle }) => (
    POWER-UPS BAR (for Home)
    ========================================================================== */
 const PowerupsBar = ({ pu }) => (
-  <div className="flex gap-2 mt-3 mb-4">
+  <div className="flex gap-2 mt-3 mb-4" title="Use these inside a game">
     <div className="flex-1 rounded-xl p-2 flex items-center gap-2"
          style={{ background: pu.hints > 0 ? '#FFF4E0' : 'rgba(255,255,255,0.5)',
                   border: `1px solid ${pu.hints > 0 ? '#FFE082' : '#E8E0F0'}`, opacity: pu.hints > 0 ? 1 : 0.55 }}>
       <span className="text-lg">💡</span>
       <div className="min-w-0">
         <p className="text-[10px] font-bold tracking-wider uppercase" style={{ color: '#2D2D3F' }}>{t('hint')}</p>
-        <p className="text-[11px]" style={{ color: '#7B7B9A' }}>x{pu.hints}</p>
+        <p className="text-[11px]" style={{ color: '#7B7B9A' }}>x{pu.hints} · use in-game</p>
       </div>
     </div>
     <div className="flex-1 rounded-xl p-2 flex items-center gap-2"
@@ -2649,9 +2732,45 @@ const PowerupsBar = ({ pu }) => (
       <span className="text-lg">⏭️</span>
       <div className="min-w-0">
         <p className="text-[10px] font-bold tracking-wider uppercase" style={{ color: '#2D2D3F' }}>{t('skip')}</p>
-        <p className="text-[11px]" style={{ color: '#7B7B9A' }}>x{pu.skips}</p>
+        <p className="text-[11px]" style={{ color: '#7B7B9A' }}>x{pu.skips} · use in-game</p>
       </div>
     </div>
+  </div>
+);
+
+/* In-game powerup row. Used inside each GameMode. */
+const GamePowerBar = ({ pu, onHint, onSkip, hintDisabled, skipDisabled, hintHint = "Eliminate a wrong option" }) => (
+  <div className="flex gap-2 mb-4">
+    <button
+      onClick={onHint}
+      disabled={hintDisabled || pu.hints <= 0}
+      title={hintHint}
+      className="flex-1 rounded-xl p-2.5 flex items-center gap-2 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5"
+      style={{
+        background: (!hintDisabled && pu.hints > 0) ? '#FFF4E0' : 'rgba(255,255,255,0.5)',
+        border: `1.5px solid ${(!hintDisabled && pu.hints > 0) ? '#FFE082' : '#E8E0F0'}`,
+      }}>
+      <span className="text-lg">💡</span>
+      <div className="min-w-0 text-left">
+        <p className="text-[10px] font-bold tracking-wider uppercase" style={{ color: '#2D2D3F' }}>Hint</p>
+        <p className="text-[11px]" style={{ color: '#7B7B9A' }}>x{pu.hints}</p>
+      </div>
+    </button>
+    <button
+      onClick={onSkip}
+      disabled={skipDisabled || pu.skips <= 0}
+      title="Skip this question (no points)"
+      className="flex-1 rounded-xl p-2.5 flex items-center gap-2 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5"
+      style={{
+        background: (!skipDisabled && pu.skips > 0) ? '#E0F5EC' : 'rgba(255,255,255,0.5)',
+        border: `1.5px solid ${(!skipDisabled && pu.skips > 0) ? '#A8E6CF' : '#E8E0F0'}`,
+      }}>
+      <span className="text-lg">⏭️</span>
+      <div className="min-w-0 text-left">
+        <p className="text-[10px] font-bold tracking-wider uppercase" style={{ color: '#2D2D3F' }}>Skip</p>
+        <p className="text-[11px]" style={{ color: '#7B7B9A' }}>x{pu.skips}</p>
+      </div>
+    </button>
   </div>
 );
 
@@ -2698,12 +2817,17 @@ const AuthScreen = ({ onAuth }) => {
             key === ADMIN_USERNAME &&
             password === ADMIN_PASSWORD_PLAIN
           );
+          const existing = users[key] || {};
           users[key] = {
+            ...existing,
             name: serverUser.username,
             passHash: 'server',
-            color: serverUser.avatarColor || '#C5B3E6',
-            avatar: serverUser.faceShape || null,
-            joined: Date.now(),
+            color: serverUser.avatarColor || existing.color || '#C5B3E6',
+            // Preserve locally-uploaded avatar (data URL). Server only stores a faceShape hint.
+            avatar: (existing.avatar && typeof existing.avatar === 'string' && existing.avatar.startsWith('data:'))
+                    ? existing.avatar
+                    : (serverUser.faceShape || existing.avatar || null),
+            joined: existing.joined || Date.now(),
             isAdmin: isAdminUser,
             serverId: serverUser.id
           };
@@ -2948,7 +3072,6 @@ const AdminPanel = ({ profile, onExit, onLogout, onEnterApp }) => {
   };
 
   const unlockAllToday = () => {
-    // Forces today's progress=all-done for admin only
     storage.set(userProgressKey(profile.name.toLowerCase(), todayStr()),
                 { guess: true, price: true, trait: true });
     alert('Admin progress set to all-done for today.');
@@ -2958,8 +3081,75 @@ const AdminPanel = ({ profile, onExit, onLogout, onEnterApp }) => {
     const v = !debug; setDebug(v); storage.set('don:debug', v);
   };
 
+  // ---- New per-user admin actions ----
+  const resetUserStats = (key) => {
+    storage.set(userStatsKey(key),
+      { totalPts: 0, gamesPlayed: 0, bestWeek: 0, weekPts: 0, weekKey: getWeekKey() });
+    storage.set(userStreakKey(key), { count: 0, lastDate: null });
+    storage.set(userAchvKey(key), []);
+    // Wipe all daily progress rows
+    for (const k of storage.allKeys()) {
+      if (k.startsWith(`don:progress:${key}:`)) storage.remove(k);
+    }
+    refresh();
+  };
+
+  const resetUserDex = (key) => {
+    storage.remove(userDexKey(key));
+    refresh();
+  };
+
+  const grantPowerups = (key, n = 3) => {
+    const cur = storage.get(POWERUPS_KEY(key, todayStr()), { hints: 0, skips: 0 });
+    cur.hints = (cur.hints || 0) + n;
+    cur.skips = (cur.skips || 0) + n;
+    storage.set(POWERUPS_KEY(key, todayStr()), cur);
+    refresh();
+  };
+
+  const resetAllStats = () => {
+    if (!window.confirm('Reset stats + streaks + achievements for EVERY non-admin user?')) return;
+    for (const [key, u] of Object.entries(getUsers())) {
+      if (u.isAdmin) continue;
+      resetUserStats(key);
+    }
+    refresh();
+  };
+
+  const resetAllDex = () => {
+    if (!window.confirm('Clear the Doodle Dex for EVERY user?')) return;
+    for (const [key] of Object.entries(getUsers())) {
+      storage.remove(userDexKey(key));
+    }
+    refresh();
+  };
+
+  const resetMyDex = () => {
+    storage.remove(userDexKey(profile.name.toLowerCase()));
+    alert('Your Dex has been cleared.');
+    refresh();
+  };
+
+  const grantMeMaxPowerups = () => {
+    storage.set(POWERUPS_KEY(profile.name.toLowerCase(), todayStr()),
+                { hints: 99, skips: 99 });
+    alert('Maxed out your powerups for today.');
+  };
+
+  const clearTodayProgress = () => {
+    if (!window.confirm('Wipe today\'s mode-completion flags for everyone?')) return;
+    const today = todayStr();
+    for (const k of storage.allKeys()) {
+      if (k.endsWith(`:${today}`) && k.startsWith('don:progress:')) storage.remove(k);
+    }
+    refresh();
+  };
+
+  const [confirmResetStats, setConfirmResetStats] = useState(null);
+  const [confirmResetDex, setConfirmResetDex] = useState(null);
+
   return (
-    <div className="px-4 pt-6 pb-10 max-w-[720px] mx-auto">
+    <div className="px-4 pt-6 pb-10 max-w-[720px] lg:max-w-[1100px] lg:px-8 mx-auto">
       <FrostedCard className="p-5 mb-5 anim-float-in">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
@@ -2976,8 +3166,8 @@ const AdminPanel = ({ profile, onExit, onLogout, onEnterApp }) => {
               </h1>
             </div>
           </div>
-          <div className="flex gap-2">
-            <SoftButton onClick={onEnterApp}>Enter app</SoftButton>
+          <div className="flex gap-2 flex-wrap">
+            <SoftButton onClick={onEnterApp}>← Back to app</SoftButton>
             <SoftButton onClick={onLogout}>Log out</SoftButton>
           </div>
         </div>
@@ -3000,12 +3190,36 @@ const AdminPanel = ({ profile, onExit, onLogout, onEnterApp }) => {
       </div>
 
       <FrostedCard className="p-5 mb-5">
-        <h3 className="font-bold mb-3" style={{ color: '#2D2D3F' }}>Tools</h3>
+        <h3 className="font-bold mb-1" style={{ color: '#2D2D3F' }}>Global tools</h3>
+        <p className="text-[11px] mb-3" style={{ color: '#7B7B9A' }}>
+          These affect every non-admin user. Actions are instant.
+        </p>
         <div className="flex flex-wrap gap-2">
           <SoftButton onClick={resetAllWeekly}>Reset weekly points (all)</SoftButton>
-          <SoftButton onClick={unlockAllToday}>Mark today complete (me)</SoftButton>
+          <button onClick={resetAllStats}
+                  className="rounded-full px-3 py-2 text-sm font-bold active:scale-95 transition-transform"
+                  style={{ background: 'rgba(229,115,115,0.14)', color: '#B94A4A', border: '1px solid rgba(229,115,115,0.3)' }}>
+            Reset ALL stats
+          </button>
+          <button onClick={resetAllDex}
+                  className="rounded-full px-3 py-2 text-sm font-bold active:scale-95 transition-transform"
+                  style={{ background: 'rgba(229,115,115,0.14)', color: '#B94A4A', border: '1px solid rgba(229,115,115,0.3)' }}>
+            Clear ALL Dex
+          </button>
+          <SoftButton onClick={clearTodayProgress}>Wipe today's completions</SoftButton>
+        </div>
+
+        <h3 className="font-bold mt-5 mb-2" style={{ color: '#2D2D3F' }}>Just for me</h3>
+        <div className="flex flex-wrap gap-2">
+          <SoftButton onClick={unlockAllToday}>Mark today complete</SoftButton>
+          <SoftButton onClick={resetMyDex}>Clear my Dex</SoftButton>
+          <SoftButton onClick={grantMeMaxPowerups}>Max my powerups (99/99)</SoftButton>
+        </div>
+
+        <h3 className="font-bold mt-5 mb-2" style={{ color: '#2D2D3F' }}>System</h3>
+        <div className="flex flex-wrap gap-2">
           <SoftButton onClick={toggleDebug}>{debug ? 'Debug: ON' : 'Debug: OFF'}</SoftButton>
-          <SoftButton onClick={refresh}>Refresh</SoftButton>
+          <SoftButton onClick={refresh}>Refresh data</SoftButton>
         </div>
       </FrostedCard>
 
@@ -3038,22 +3252,39 @@ const AdminPanel = ({ profile, onExit, onLogout, onEnterApp }) => {
                 </div>
               </div>
               {!r.isAdmin && (
-                confirmWipe === r.key ? (
-                  <div className="flex gap-1 shrink-0">
-                    <button onClick={() => wipeUser(r.key)}
-                            className="rounded-lg px-2 py-1 text-[11px] font-bold"
-                            style={{ background: '#E57373', color: '#fff' }}>Confirm</button>
-                    <button onClick={() => setConfirmWipe(null)}
-                            className="rounded-lg px-2 py-1 text-[11px] font-bold"
-                            style={{ background: 'rgba(255,255,255,0.8)', color: '#2D2D3F', border: '1px solid #E8E0F0' }}>Cancel</button>
-                  </div>
-                ) : (
-                  <button onClick={() => setConfirmWipe(r.key)}
-                          className="rounded-lg px-2 py-1 text-[11px] font-bold shrink-0"
-                          style={{ background: 'rgba(229,115,115,0.14)', color: '#B94A4A', border: '1px solid rgba(229,115,115,0.3)' }}>
-                    Delete
+                <div className="flex flex-wrap gap-1 shrink-0 justify-end">
+                  <button onClick={() => { if (window.confirm(`Reset stats for @${r.name}?`)) resetUserStats(r.key); }}
+                          className="rounded-lg px-2 py-1 text-[11px] font-bold"
+                          style={{ background: 'rgba(255,224,130,0.35)', color: '#7A5A00', border: '1px solid rgba(255,200,80,0.45)' }}>
+                    Reset stats
                   </button>
-                )
+                  <button onClick={() => { if (window.confirm(`Clear Dex for @${r.name}?`)) resetUserDex(r.key); }}
+                          className="rounded-lg px-2 py-1 text-[11px] font-bold"
+                          style={{ background: 'rgba(144,202,249,0.35)', color: '#1A4A7A', border: '1px solid rgba(100,170,220,0.45)' }}>
+                    Clear Dex
+                  </button>
+                  <button onClick={() => grantPowerups(r.key, 3)}
+                          className="rounded-lg px-2 py-1 text-[11px] font-bold"
+                          style={{ background: 'rgba(168,230,207,0.45)', color: '#1B5A3B', border: '1px solid rgba(100,200,150,0.5)' }}>
+                    +3 powerups
+                  </button>
+                  {confirmWipe === r.key ? (
+                    <>
+                      <button onClick={() => wipeUser(r.key)}
+                              className="rounded-lg px-2 py-1 text-[11px] font-bold"
+                              style={{ background: '#E57373', color: '#fff' }}>Confirm delete</button>
+                      <button onClick={() => setConfirmWipe(null)}
+                              className="rounded-lg px-2 py-1 text-[11px] font-bold"
+                              style={{ background: 'rgba(255,255,255,0.8)', color: '#2D2D3F', border: '1px solid #E8E0F0' }}>Cancel</button>
+                    </>
+                  ) : (
+                    <button onClick={() => setConfirmWipe(r.key)}
+                            className="rounded-lg px-2 py-1 text-[11px] font-bold"
+                            style={{ background: 'rgba(229,115,115,0.14)', color: '#B94A4A', border: '1px solid rgba(229,115,115,0.3)' }}>
+                      Delete account
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           ))}
@@ -3469,11 +3700,40 @@ const GuessMode = ({ seed, onFinish }) => {
   const [round, setRound] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [results, setResults] = useState([]);
+  const [pu, setPu] = useState(() => currentPowerups());
+  const [hintedSide, setHintedSide] = useState(null); // which side to grey out
   const current = pairs.current[round];
   if (!current) {
     return <div className="p-10 text-center" style={{ color: '#7B7B9A' }}>Loading dataset…</div>;
   }
   const correctSide = current.a.s.p > current.b.s.p ? 'a' : 'b';
+  const wrongSide = correctSide === 'a' ? 'b' : 'a';
+
+  // Clear hint highlight whenever the round changes
+  useEffect(() => { setHintedSide(null); }, [round]);
+
+  const doHint = () => {
+    if (revealed || hintedSide) return;
+    if (!consumePowerup('hints')) return;
+    setHintedSide(wrongSide);
+    setPu(currentPowerups());
+    Haptics.buzz(8);
+  };
+  const doSkip = () => {
+    if (revealed) return;
+    if (!consumePowerup('skips')) return;
+    setPu(currentPowerups());
+    setHintedSide(null);
+    Haptics.buzz(8);
+    const newResults = [...results, 'skip'];
+    setResults(newResults);
+    if (round + 1 >= pairs.current.length) {
+      const pts = newResults.filter(r => r === 'correct').length;
+      onFinish({ points: pts, icons: newResults, mode: 'guess' });
+    } else {
+      setRound(round + 1);
+    }
+  };
 
   const fmtPrice = (p) => {
     if (p >= 1) return p.toFixed(2) + ' ETH';
@@ -3492,6 +3752,7 @@ const GuessMode = ({ seed, onFinish }) => {
 
   const choose = (side) => {
     if (revealed) return;
+    if (hintedSide && side === hintedSide) return; // blocked by hint
     setRevealed(true);
     const correct = side === correctSide;
     if (correct) { Sound.correct(); Haptics.buzz(14); } else { Sound.wrong(); Haptics.buzz([8, 40, 8]); }
@@ -3517,7 +3778,7 @@ const GuessMode = ({ seed, onFinish }) => {
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, [revealed, round]);
+  }, [revealed, round, hintedSide]);
 
   return (
     <div className="px-4 pt-4 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto">
@@ -3531,6 +3792,15 @@ const GuessMode = ({ seed, onFinish }) => {
         </span>
       </div>
 
+      <GamePowerBar
+        pu={pu}
+        onHint={doHint}
+        onSkip={doSkip}
+        hintDisabled={revealed || !!hintedSide}
+        skipDisabled={revealed}
+        hintHint="Eliminates the wrong option for this round"
+      />
+
       <FrostedCard className="p-4 mb-4 text-center">
         <p className="text-sm font-medium" style={{ color: '#7B7B9A' }}>Which one sold for</p>
         <h3 className="font-bold text-xl" style={{ color: '#4140FF' }}>MORE ETH most recently?</h3>
@@ -3541,13 +3811,16 @@ const GuessMode = ({ seed, onFinish }) => {
           const d = current[side];
           const isCorrect = revealed && side === correctSide;
           const isWrong = revealed && side !== correctSide;
+          const isHintedOut = hintedSide === side && !revealed;
           return (
             <FrostedCard key={side}
                          onClick={() => choose(side)}
-                         className={`p-3 lg:p-6 cursor-pointer transition-all ${revealed ? '' : 'active:scale-95 lg:hover:-translate-y-1'}`}
+                         className={`p-3 lg:p-6 transition-all ${isHintedOut ? 'cursor-not-allowed' : 'cursor-pointer'} ${revealed ? '' : 'active:scale-95 lg:hover:-translate-y-1'}`}
                          style={{
                            outline: isCorrect ? '3px solid #7DD8A0' : isWrong ? '3px solid #FF8A8A' : 'none',
-                           outlineOffset: '2px'
+                           outlineOffset: '2px',
+                           opacity: isHintedOut ? 0.35 : 1,
+                           filter: isHintedOut ? 'grayscale(0.8)' : 'none'
                          }}>
               <div className="doodle-card-img"><DoodleAvatar doodle={d} size={170} /></div>
               <div className="mt-2 text-center">
@@ -3562,7 +3835,9 @@ const GuessMode = ({ seed, onFinish }) => {
                     </div>
                   </>
                 ) : (
-                  <div className="font-bold text-lg" style={{ color: '#C5B3E6' }}>? ETH</div>
+                  <div className="font-bold text-lg" style={{ color: '#C5B3E6' }}>
+                    {isHintedOut ? '✗ not this one' : '? ETH'}
+                  </div>
                 )}
               </div>
             </FrostedCard>
@@ -3612,12 +3887,15 @@ const PriceMode = ({ seed, onFinish }) => {
   const [revealed, setRevealed] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [icons, setIcons] = useState([]);
+  const [pu, setPu] = useState(() => currentPowerups());
+  const [hintedSide, setHintedSide] = useState(null);
   const current = pairs.current[round];
   if (!current) {
     return <div className="p-10 text-center" style={{ color: '#7B7B9A' }}>Loading dataset…</div>;
   }
   // rarer = higher score = LOWER rank number
   const correctSide = current.a.r > current.b.r ? 'a' : 'b';
+  const wrongSide = correctSide === 'a' ? 'b' : 'a';
   const mult = streak >= 10 ? 3 : streak >= 5 ? 2 : 1;
 
   // Dex hook: record both doodles shown
@@ -3625,8 +3903,32 @@ const PriceMode = ({ seed, onFinish }) => {
     if (current) recordDexGlobal([current.a.id, current.b.id]);
   }, [round]);
 
+  useEffect(() => { setHintedSide(null); }, [round]);
+
+  const doHint = () => {
+    if (revealed || hintedSide) return;
+    if (!consumePowerup('hints')) return;
+    setPu(currentPowerups());
+    setHintedSide(wrongSide);
+  };
+
+  const doSkip = () => {
+    if (revealed) return;
+    if (!consumePowerup('skips')) return;
+    setPu(currentPowerups());
+    const newIcons = [...icons, 'skip'];
+    setIcons(newIcons);
+    if (round + 1 >= pairs.current.length) {
+      finish(streak, newIcons);
+    } else {
+      setRound(round + 1);
+      setRevealed(false);
+    }
+  };
+
   const choose = (side) => {
     if (revealed) return;
+    if (side === hintedSide) return;
     setRevealed(true);
     const correct = side === correctSide;
     if (correct) { Sound.correct(); Haptics.buzz(14); } else { Sound.wrong(); Haptics.buzz([8, 40, 8]); }
@@ -3686,18 +3988,25 @@ const PriceMode = ({ seed, onFinish }) => {
         Which Doodle is <strong style={{ color: '#4140FF' }}>RARER</strong>?
       </p>
 
+      <GamePowerBar pu={pu} onHint={doHint} onSkip={doSkip}
+                    hintDisabled={revealed || !!hintedSide} skipDisabled={revealed} />
+
       <div className="grid grid-cols-2 gap-3 lg:gap-10 lg:max-w-5xl lg:mx-auto mb-4">
         {['a', 'b'].map(side => {
           const d = current[side];
           const isCorrect = revealed && side === correctSide;
           const isWrong = revealed && side !== correctSide;
+          const isHintedOut = hintedSide === side;
           return (
             <FrostedCard key={side}
                          onClick={() => choose(side)}
-                         className={`p-3 lg:p-6 cursor-pointer transition-all ${revealed ? '' : 'active:scale-95 lg:hover:-translate-y-1'}`}
+                         className={`p-3 lg:p-6 transition-all ${revealed || isHintedOut ? '' : 'cursor-pointer active:scale-95 lg:hover:-translate-y-1'}`}
                          style={{
                            outline: isCorrect ? '3px solid #7DD8A0' : isWrong ? '3px solid #FF8A8A' : 'none',
-                           outlineOffset: '2px'
+                           outlineOffset: '2px',
+                           opacity: isHintedOut ? 0.35 : 1,
+                           filter: isHintedOut ? 'grayscale(0.8)' : 'none',
+                           cursor: isHintedOut ? 'not-allowed' : undefined
                          }}>
               <div className="doodle-card-img"><DoodleAvatar doodle={d} size={170} /></div>
               <div className="mt-2 text-center">
@@ -3721,7 +4030,9 @@ const PriceMode = ({ seed, onFinish }) => {
                style={{ background: 'rgba(255,255,255,0.7)' }}>
             {icn === 'up'
               ? <span className="text-sm font-bold" style={{ color: '#7DD8A0' }}>▲</span>
-              : <span className="text-sm font-bold" style={{ color: '#FF8A8A' }}>▼</span>}
+              : icn === 'skip'
+                ? <span className="text-sm font-bold" style={{ color: '#7B7B9A' }}>⇥</span>
+                : <span className="text-sm font-bold" style={{ color: '#FF8A8A' }}>▼</span>}
           </div>
         ))}
       </div>
@@ -3798,6 +4109,8 @@ const TraitMode = ({ seed, onFinish }) => {
   const [guess, setGuess] = useState(20);
   const [revealed, setRevealed] = useState(false);
   const [results, setResults] = useState([]);
+  const [pu, setPu] = useState(() => currentPowerups());
+  const [hintRange, setHintRange] = useState(null); // {lo, hi} narrowing the slider after hint
   const current = questions.current[round];
   if (!current) {
     return <div className="p-10 text-center" style={{ color: '#7B7B9A' }}>Loading dataset…</div>;
@@ -3810,6 +4123,39 @@ const TraitMode = ({ seed, onFinish }) => {
       recordDexGlobal(current.exampleCandidates.slice(0, 3).map(d => d.id));
     }
   }, [round]);
+
+  useEffect(() => { setHintRange(null); }, [round]);
+
+  const doHint = () => {
+    if (revealed || hintRange) return;
+    if (!consumePowerup('hints')) return;
+    setPu(currentPowerups());
+    // reveal a ±6% window around the actual value
+    const lo = Math.max(0, Math.round(actual) - 6);
+    const hi = Math.min(50, Math.round(actual) + 6);
+    setHintRange({ lo, hi });
+    // nudge the guess into the window if it's outside
+    setGuess(g => (g < lo ? lo : g > hi ? hi : g));
+  };
+
+  const doSkip = () => {
+    if (revealed) return;
+    if (!consumePowerup('skips')) return;
+    setPu(currentPowerups());
+    const newResults = [...results, { type: 'skip', pts: 0 }];
+    setResults(newResults);
+    if (round + 1 >= questions.current.length) {
+      onFinish({
+        points: newResults.reduce((s, r) => s + r.pts, 0),
+        icons: newResults.map(r => r.type),
+        mode: 'trait'
+      });
+    } else {
+      setRound(round + 1);
+      setRevealed(false);
+      setGuess(20);
+    }
+  };
 
   const submit = () => {
     if (revealed) return;
@@ -3884,6 +4230,9 @@ const TraitMode = ({ seed, onFinish }) => {
         </span>
       </div>
 
+      <GamePowerBar pu={pu} onHint={doHint} onSkip={doSkip}
+                    hintDisabled={revealed || !!hintRange} skipDisabled={revealed} />
+
       <FrostedCard className="p-6 mb-5 text-center">
         <p className="text-sm font-medium mb-1" style={{ color: '#7B7B9A' }}>What % of Doodles have</p>
         <h3 className="font-bold text-2xl" style={{ color: '#4140FF' }}>{titleCase(current.value)}</h3>
@@ -3900,6 +4249,15 @@ const TraitMode = ({ seed, onFinish }) => {
         <div className="relative h-12 mb-4">
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full"
                style={{ background: 'linear-gradient(90deg, #A8E6CF, #FFE082, #FFB7C5)' }} />
+          {hintRange && !revealed && (
+            <div className="absolute top-1/2 -translate-y-1/2 h-3 rounded-full pointer-events-none"
+                 style={{
+                   left: `${pct2x(hintRange.lo)}%`,
+                   width: `${pct2x(hintRange.hi) - pct2x(hintRange.lo)}%`,
+                   background: 'rgba(125,216,160,0.35)',
+                   border: '2px dashed #7DD8A0'
+                 }} />
+          )}
           {revealed && (
             <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all"
                  style={{ left: `${pct2x(actual)}%` }}>
@@ -4291,7 +4649,7 @@ const LeaderboardScreen = ({ profile, weekPts }) => {
    PROFILE SCREEN
    ========================================================================== */
 
-const ProfileScreen = ({ profile, stats, streak = 0, achievements = [], onEdit, onLogout, onDelete, onOpenDex }) => {
+const ProfileScreen = ({ profile, stats, streak = 0, achievements = [], onEdit, onLogout, onDelete, onOpenDex, onOpenAdmin }) => {
   const dexIds = getDex(profile.name.toLowerCase());
   const [confirmDelete, setConfirmDelete] = useState(false);
   // 8 weeks of fake history scaled against current performance
@@ -4328,6 +4686,18 @@ const ProfileScreen = ({ profile, stats, streak = 0, achievements = [], onEdit, 
         <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
           <SoftButton onClick={onEdit}>Edit profile</SoftButton>
           {onLogout && <SoftButton onClick={onLogout}>Log out</SoftButton>}
+          {onOpenAdmin && (
+            <button onClick={onOpenAdmin}
+                    className="rounded-full px-4 py-2 text-sm font-bold flex items-center gap-1.5 active:scale-95 transition-transform"
+                    style={{
+                      background: 'linear-gradient(135deg,#4140FF,#C5B3E6)',
+                      color: '#fff',
+                      border: '2px solid #2D2D3F',
+                      boxShadow: '0 4px 14px rgba(65,64,255,0.35)'
+                    }}>
+              <CrownIcon size={16} /> Admin menu
+            </button>
+          )}
         </div>
 
         {/* XP / level bar */}
@@ -5105,6 +5475,7 @@ function DoodleOrNot() {
                          onEdit={() => setEditing(true)}
                          onLogout={handleLogout}
                          onOpenDex={() => setDexOpen(true)}
+                         onOpenAdmin={profile.isAdmin ? () => setAdminMode(true) : null}
                          onDelete={profile.isAdmin ? null : handleDeleteAccount} />
         )}
       </div>
@@ -5788,6 +6159,7 @@ const FontLoader = () => (
     }
   `}</style>
 );
+
 </script>
 </body>
 </html>
