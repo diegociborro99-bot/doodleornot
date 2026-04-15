@@ -8729,6 +8729,31 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     }
   `);
 
-/* ---------- Mount ---------- */
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(DoodleOrNot));
+/* ---------- Mount (with error boundary that surfaces render errors) ---------- */
+function __showFatal(title, err, extra) {
+  try {
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;inset:12px;z-index:99999;background:#fff;border:2px solid #E57373;border-radius:14px;padding:16px;font:12px/1.5 ui-monospace,Menlo,monospace;color:#2D2D3F;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.2);white-space:pre-wrap;';
+    box.textContent = title + '\n\n' + (err && err.message ? err.message : String(err)) + '\n\n' + ((err && err.stack) || '').split('\n').slice(0,8).join('\n') + (extra ? '\n\n' + extra : '');
+    document.body.appendChild(box);
+  } catch(e) {}
+}
+class __RootErrorBoundary extends React.Component {
+  constructor(p){ super(p); this.state = { err: null }; }
+  static getDerivedStateFromError(err){ return { err }; }
+  componentDidCatch(err, info){
+    __showFatal('Render error', err, 'Component stack:' + (info && info.componentStack || ''));
+  }
+  render(){
+    if (this.state.err) return null;
+    return this.props.children;
+  }
+}
+try {
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    React.createElement(__RootErrorBoundary, null, React.createElement(DoodleOrNot))
+  );
+} catch (e) {
+  __showFatal('Mount error', e);
+}
 
