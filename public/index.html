@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
 <title>Doodle or Not</title>
 <meta name="theme-color" content="#C5B3E6" />
+<meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Doodle" />
@@ -3973,7 +3974,7 @@ const BottomNav = ({ tab, onTab }) => {
    MAIN APP
    ========================================================================== */
 
-export default function DoodleOrNot() {
+function DoodleOrNot() {
   // ---- SESSION ----
   const [session, setSessionState] = useState(() => getSession());
   const username = session?.username || null;
@@ -4620,6 +4621,8 @@ const FontLoader = () => (
   `}</style>
 );
 
+
+ReactDOM.createRoot(document.getElementById('root')).render(<DoodleOrNot />);
 </script>
 </body>
 </html>
