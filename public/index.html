@@ -848,9 +848,10 @@ const RainbowIcon = ({ size = 24 }) => {
          strokeLinecap="round" strokeLinejoin="round"
          style={{ overflow: 'visible' }}>
       <defs>
-        <filter id={`glow-${uid}`} x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="1.8" result="b1" />
-          <feGaussianBlur stdDeviation="4" in="SourceGraphic" result="b2" />
+        {/* wider filter region + softer blur → no boxy halo on dark bg */}
+        <filter id={`glow-${uid}`} x="-150%" y="-150%" width="400%" height="400%">
+          <feGaussianBlur stdDeviation="1.2" result="b1" />
+          <feGaussianBlur stdDeviation="2.6" in="SourceGraphic" result="b2" />
           <feMerge>
             <feMergeNode in="b2" />
             <feMergeNode in="b1" />
@@ -1746,7 +1747,7 @@ const CountUp = ({ value, duration = 900, spring = true }) => {
 const FooterSignature = () => {
   const full = 'vibe coded by Degos';
   return (
-    <div className="w-full flex justify-center pt-8 select-none"
+    <div className="w-full flex flex-col items-center justify-center pt-8 select-none gap-4"
          style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
       <div className="degos-wrap">
         <span className="degos-sig">
@@ -1758,6 +1759,15 @@ const FooterSignature = () => {
           ))}
         </span>
         <span className="degos-underline" aria-hidden="true" />
+      </div>
+      <div className="degos-doodle-wrap">
+        <div className="degos-doodle-halo" aria-hidden="true" />
+        <img
+          src="./degos-doodle.png"
+          alt="Degos' Doodle"
+          className="degos-doodle-img"
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        />
       </div>
     </div>
   );
@@ -2762,13 +2772,13 @@ const AuthScreen = ({ onAuth }) => {
         <div className="mt-3 opacity-95 anim-rainbow-spin-slow breathe lg:mt-5"><RainbowIcon size={64} /></div>
         <p className="mt-3 text-sm px-3 py-1 rounded-full text-center lg:text-left lg:mt-5 lg:text-base lg:px-4 lg:py-2"
            style={{
-             color: '#2D2D3F',
-             fontWeight: 500,
-             background: 'rgba(255,255,255,0.55)',
-             backdropFilter: 'blur(8px)',
-             WebkitBackdropFilter: 'blur(8px)',
-             border: '1px solid rgba(255,255,255,0.7)',
-             boxShadow: '0 2px 12px rgba(45,45,63,0.08)',
+             color: '#1F1C50',
+             fontWeight: 600,
+             background: 'rgba(255,255,255,0.92)',
+             backdropFilter: 'blur(10px) saturate(1.2)',
+             WebkitBackdropFilter: 'blur(10px) saturate(1.2)',
+             border: '1px solid rgba(255,255,255,0.95)',
+             boxShadow: '0 4px 20px rgba(15,13,46,0.25), 0 2px 6px rgba(15,13,46,0.15)',
              maxWidth: '420px'
            }}>
           {mode === 'login' ? 'Welcome back, Doodle' : 'Create your account to start playing'}
@@ -3133,13 +3143,13 @@ const SplashScreen = ({ onCreate, initial, editMode = false }) => {
         <div className="mt-3 opacity-95 anim-rainbow-spin-slow breathe lg:mt-5"><RainbowIcon size={64} /></div>
         <p className="mt-3 text-sm px-3 py-1 rounded-full text-center lg:text-left lg:mt-5 lg:text-base lg:px-4 lg:py-2"
            style={{
-             color: '#2D2D3F',
-             fontWeight: 500,
-             background: 'rgba(255,255,255,0.55)',
-             backdropFilter: 'blur(8px)',
-             WebkitBackdropFilter: 'blur(8px)',
-             border: '1px solid rgba(255,255,255,0.7)',
-             boxShadow: '0 2px 12px rgba(45,45,63,0.08)',
+             color: '#1F1C50',
+             fontWeight: 600,
+             background: 'rgba(255,255,255,0.92)',
+             backdropFilter: 'blur(10px) saturate(1.2)',
+             WebkitBackdropFilter: 'blur(10px) saturate(1.2)',
+             border: '1px solid rgba(255,255,255,0.95)',
+             boxShadow: '0 4px 20px rgba(15,13,46,0.25), 0 2px 6px rgba(15,13,46,0.15)',
              maxWidth: '420px'
            }}>
           {isEdit ? 'Edit your Doodle identity' : 'A daily Doodles trivia game · No wallet, just vibes'}
@@ -5281,6 +5291,42 @@ const FontLoader = () => (
     /* ===== Rainbow slow spin ===== */
     @keyframes rainbowSway { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
     .anim-rainbow-spin-slow { animation: rainbowSway 6s ease-in-out infinite; transform-origin: 50% 70%; }
+
+    /* ===== Degos Doodle — portrait embedded under signature ===== */
+    @keyframes doodleFloat { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
+    @keyframes doodleHalo  { 0%,100% { opacity:.55; transform: scale(1); } 50% { opacity:.9; transform: scale(1.08); } }
+    .degos-doodle-wrap {
+      position: relative;
+      width: 132px; height: 132px;
+      display: inline-flex; align-items: center; justify-content: center;
+      animation: doodleFloat 5.2s ease-in-out infinite;
+      will-change: transform;
+    }
+    .degos-doodle-halo {
+      position: absolute; inset: -10px;
+      border-radius: 50%;
+      background:
+        conic-gradient(from 0deg,
+          #FFB7C5, #FFE082, #A8E6CF, #90CAF9, #C5B3E6, #FFB7C5);
+      filter: blur(16px);
+      opacity: .7;
+      animation: doodleHalo 4s ease-in-out infinite, rainbowSway 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .degos-doodle-img {
+      position: relative;
+      width: 120px; height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.92);
+      box-shadow:
+        0 8px 24px rgba(15,13,46,0.35),
+        0 0 0 1px rgba(255,255,255,0.2) inset;
+    }
+    @media (min-width: 1024px) {
+      .degos-doodle-wrap { width: 160px; height: 160px; }
+      .degos-doodle-img  { width: 148px; height: 148px; }
+    }
 
     /* ===== Degos signature — legible solid ink + animated rainbow underline ===== */
     @keyframes degosBob       { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
