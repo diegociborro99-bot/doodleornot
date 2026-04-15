@@ -1,0 +1,154 @@
+// Doodle or Not — PostgreSQL schema
+// Run `npx prisma migrate deploy` on Railway to apply.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  email        String?  @unique
+  avatarColor  String   @default("#C5B3E6")
+  faceShape    String   @default("round")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  progress     DailyProgress[]
+  stats        Stats?
+  streak       Streak?
+  dex          DexEntry[]
+  achievements UserAchievement[]
+  leagues      LeagueMember[]
+  powerups     Powerup[]
+  preferences  Preferences?
+  scores       Score[]
+  createdLeagues League[] @relation("LeagueCreator")
+
+  @@index([username])
+}
+
+model DailyProgress {
+  id               String   @id @default(cuid())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  day              String   // ISO date e.g. "2026-04-15"
+  higherSale       Boolean  @default(false)
+  rarityDuel       Boolean  @default(false)
+  traitRoulette    Boolean  @default(false)
+  totalPoints      Int      @default(0)
+  clutch           Boolean  @default(false)
+  wrongIcons       String[] @default([])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([userId, day])
+  @@index([day])
+}
+
+model Score {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  day        String
+  mode       String   // 'higher' | 'rarity' | 'trait'
+  points     Int
+  icons      String[] @default([])
+  createdAt  DateTime @default(now())
+
+  @@index([day, mode])
+  @@index([userId])
+}
+
+model Stats {
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String  @id
+  totalGames      Int     @default(0)
+  totalCorrect    Int     @default(0)
+  totalPoints     Int     @default(0)
+  highestStreak   Int     @default(0)
+  weekPoints      Int     @default(0)
+  weekStart       String  @default("") // ISO week-start date, rolls weekly
+  xp              Int     @default(0)
+  updatedAt       DateTime @updatedAt
+}
+
+model Streak {
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String   @id
+  currentStreak    Int      @default(0)
+  longestStreak    Int      @default(0)
+  lastPlayedDay    String?  // ISO date
+  freezesAvailable Int      @default(1)
+  freezeWeekStart  String   @default("")
+  updatedAt        DateTime @updatedAt
+}
+
+model DexEntry {
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  doodleId   Int
+  firstSeen  DateTime @default(now())
+
+  @@id([userId, doodleId])
+  @@index([userId])
+}
+
+model UserAchievement {
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  @@id([userId, achievementId])
+}
+
+model League {
+  id         String         @id @default(cuid())
+  code       String         @unique
+  name       String
+  creator    User           @relation("LeagueCreator", fields: [creatorId], references: [id])
+  creatorId  String
+  createdAt  DateTime       @default(now())
+  members    LeagueMember[]
+
+  @@index([code])
+}
+
+model LeagueMember {
+  league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  leagueId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  @@id([leagueId, userId])
+  @@index([userId])
+}
+
+model Powerup {
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  day        String
+  hintsUsed  Int    @default(0)
+  skipsUsed  Int    @default(0)
+
+  @@id([userId, day])
+}
+
+model Preferences {
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String  @id
+  darkMode       String  @default("auto")  // 'auto' | 'light' | 'dark'
+  sound          Boolean @default(true)
+  haptics        Boolean @default(true)
+  lang           String  @default("en")    // 'en' | 'es' | 'de'
+  notifications  Boolean @default(false)
+  updatedAt      DateTime @updatedAt
+}

@@ -1,17 +1,25 @@
 {
   "name": "doodle-or-not",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Daily Doodles NFT trivia game — static site deploy",
+  "description": "Daily Doodles NFT trivia game — PostgreSQL-backed.",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:dev": "prisma migrate dev",
+    "db:studio": "prisma studio"
   },
-  "engines": {
-    "node": ">=20"
-  },
+  "engines": { "node": ">=20" },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
-    "express": "^4.19.2"
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "prisma": "^5.22.0"
   }
 }

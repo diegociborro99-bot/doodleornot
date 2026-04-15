@@ -19,6 +19,7 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
 <script src="./doodles-dataset.js"></script>
+<script src="./api.js"></script>
 <style>
   html, body, #root { height: 100%; margin: 0; }
   body { font-family: 'Quicksand', system-ui, sans-serif; color: #2D2D3F; }
@@ -2419,57 +2420,94 @@ const AuthScreen = ({ onAuth }) => {
     if (!canSubmit) return;
     setBusy(true); setErr('');
     try {
-      // ADMIN login short-circuit
+      const key = username.toLowerCase();
+      const api = window.DON_API;
+
+      // Try backend first; fall back to local if API unavailable (offline dev)
+      if (api) {
+        try {
+          let serverUser;
+          if (mode === 'register') {
+            const colorPool = ['#A8E6CF','#FFB7C5','#FFAB91','#FFE082','#C5B3E6','#90CAF9'];
+            const defaultColor = colorPool[hashCode(key) % colorPool.length];
+            serverUser = await api.signup({ username: key, password, avatarColor: defaultColor, faceShape: 'round' });
+          } else {
+            serverUser = await api.login({ username: key, password });
+          }
+          // Mirror into local cache for legacy code paths
+          const users = getUsers();
+          users[key] = {
+            name: serverUser.username,
+            passHash: 'server',
+            color: serverUser.avatarColor || '#C5B3E6',
+            avatar: serverUser.faceShape || null,
+            joined: Date.now(),
+            isAdmin: false,
+            serverId: serverUser.id
+          };
+          saveUsers(users);
+          setSession({ username: key, remember });
+
+          // Hydrate server-side state into local cache
+          try {
+            const me = await api.me();
+            if (me && me.stats) storage.set(userStatsKey(key), {
+              gamesPlayed: me.stats.totalGames, totalPts: me.stats.totalPoints,
+              bestWeek: me.stats.weekPoints, xp: me.stats.xp || me.stats.totalPoints
+            });
+            if (me && me.streak) storage.set(userStreakKey(key), {
+              count: me.streak.currentStreak || 0,
+              last: me.streak.lastPlayedDay || null,
+              longest: me.streak.longestStreak || 0
+            });
+            if (me && Array.isArray(me.achievements)) storage.set(userAchvKey(key), me.achievements);
+            if (me && Array.isArray(me.dex)) storage.set(userDexKey(key), me.dex);
+          } catch(_){}
+
+          onAuth(users[key]);
+          return;
+        } catch (apiErr) {
+          const code = apiErr.message || '';
+          if (code === 'username_taken')   { setErr('That username is taken.');      setBusy(false); return; }
+          if (code === 'bad_credentials')  { setErr('Wrong username or password.');  setBusy(false); return; }
+          if (code === 'weak_password')    { setErr('Password too short (6+).');     setBusy(false); return; }
+          if (code === 'invalid_username') { setErr('Invalid username format.');     setBusy(false); return; }
+          // network/server errors: fall through to local fallback so dev still works
+          console.warn('API auth failed, falling back to local:', code);
+        }
+      }
+
+      // -------- LOCAL FALLBACK (no network / no server) --------
       if (mode === 'login' &&
           username.toLowerCase() === ADMIN_USERNAME &&
           password === ADMIN_PASSWORD_PLAIN) {
-        // Ensure admin user exists in users store
         const users = getUsers();
         const adminHash = await sha256Hex(ADMIN_PASSWORD_PLAIN);
         users[ADMIN_USERNAME] = {
-          name: ADMIN_USERNAME,
-          passHash: adminHash,
-          color: '#4140FF',
-          avatar: null,
-          joined: users[ADMIN_USERNAME]?.joined || Date.now(),
-          isAdmin: true
+          name: ADMIN_USERNAME, passHash: adminHash, color: '#4140FF',
+          avatar: null, joined: users[ADMIN_USERNAME]?.joined || Date.now(), isAdmin: true
         };
         saveUsers(users);
         setSession({ username: ADMIN_USERNAME, remember });
         onAuth(users[ADMIN_USERNAME]);
         return;
       }
-
       const users = getUsers();
       const hash = await sha256Hex(password);
-
       if (mode === 'register') {
-        const key = username.toLowerCase();
         if (users[key]) { setErr('That username is taken.'); setBusy(false); return; }
         if (key === ADMIN_USERNAME) { setErr('Reserved username.'); setBusy(false); return; }
-        // Deterministic default color from username so re-registrations look consistent
         const colorPool = ['#A8E6CF','#FFB7C5','#FFAB91','#FFE082','#C5B3E6','#90CAF9'];
         const defaultColor = colorPool[hashCode(key) % colorPool.length];
-        const newUser = {
-          name: username,
-          passHash: hash,
-          color: defaultColor,
-          avatar: null,
-          joined: Date.now(),
-          isAdmin: false
-        };
-        users[key] = newUser;
-        saveUsers(users);
+        const newUser = { name: username, passHash: hash, color: defaultColor, avatar: null, joined: Date.now(), isAdmin: false };
+        users[key] = newUser; saveUsers(users);
         setSession({ username: key, remember });
         onAuth(newUser);
         return;
       }
-
-      // Login
-      const key = username.toLowerCase();
       const u = users[key];
-      if (!u)            { setErr("That account doesn't exist."); setBusy(false); return; }
-      if (u.passHash !== hash) { setErr('Wrong password.'); setBusy(false); return; }
+      if (!u)                    { setErr("That account doesn't exist."); setBusy(false); return; }
+      if (u.passHash !== hash)   { setErr('Wrong password.'); setBusy(false); return; }
       setSession({ username: key, remember });
       onAuth(u);
     } catch (e) {
@@ -4305,6 +4343,53 @@ function DoodleOrNot() {
     return () => window.removeEventListener('don:installable', h);
   }, []);
 
+  // ---- Server session auto-hydration (httpOnly cookie → state) ----
+  useEffect(() => {
+    if (session) return;
+    const api = typeof window !== 'undefined' ? window.DON_API : null;
+    if (!api) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await api.me();
+        if (cancelled || !data || !data.user) return;
+        const u = data.user;
+        const uname = u.username;
+        // Mirror profile locally so the rest of the app sees it.
+        const users = getUsers();
+        const existing = users[uname] || {};
+        const hydrated = {
+          ...existing,
+          username: uname,
+          avatarColor: u.avatarColor || existing.avatarColor || '#C5B3E6',
+          faceShape: u.faceShape || existing.faceShape || 'round',
+          createdAt: existing.createdAt || Date.now(),
+          isAdmin: !!existing.isAdmin
+        };
+        users[uname] = hydrated;
+        storage.set('don:users', users);
+        if (data.stats) storage.set(userStatsKey(uname), {
+          totalPts: data.stats.totalPoints || 0,
+          gamesPlayed: data.stats.totalGames || 0,
+          bestWeek: data.stats.bestWeek || 0,
+          weekPts: data.stats.weekPoints || 0,
+          weekKey: getWeekKey()
+        });
+        if (data.streak) storage.set(userStreakKey(uname), {
+          count: data.streak.currentStreak || 0,
+          lastDate: data.streak.lastPlayedDay || null
+        });
+        if (Array.isArray(data.achievements)) storage.set(userAchvKey(uname), data.achievements);
+        if (Array.isArray(data.dex)) storage.set(userDexKey(uname), data.dex);
+        const sess = { username: uname, remember: true };
+        setSession(sess);
+        setSessionState(sess);
+        setProfile(hydrated);
+      } catch (_) { /* not logged in or offline — stay on auth screen */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   // Daily recap — show once per day on first visit
   useEffect(() => {
     if (!username) return;
@@ -4486,7 +4571,26 @@ function DoodleOrNot() {
       const stamped = newly.map(id => ({ id, key: id + ':' + Date.now() + Math.random() }));
       setToasts(prev => [...prev, ...stamped]);
       Sound.shimmer && Sound.shimmer();
+      // Server sync — fire-and-forget
+      try { window.DON_API && window.DON_API.achievementsUnlock(newly); } catch(_){}
     }
+
+    // ---- Server sync: save progress, dex entries, streak updates ----
+    try {
+      if (window.DON_API) {
+        const apiMode = result.mode === 'guess' ? 'higher' : result.mode === 'price' ? 'rarity' : 'trait';
+        window.DON_API.saveProgress({
+          mode: apiMode,
+          points: result.points,
+          icons: result.icons || [],
+          clutch: !!result.clutch,
+          day: today
+        }).catch(() => {});
+        if (Array.isArray(result.doodleIds) && result.doodleIds.length) {
+          window.DON_API.dexAdd(result.doodleIds).catch(() => {});
+        }
+      }
+    } catch (_) {}
 
     // Level-up detection
     const newLevel = levelFromXp(xpFromPoints(newStats.totalPts)).level;
