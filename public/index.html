@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
 <title>Doodle or Not</title>
+<meta name="theme-color" content="#C5B3E6" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Doodle" />
+<link rel="manifest" href="./manifest.json" />
+<link rel="icon" type="image/svg+xml" href="./icon.svg" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
 <script>window.process = { env: { NODE_ENV: 'production' } };</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -19,7 +26,7 @@
 <body>
 <div id="root"></div>
 <script type="text/babel" data-presets="react">
-const { useState, useEffect, useRef } = React;
+import React, { useState, useEffect, useRef } from 'react';
 
 /* ==========================================================================
    DOODLE OR NOT — Daily Doodles NFT trivia game
@@ -109,6 +116,24 @@ const ACHIEVEMENTS = [
   { id: 'top_10',        name: 'Top 10',           desc: 'Crack the weekly top 10.',             tint: '#90CAF9' }
 ];
 
+// Progress for a given achievement as a 0..1 ratio given current stats/streak/progress/dexCount
+const achievementProgress = (id, { stats, streak, progress, dexCount }) => {
+  const ratio = (cur, target) => Math.max(0, Math.min(1, (cur || 0) / target));
+  switch (id) {
+    case 'first_blood':   return ratio((stats.gamesPlayed || 0), 1);
+    case 'perfect_day':   return ratio(Object.values(progress || {}).filter(Boolean).length, 3);
+    case 'streak_3':      return ratio(streak.count, 3);
+    case 'streak_7':      return ratio(streak.count, 7);
+    case 'streak_30':     return ratio(streak.count, 30);
+    case 'century':       return ratio(stats.totalPts, 100);
+    case 'rarity_hunter':
+    case 'whale_spotter':
+    case 'eye_for_rare':  return (stats.gamesPlayed || 0) > 0 ? 0.33 : 0;
+    case 'top_10':        return ratio(stats.bestWeek, 30);
+    default:              return 0;
+  }
+};
+
 // Returns newly unlocked achievement ids given a finishMode event
 const checkAchievements = ({ prev, mode, points, newStats, newProgress, newStreak }) => {
   const unlocked = new Set(prev);
@@ -156,7 +181,9 @@ const DEFAULT_PREFS = {
   haptics: true,
   reducedMotion: false,
   fontScale: 1,          // 0.9 | 1 | 1.1 | 1.25
-  lang: 'en'             // 'en' | 'es' | 'de'
+  lang: 'en',            // 'en' | 'es' | 'de'
+  darkMode: 'auto',      // 'auto' | 'light' | 'dark'
+  notifications: false
 };
 const getPrefs = () => ({ ...DEFAULT_PREFS, ...(storage.get(PREFS_KEY, {}) || {}) });
 const setPrefs = (p) => storage.set(PREFS_KEY, p);
@@ -273,6 +300,272 @@ const levelFromXp = (xp) => {
   while (xp >= acc + need) { acc += need; lvl++; need = Math.round(need * 1.15); }
   const into = xp - acc;
   return { level: lvl, into, need, pct: Math.min(100, Math.round((into / need) * 100)) };
+};
+
+/* ---------- XP tiers with named ranks ---------- */
+const XP_TIERS = [
+  { min: 1,  name: 'Sapling',       color: '#A8E6CF', icon: '🌱' },
+  { min: 5,  name: 'Collector',     color: '#90CAF9', icon: '🌸' },
+  { min: 10, name: 'Curator',       color: '#FFE082', icon: '🐝' },
+  { min: 18, name: 'Rare Hunter',   color: '#FFB7C5', icon: '🦋' },
+  { min: 28, name: 'Doodle Sage',   color: '#C5B3E6', icon: '🌙' },
+  { min: 42, name: 'Cloudwalker',   color: '#FFAB91', icon: '☁️' },
+  { min: 60, name: 'Mythic',        color: '#F8BBD0', icon: '🌈' }
+];
+const tierFromLevel = (lvl) => {
+  let t = XP_TIERS[0];
+  for (const x of XP_TIERS) if (lvl >= x.min) t = x;
+  return t;
+};
+
+/* ---------- i18n (ES/EN/DE) ---------- */
+const I18N = {
+  en: {
+    good_morning: 'good morning', good_afternoon: 'good afternoon',
+    good_evening: 'good evening', happy_late_night: 'happy late night',
+    daily_challenge: 'Daily Challenge', day: 'Day', play: 'Play',
+    ranks: 'Ranks', profile: 'Profile', back: 'Back', home: 'Home',
+    locked: 'Locked', done: 'Done', edit_profile: 'Edit profile',
+    log_out: 'Log out', settings: 'Settings', sound_fx: 'Sound effects',
+    haptics: 'Haptics', reduced_motion: 'Reduced motion',
+    text_size: 'Text size', language: 'Language', wipe_data: 'Wipe local data',
+    wipe: 'Wipe', total_points: 'Total points', games_played: 'Games played',
+    best_week: 'Best week', this_week: 'This week',
+    current_streak: 'Current streak', level: 'Level', how_to_play: 'How to play',
+    doodle_dex: 'Doodle Dex', achievements: 'Achievements',
+    danger_zone: 'Danger zone', delete_account: 'Delete account',
+    lives_left: 'lives', hint: 'Hint', skip: 'Skip',
+    no_hints: 'out of hints today', no_skips: 'out of skips today',
+    share: 'Share', copy_image: 'Copy image', download_png: 'Download PNG',
+    challenge_friend: 'Challenge a friend', play_my_game: 'Play my game',
+    challenge_incoming: 'Incoming challenge', private_leagues: 'Private leagues',
+    create_league: 'Create league', join_league: 'Join league',
+    league_code: 'League code', members: 'members',
+    yesterday_recap: 'Yesterday\u2019s recap', streak_alive: 'Streak alive',
+    install_app: 'Install app', notifications: 'Notifications',
+    daily_reminder: 'Daily reminder', dark_mode: 'Dark mode',
+    shortcuts: 'Keyboard shortcuts', mood_of_day: 'Mood of the day',
+    weekly_reading: 'Weekly reading', clutch_bonus: 'Clutch bonus!',
+    no_petals: 'No pétalos lost', league_empty: 'No one here yet',
+    be_first: 'Be the first to claim the top spot today.',
+    points: 'pts', new_tier: 'New tier!', empty_dex: 'Empty dex — play to collect.'
+  },
+  es: {
+    good_morning: 'buenos días', good_afternoon: 'buenas tardes',
+    good_evening: 'buenas noches', happy_late_night: 'feliz madrugada',
+    daily_challenge: 'Reto diario', day: 'Día', play: 'Jugar',
+    ranks: 'Rankings', profile: 'Perfil', back: 'Atrás', home: 'Inicio',
+    locked: 'Bloqueado', done: 'Hecho', edit_profile: 'Editar perfil',
+    log_out: 'Cerrar sesión', settings: 'Ajustes', sound_fx: 'Efectos de sonido',
+    haptics: 'Vibración', reduced_motion: 'Menos animación',
+    text_size: 'Tamaño de letra', language: 'Idioma', wipe_data: 'Borrar datos locales',
+    wipe: 'Borrar', total_points: 'Puntos totales', games_played: 'Partidas',
+    best_week: 'Mejor semana', this_week: 'Esta semana',
+    current_streak: 'Racha actual', level: 'Nivel', how_to_play: 'Cómo jugar',
+    doodle_dex: 'Doodle Dex', achievements: 'Logros',
+    danger_zone: 'Zona de peligro', delete_account: 'Borrar cuenta',
+    lives_left: 'vidas', hint: 'Pista', skip: 'Saltar',
+    no_hints: 'sin pistas hoy', no_skips: 'sin saltos hoy',
+    share: 'Compartir', copy_image: 'Copiar imagen', download_png: 'Descargar PNG',
+    challenge_friend: 'Reta a un amigo', play_my_game: 'Juega mi partida',
+    challenge_incoming: 'Reto recibido', private_leagues: 'Ligas privadas',
+    create_league: 'Crear liga', join_league: 'Unirme a liga',
+    league_code: 'Código de liga', members: 'miembros',
+    yesterday_recap: 'Resumen de ayer', streak_alive: 'Racha viva',
+    install_app: 'Instalar app', notifications: 'Notificaciones',
+    daily_reminder: 'Recordatorio diario', dark_mode: 'Modo oscuro',
+    shortcuts: 'Atajos de teclado', mood_of_day: 'Ánimo del día',
+    weekly_reading: 'Lectura semanal', clutch_bonus: '¡Clutch!',
+    no_petals: 'Sin pétalos perdidos', league_empty: 'Aún no hay nadie',
+    be_first: 'Sé la primera ola del día.',
+    points: 'pts', new_tier: '¡Nuevo rango!', empty_dex: 'Dex vacío — juega para coleccionar.'
+  },
+  de: {
+    good_morning: 'guten Morgen', good_afternoon: 'guten Tag',
+    good_evening: 'guten Abend', happy_late_night: 'späte Nachtgrüße',
+    daily_challenge: 'Tagesquest', day: 'Tag', play: 'Spielen',
+    ranks: 'Rangliste', profile: 'Profil', back: 'Zurück', home: 'Start',
+    locked: 'Gesperrt', done: 'Fertig', edit_profile: 'Profil bearbeiten',
+    log_out: 'Abmelden', settings: 'Einstellungen', sound_fx: 'Soundeffekte',
+    haptics: 'Vibration', reduced_motion: 'Weniger Bewegung',
+    text_size: 'Schriftgröße', language: 'Sprache', wipe_data: 'Lokale Daten löschen',
+    wipe: 'Löschen', total_points: 'Punkte gesamt', games_played: 'Spiele',
+    best_week: 'Beste Woche', this_week: 'Diese Woche',
+    current_streak: 'Aktuelle Serie', level: 'Level', how_to_play: 'So spielst du',
+    doodle_dex: 'Doodle Dex', achievements: 'Erfolge',
+    danger_zone: 'Gefahrenzone', delete_account: 'Konto löschen',
+    lives_left: 'Leben', hint: 'Tipp', skip: 'Skip',
+    no_hints: 'Keine Tipps mehr', no_skips: 'Keine Skips mehr',
+    share: 'Teilen', copy_image: 'Bild kopieren', download_png: 'PNG laden',
+    challenge_friend: 'Freund herausfordern', play_my_game: 'Spiel mein Spiel',
+    challenge_incoming: 'Herausforderung', private_leagues: 'Private Ligen',
+    create_league: 'Liga erstellen', join_league: 'Liga beitreten',
+    league_code: 'Liga-Code', members: 'Mitglieder',
+    yesterday_recap: 'Gestern', streak_alive: 'Serie lebt',
+    install_app: 'App installieren', notifications: 'Benachrichtigungen',
+    daily_reminder: 'Tägliche Erinnerung', dark_mode: 'Dunkler Modus',
+    shortcuts: 'Tastenkürzel', mood_of_day: 'Stimmung des Tages',
+    weekly_reading: 'Wochenlesung', clutch_bonus: 'Clutch!',
+    no_petals: 'Kein Leben verloren', league_empty: 'Noch niemand hier',
+    be_first: 'Sei die erste Welle heute.',
+    points: 'Pkt', new_tier: 'Neuer Rang!', empty_dex: 'Dex leer — spiel zum Sammeln.'
+  }
+};
+const t = (key) => {
+  const lang = (getPrefs().lang || 'en');
+  return (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
+};
+
+/* ---------- Daily power-ups ---------- */
+const POWERUPS_KEY = (u, d) => `don:pu:${u}:${d}`;
+const HINTS_PER_DAY = 1;
+const SKIPS_PER_DAY = 1;
+const getPowerups = (u) => storage.get(POWERUPS_KEY(u, todayStr()),
+  { hints: HINTS_PER_DAY, skips: SKIPS_PER_DAY });
+const savePowerups = (u, pu) => storage.set(POWERUPS_KEY(u, todayStr()), pu);
+
+/* ---------- Private leagues (local-only, code-based) ---------- */
+const LEAGUES_KEY = 'don:leagues';
+const makeLeagueCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+};
+const getLeagues = () => storage.get(LEAGUES_KEY, {});
+const saveLeagues = (obj) => storage.set(LEAGUES_KEY, obj);
+const joinLeague = (code, username) => {
+  const all = getLeagues();
+  const key = code.toUpperCase().trim();
+  if (!all[key]) all[key] = { code: key, createdAt: Date.now(), members: {} };
+  all[key].members[username] = { joinedAt: all[key].members[username]?.joinedAt || Date.now() };
+  saveLeagues(all);
+  return all[key];
+};
+const userLeaguesKey = (u) => `don:userleagues:${u}`;
+const getUserLeagues = (u) => storage.get(userLeaguesKey(u), []);
+const setUserLeagues = (u, arr) => storage.set(userLeaguesKey(u), arr);
+
+/* ---------- Daily recap ---------- */
+const recapKey = (u) => `don:recap:${u}`;
+const getLastRecap = (u) => storage.get(recapKey(u), { lastShown: null, snapshot: null });
+const setLastRecap = (u, v) => storage.set(recapKey(u), v);
+
+/* ---------- Challenge link: read ?c=SEED from URL ---------- */
+const readChallengeSeed = () => {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    const c = p.get('c');
+    if (!c) return null;
+    const n = parseInt(c, 36);
+    return Number.isFinite(n) ? n : null;
+  } catch { return null; }
+};
+const writeChallengeLink = (seed) => {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('c', (seed >>> 0).toString(36));
+    return url.toString();
+  } catch { return ''; }
+};
+
+/* ---------- Share PNG (canvas render) ---------- */
+const renderShareCard = ({ modeName, points, icons, profileName, avatarColor, day, url }) => new Promise((resolve) => {
+  const W = 1080, H = 1080;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  // Background sky gradient
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#FFE4CC'); g.addColorStop(0.5, '#FFD0E0'); g.addColorStop(1, '#C5B3E6');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // Cloud bubble
+  ctx.fillStyle = 'rgba(255,255,255,0.82)';
+  const rx = 80, rw = W - 160, rh = H - 360;
+  ctx.beginPath();
+  const r = 60;
+  ctx.moveTo(rx + r, 220);
+  ctx.arcTo(rx + rw, 220, rx + rw, 220 + rh, r);
+  ctx.arcTo(rx + rw, 220 + rh, rx, 220 + rh, r);
+  ctx.arcTo(rx, 220 + rh, rx, 220, r);
+  ctx.arcTo(rx, 220, rx + rw, 220, r);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#2D2D3F'; ctx.lineWidth = 6; ctx.stroke();
+  // Title
+  ctx.fillStyle = '#2D2D3F';
+  ctx.font = '700 72px Quicksand, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Doodle or Not', W / 2, 150);
+  ctx.font = '500 36px Quicksand, system-ui, sans-serif';
+  ctx.fillStyle = '#7B7B9A';
+  ctx.fillText(`Day #${day}`, W / 2, 195);
+  // Avatar dot + username
+  ctx.beginPath();
+  ctx.fillStyle = avatarColor || '#C5B3E6';
+  ctx.arc(W / 2, 340, 54, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#2D2D3F'; ctx.lineWidth = 5; ctx.stroke();
+  ctx.fillStyle = '#2D2D3F';
+  ctx.font = '700 56px Quicksand, system-ui, sans-serif';
+  ctx.fillText('@' + profileName, W / 2, 470);
+  // Mode
+  ctx.font = '600 40px Quicksand, system-ui, sans-serif';
+  ctx.fillStyle = '#4140FF';
+  ctx.fillText(modeName, W / 2, 540);
+  // Score big
+  ctx.font = '700 200px Fraunces, Quicksand, serif';
+  ctx.fillStyle = '#2D2D3F';
+  ctx.fillText(String(points) + ' pts', W / 2, 750);
+  // Icons row
+  const sym = { perfect: '◉', correct: '✿', close: '★', near: '✦', wrong: '·', up: '▲', down: '▼' };
+  ctx.font = '600 72px Quicksand, system-ui, sans-serif';
+  ctx.fillStyle = '#4140FF';
+  ctx.fillText((icons || []).map(i => sym[i] || '·').join('  '), W / 2, 850);
+  // URL footer
+  ctx.font = '500 32px Quicksand, system-ui, sans-serif';
+  ctx.fillStyle = '#7B7B9A';
+  ctx.fillText(url || 'doodleornot.xyz', W / 2, 990);
+  canvas.toBlob(b => resolve(b), 'image/png', 0.95);
+});
+
+/* ---------- PWA install prompt state ---------- */
+let _deferredInstall = null;
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); _deferredInstall = e;
+    window.dispatchEvent(new CustomEvent('don:installable'));
+  });
+}
+const promptInstall = async () => {
+  if (!_deferredInstall) return false;
+  _deferredInstall.prompt();
+  const { outcome } = await _deferredInstall.userChoice;
+  _deferredInstall = null;
+  return outcome === 'accepted';
+};
+const registerSW = () => {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+};
+if (typeof window !== 'undefined') window.addEventListener('load', registerSW);
+
+/* ---------- Notifications ---------- */
+const requestNotifPermission = async () => {
+  if (typeof Notification === 'undefined') return 'unsupported';
+  if (Notification.permission === 'granted') return 'granted';
+  if (Notification.permission === 'denied')  return 'denied';
+  return await Notification.requestPermission();
+};
+const scheduleDailyReminder = () => {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  const now = new Date();
+  const next = new Date(now);
+  next.setHours(9, 0, 0, 0);
+  if (next.getTime() <= now.getTime()) next.setDate(next.getDate() + 1);
+  const ms = next.getTime() - now.getTime();
+  setTimeout(() => {
+    try { new Notification('Doodle or Not', { body: 'New daily puzzles are live 🌸', icon: './icon-192.png' }); } catch {}
+    scheduleDailyReminder();
+  }, Math.min(ms, 2147483000));
 };
 
 /* ---------- Daily seed (deterministic pseudo-random per day) ---------- */
@@ -1117,7 +1410,7 @@ const TopActions = ({ sound, onToggleSound, onSettings }) => (
 );
 
 /* SETTINGS MODAL */
-const SettingsModal = ({ open, onClose, prefs, onChange, onWipe }) => {
+const SettingsModal = ({ open, onClose, prefs, onChange, onWipe, onInstall, installable, onNotifToggle }) => {
   if (!open) return null;
   const Row = ({ label, desc, children }) => (
     <div className="flex items-start justify-between gap-3 py-3 border-t first:border-t-0" style={{ borderColor: '#E8E0F0' }}>
@@ -1191,11 +1484,28 @@ const SettingsModal = ({ open, onClose, prefs, onChange, onWipe }) => {
                  options={[{ label: 'EN', value: 'en' }, { label: 'ES', value: 'es' }, { label: 'DE', value: 'de' }]}
                  on={(v) => onChange({ lang: v })} />
           </Row>
-          <Row label="Wipe local data" desc="Clears the data cached on this device.">
+          <Row label={t('dark_mode')} desc="Override automatic sky.">
+            <Seg value={prefs.darkMode || 'auto'}
+                 options={[{ label: 'Auto', value: 'auto' }, { label: 'Light', value: 'light' }, { label: 'Dark', value: 'dark' }]}
+                 on={(v) => onChange({ darkMode: v })} />
+          </Row>
+          <Row label={t('notifications')} desc={t('daily_reminder')}>
+            <Toggle v={!!prefs.notifications} on={(v) => onNotifToggle && onNotifToggle(v)} />
+          </Row>
+          {installable && (
+            <Row label={t('install_app')} desc="Add to home screen.">
+              <button onClick={onInstall}
+                      className="rounded-lg px-3 py-1.5 text-[11px] font-bold"
+                      style={{ background: '#4140FF', color: '#fff' }}>
+                Install
+              </button>
+            </Row>
+          )}
+          <Row label={t('wipe_data')} desc="Clears the data cached on this device.">
             <button onClick={onWipe}
                     className="rounded-lg px-3 py-1.5 text-[11px] font-bold"
                     style={{ background: 'rgba(229,115,115,0.14)', color: '#B94A4A', border: '1px solid rgba(229,115,115,0.3)' }}>
-              Wipe
+              {t('wipe')}
             </button>
           </Row>
         </div>
@@ -1279,7 +1589,7 @@ const MoodCard = () => {
 };
 
 /* DOODLE DEX MODAL */
-const DexModal = ({ open, onClose, ids }) => {
+const DexModal = ({ open, onClose, ids, onOpenDoodle }) => {
   if (!open) return null;
   const doodles = (window.DOODLES || []);
   const total = doodles.length;
@@ -1332,10 +1642,11 @@ const DexModal = ({ open, onClose, ids }) => {
                 const d = doodles.find(x => x.id === id);
                 if (!d) return null;
                 return (
-                  <div key={id} className="aspect-square rounded-xl overflow-hidden"
-                       style={{ border: `1.5px solid #E8E0F0`, background: 'rgba(255,255,255,0.6)' }}>
+                  <button key={id} onClick={() => onOpenDoodle && onOpenDoodle(d)}
+                          className="aspect-square rounded-xl overflow-hidden active:scale-95 transition-transform"
+                          style={{ border: `1.5px solid #E8E0F0`, background: 'rgba(255,255,255,0.6)' }}>
                     <DoodleAvatar doodle={d} size={96} />
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -1407,6 +1718,434 @@ const WeeklyReading = ({ username, stats, streak, achievements, dexCount }) => {
   );
 };
 
+/* ==========================================================================
+   LIQUID WATER-WIPE TRANSITION
+   ========================================================================== */
+const WipeTransition = ({ trigger }) => {
+  const [anim, setAnim] = useState(0); // render key to restart anim
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    setAnim(a => a + 1);
+  }, [trigger]);
+  if (anim === 0) return null;
+  const reduced = typeof document !== 'undefined' && document.documentElement.dataset.reducedMotion === '1';
+  if (reduced) return null;
+  return (
+    <div key={anim} className="fixed inset-0 z-[60] pointer-events-none overflow-hidden">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+        <defs>
+          <linearGradient id="wipeGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stopColor="#C5B3E6" stopOpacity="0.9"/>
+            <stop offset="50%" stopColor="#FFB7C5" stopOpacity="0.75"/>
+            <stop offset="100%" stopColor="#90CAF9" stopOpacity="0.85"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#wipeGrad)">
+          <animate attributeName="d" dur="700ms" fill="freeze"
+            values="
+              M0,110 Q25,100 50,110 T100,110 L100,130 L0,130 Z;
+              M0,-10 Q25,10 50,-6 T100,-10 L100,50 Q75,30 50,46 T0,50 Z;
+              M0,-30 Q25,-30 50,-30 T100,-30 L100,-30 L0,-30 Z
+            "/>
+        </path>
+      </svg>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   KEYBOARD SHORTCUTS OVERLAY ("?")
+   ========================================================================== */
+const ShortcutsOverlay = ({ open, onClose }) => {
+  if (!open) return null;
+  const rows = [
+    ['A / ← ', 'Pick left (Duel & Higher)'],
+    ['L / →', 'Pick right (Duel & Higher)'],
+    ['↑ / ↓', 'Adjust % in Trait Roulette'],
+    ['Shift + ↑/↓', 'Jump by 5%'],
+    ['Enter', 'Lock answer / reveal'],
+    ['H', 'Use daily hint'],
+    ['S', 'Skip this round (daily)'],
+    ['M', 'Mute / unmute sound'],
+    ['?', 'Toggle this overlay'],
+    ['Esc', 'Close modal']
+  ];
+  return (
+    <div className="fixed inset-0 z-[65] flex items-center justify-center p-4"
+         style={{ background: 'rgba(45,45,63,0.55)', backdropFilter: 'blur(5px)' }}
+         onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl p-5 anim-pop-in"
+           onClick={e => e.stopPropagation()}
+           style={{ background: 'rgba(255,255,255,0.97)', border: '1px solid #E8E0F0',
+                    boxShadow: '0 20px 50px rgba(45,45,63,0.35)' }}>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display font-semibold text-2xl" style={{ color: '#2D2D3F' }}>{t('shortcuts')}</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-full font-bold"
+                  style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid #E8E0F0', color: '#2D2D3F' }}>×</button>
+        </div>
+        <div className="space-y-1">
+          {rows.map(([k, desc]) => (
+            <div key={k} className="flex items-center justify-between py-1.5 border-t first:border-t-0"
+                 style={{ borderColor: '#E8E0F0' }}>
+              <span className="text-sm" style={{ color: '#2D2D3F' }}>{desc}</span>
+              <kbd className="px-2 py-0.5 rounded-md text-xs font-bold tabular-nums"
+                   style={{ background: '#F1EDF7', color: '#4140FF', border: '1px solid #E8E0F0' }}>{k}</kbd>
+            </div>
+          ))}
+        </div>
+        <p className="text-[11px] mt-3 text-center" style={{ color: '#7B7B9A' }}>Press <b>?</b> anytime to see this again.</p>
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   DOODLE DETAIL MODAL (from Dex tap)
+   ========================================================================== */
+const DoodleDetailModal = ({ doodle, onClose }) => {
+  if (!doodle) return null;
+  const traits = [];
+  for (const k of Object.keys(doodle)) {
+    if (k === 'id' || k === 'image' || typeof doodle[k] === 'number') continue;
+    if (typeof doodle[k] === 'string' && doodle[k]) traits.push({ type: k, value: doodle[k] });
+  }
+  return (
+    <div className="fixed inset-0 z-[65] flex items-end sm:items-center justify-center p-3"
+         style={{ background: 'rgba(45,45,63,0.45)', backdropFilter: 'blur(4px)' }}
+         onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl p-5 anim-pop-in"
+           onClick={e => e.stopPropagation()}
+           style={{ background: 'rgba(255,255,255,0.98)', border: '1px solid #E8E0F0',
+                    boxShadow: '0 20px 50px rgba(45,45,63,0.3)' }}>
+        <div className="flex items-start gap-4 mb-3">
+          <div className="w-28 h-28 rounded-2xl overflow-hidden shrink-0"
+               style={{ border: '1.5px solid #E8E0F0', background: '#F1EDF7' }}>
+            <DoodleAvatar doodle={doodle} size={128} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: '#7B7B9A' }}>Doodle</p>
+            <h2 className="font-display font-semibold text-2xl" style={{ color: '#2D2D3F' }}>#{doodle.id}</h2>
+            {typeof doodle.lastSale === 'number' && (
+              <p className="text-xs mt-1" style={{ color: '#4140FF' }}>
+                Last sale: <span className="font-bold">{doodle.lastSale} ETH</span>
+              </p>
+            )}
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full font-bold shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid #E8E0F0', color: '#2D2D3F' }}>×</button>
+        </div>
+        <div className="max-h-64 overflow-auto -mx-1 px-1">
+          <div className="grid grid-cols-2 gap-2">
+            {traits.slice(0, 20).map(tr => (
+              <div key={tr.type} className="rounded-xl p-2"
+                   style={{ background: 'rgba(255,255,255,0.65)', border: '1px solid #E8E0F0' }}>
+                <p className="text-[10px] font-bold tracking-wider uppercase truncate" style={{ color: '#7B7B9A' }}>{tr.type}</p>
+                <p className="text-sm font-semibold capitalize truncate" style={{ color: '#2D2D3F' }}>{String(tr.value)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   SHARE CARD MODAL (PNG via canvas)
+   ========================================================================== */
+const ShareCardModal = ({ open, onClose, payload }) => {
+  const [url, setUrl] = useState(null);
+  useEffect(() => {
+    let revoked = null;
+    if (open && payload) {
+      renderShareCard(payload).then(blob => {
+        if (!blob) return;
+        const u = URL.createObjectURL(blob);
+        setUrl(u); revoked = u;
+      });
+    }
+    return () => { if (revoked) URL.revokeObjectURL(revoked); };
+  }, [open]);
+  if (!open) return null;
+  const download = () => {
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url; a.download = `doodle-or-not-day${payload.day}.png`;
+    a.click();
+  };
+  const copyImg = async () => {
+    try {
+      if (!url) return;
+      const blob = await (await fetch(url)).blob();
+      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+    } catch {}
+  };
+  return (
+    <div className="fixed inset-0 z-[65] flex items-center justify-center p-4"
+         style={{ background: 'rgba(45,45,63,0.55)', backdropFilter: 'blur(5px)' }}
+         onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl p-4 anim-pop-in"
+           onClick={e => e.stopPropagation()}
+           style={{ background: 'rgba(255,255,255,0.97)', border: '1px solid #E8E0F0',
+                    boxShadow: '0 20px 50px rgba(45,45,63,0.35)' }}>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display font-semibold text-xl" style={{ color: '#2D2D3F' }}>{t('share')}</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-full font-bold"
+                  style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid #E8E0F0', color: '#2D2D3F' }}>×</button>
+        </div>
+        <div className="rounded-xl overflow-hidden mb-3" style={{ border: '1px solid #E8E0F0' }}>
+          {url ? <img src={url} alt="share card" className="block w-full"/>
+               : <div className="aspect-square flex items-center justify-center text-sm" style={{ color: '#7B7B9A' }}>Rendering…</div>}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button onClick={download}
+                  className="rounded-xl py-2.5 font-bold text-sm"
+                  style={{ background: '#4140FF', color: '#fff' }}>{t('download_png')}</button>
+          <button onClick={copyImg}
+                  className="rounded-xl py-2.5 font-bold text-sm"
+                  style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid #E8E0F0', color: '#2D2D3F' }}>{t('copy_image')}</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   LEAGUES MODAL
+   ========================================================================== */
+const LeaguesModal = ({ open, onClose, username, weekPts }) => {
+  const [refresh, setRefresh] = useState(0);
+  const [joinCode, setJoinCode] = useState('');
+  const [createdCode, setCreatedCode] = useState(null);
+  if (!open) return null;
+  const myCodes = getUserLeagues(username);
+  const all = getLeagues();
+
+  const create = () => {
+    const code = makeLeagueCode();
+    joinLeague(code, username);
+    setUserLeagues(username, Array.from(new Set([...myCodes, code])));
+    setCreatedCode(code);
+    setRefresh(r => r + 1);
+  };
+  const doJoin = () => {
+    const c = joinCode.toUpperCase().trim();
+    if (!/^[A-Z2-9]{4,8}$/.test(c)) return;
+    joinLeague(c, username);
+    setUserLeagues(username, Array.from(new Set([...myCodes, c])));
+    setJoinCode('');
+    setRefresh(r => r + 1);
+  };
+  const leave = (code) => {
+    const nx = getUserLeagues(username).filter(c => c !== code);
+    setUserLeagues(username, nx);
+    const a = getLeagues();
+    if (a[code] && a[code].members) { delete a[code].members[username]; saveLeagues(a); }
+    setRefresh(r => r + 1);
+  };
+  const copy = async (c) => { try { await navigator.clipboard.writeText(c); } catch {} };
+
+  return (
+    <div className="fixed inset-0 z-[65] flex items-end sm:items-center justify-center p-3"
+         style={{ background: 'rgba(45,45,63,0.45)', backdropFilter: 'blur(4px)' }}
+         onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl p-5 max-h-[85vh] overflow-auto anim-pop-in"
+           onClick={e => e.stopPropagation()}
+           style={{ background: 'rgba(255,255,255,0.98)', border: '1px solid #E8E0F0',
+                    boxShadow: '0 20px 50px rgba(45,45,63,0.3)' }}>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display font-semibold text-2xl" style={{ color: '#2D2D3F' }}>{t('private_leagues')}</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-full font-bold"
+                  style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid #E8E0F0', color: '#2D2D3F' }}>×</button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <button onClick={create}
+                  className="rounded-xl py-2.5 font-bold text-sm"
+                  style={{ background: '#4140FF', color: '#fff' }}>{t('create_league')}</button>
+          <div className="flex gap-1">
+            <input value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase())}
+                   placeholder={t('league_code')}
+                   className="flex-1 rounded-xl px-3 text-sm font-semibold"
+                   style={{ background: '#fff', border: '1px solid #E8E0F0', color: '#2D2D3F' }} />
+            <button onClick={doJoin}
+                    className="rounded-xl px-3 font-bold text-sm"
+                    style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid #E8E0F0', color: '#2D2D3F' }}>
+              {t('join_league')}
+            </button>
+          </div>
+        </div>
+
+        {createdCode && (
+          <div className="rounded-xl p-3 mb-3 text-center"
+               style={{ background: '#E0F5EC', border: '1.5px solid #A8E6CF' }}>
+            <p className="text-[11px] font-bold tracking-wider uppercase" style={{ color: '#2D2D3F' }}>{t('league_code')}</p>
+            <p className="font-display font-semibold text-3xl tracking-widest" style={{ color: '#2D2D3F' }}>{createdCode}</p>
+            <button onClick={() => copy(createdCode)}
+                    className="mt-2 rounded-lg px-3 py-1 text-[11px] font-bold"
+                    style={{ background: '#fff', border: '1px solid #A8E6CF', color: '#2D2D3F' }}>Copy</button>
+          </div>
+        )}
+
+        {myCodes.length === 0 ? (
+          <div className="text-center py-6 text-sm" style={{ color: '#7B7B9A' }}>
+            No leagues yet. Create one and share the code with friends.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {myCodes.map(code => {
+              const L = all[code] || { members: {} };
+              const members = Object.keys(L.members || {});
+              const rows = members.map(u => {
+                const st = storage.get(userStatsKey(u), { weekPts: 0 });
+                return { u, pts: (u === username ? weekPts : (st.weekPts || 0)) };
+              }).sort((a, b) => b.pts - a.pts);
+              return (
+                <div key={code} className="rounded-xl p-3"
+                     style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid #E8E0F0' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="font-display font-semibold text-lg tracking-widest" style={{ color: '#2D2D3F' }}>{code}</p>
+                      <p className="text-[10px]" style={{ color: '#7B7B9A' }}>{members.length} {t('members')}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => copy(code)}
+                              className="rounded-lg px-2 py-1 text-[11px] font-bold"
+                              style={{ background: '#F1EDF7', color: '#4140FF', border: '1px solid #E8E0F0' }}>Copy</button>
+                      <button onClick={() => leave(code)}
+                              className="rounded-lg px-2 py-1 text-[11px] font-bold"
+                              style={{ background: 'rgba(229,115,115,0.14)', color: '#B94A4A', border: '1px solid rgba(229,115,115,0.3)' }}>Leave</button>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    {rows.map((r, i) => (
+                      <div key={r.u} className="flex items-center justify-between text-xs">
+                        <span className="truncate" style={{ color: '#2D2D3F' }}>
+                          <b>{i + 1}.</b> @{r.u}{r.u === username && ' (you)'}
+                        </span>
+                        <span className="font-bold tabular-nums" style={{ color: '#4140FF' }}>{r.pts}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   DAILY RECAP MODAL (shown first visit of the day)
+   ========================================================================== */
+const DailyRecapModal = ({ open, onClose, recap }) => {
+  if (!open || !recap) return null;
+  return (
+    <div className="fixed inset-0 z-[65] flex items-center justify-center p-4"
+         style={{ background: 'rgba(45,45,63,0.45)', backdropFilter: 'blur(4px)' }}
+         onClick={onClose}>
+      <div className="w-full max-w-sm rounded-2xl p-5 anim-pop-in"
+           onClick={e => e.stopPropagation()}
+           style={{ background: 'rgba(255,255,255,0.98)', border: '1px solid #E8E0F0',
+                    boxShadow: '0 20px 50px rgba(45,45,63,0.3)' }}>
+        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-center" style={{ color: '#7B7B9A' }}>
+          {t('yesterday_recap')}
+        </p>
+        <h2 className="font-display font-semibold text-3xl text-center mb-3" style={{ color: '#2D2D3F' }}>
+          {recap.pts} {t('points')}
+        </h2>
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="rounded-xl p-3 text-center" style={{ background: '#FFECE0', border: '1px solid #E8E0F0' }}>
+            <p className="text-[10px] font-bold tracking-wider uppercase" style={{ color: '#7B7B9A' }}>{t('current_streak')}</p>
+            <p className="font-display font-semibold text-xl" style={{ color: '#2D2D3F' }}>{recap.streak} 🔥</p>
+          </div>
+          <div className="rounded-xl p-3 text-center" style={{ background: '#E0F5EC', border: '1px solid #E8E0F0' }}>
+            <p className="text-[10px] font-bold tracking-wider uppercase" style={{ color: '#7B7B9A' }}>{t('this_week')}</p>
+            <p className="font-display font-semibold text-xl" style={{ color: '#2D2D3F' }}>{recap.weekPts}</p>
+          </div>
+        </div>
+        <p className="text-sm text-center mb-3" style={{ color: '#7B7B9A' }}>
+          New puzzles just dropped. Go get them.
+        </p>
+        <button onClick={onClose} className="w-full rounded-xl py-2.5 font-bold text-sm"
+                style={{ background: '#4140FF', color: '#fff' }}>Let's play</button>
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   CHALLENGE BANNER (when ?c= URL param was parsed)
+   ========================================================================== */
+const ChallengeBanner = ({ onDismiss }) => (
+  <div className="mx-3 mt-3 rounded-2xl p-3 flex items-center gap-3 anim-float-in"
+       style={{ background: 'linear-gradient(135deg, #FFE082aa, #FFB7C5aa)',
+                border: '1.5px solid #FFE082' }}>
+    <span className="text-2xl">🎯</span>
+    <div className="flex-1 min-w-0">
+      <p className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#2D2D3F' }}>
+        {t('challenge_incoming')}
+      </p>
+      <p className="text-xs" style={{ color: '#2D2D3F' }}>A friend sent you this seed. Same puzzles, face off.</p>
+    </div>
+    <button onClick={onDismiss}
+            className="rounded-full w-7 h-7 font-bold shrink-0"
+            style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.1)', color: '#2D2D3F' }}>×</button>
+  </div>
+);
+
+/* ==========================================================================
+   EMPTY STATE ILLUSTRATION
+   ========================================================================== */
+const EmptyState = ({ title, subtitle }) => (
+  <div className="flex flex-col items-center text-center py-10 px-4">
+    <svg viewBox="0 0 160 120" width="160" height="120" aria-hidden="true">
+      <defs>
+        <linearGradient id="esSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#C5B3E6" stopOpacity="0.65"/>
+          <stop offset="100%" stopColor="#FFE4CC" stopOpacity="0.85"/>
+        </linearGradient>
+      </defs>
+      <rect x="10" y="10" width="140" height="100" rx="18" fill="url(#esSky)" stroke="#2D2D3F" strokeWidth="2.5"/>
+      <ellipse cx="54" cy="66" rx="20" ry="14" fill="#fff" stroke="#2D2D3F" strokeWidth="2"/>
+      <ellipse cx="86" cy="60" rx="28" ry="18" fill="#fff" stroke="#2D2D3F" strokeWidth="2"/>
+      <ellipse cx="112" cy="70" rx="14" ry="10" fill="#fff" stroke="#2D2D3F" strokeWidth="2"/>
+      <circle cx="125" cy="30" r="8" fill="#FFE082" stroke="#2D2D3F" strokeWidth="2"/>
+      <path d="M40,96 Q80,86 120,96" stroke="#2D2D3F" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    </svg>
+    <p className="font-display font-semibold text-lg mt-3" style={{ color: '#2D2D3F' }}>{title}</p>
+    <p className="text-xs mt-1 max-w-xs" style={{ color: '#7B7B9A' }}>{subtitle}</p>
+  </div>
+);
+
+/* ==========================================================================
+   POWER-UPS BAR (for Home)
+   ========================================================================== */
+const PowerupsBar = ({ pu }) => (
+  <div className="flex gap-2 mt-3 mb-4">
+    <div className="flex-1 rounded-xl p-2 flex items-center gap-2"
+         style={{ background: pu.hints > 0 ? '#FFF4E0' : 'rgba(255,255,255,0.5)',
+                  border: `1px solid ${pu.hints > 0 ? '#FFE082' : '#E8E0F0'}`, opacity: pu.hints > 0 ? 1 : 0.55 }}>
+      <span className="text-lg">💡</span>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold tracking-wider uppercase" style={{ color: '#2D2D3F' }}>{t('hint')}</p>
+        <p className="text-[11px]" style={{ color: '#7B7B9A' }}>x{pu.hints}</p>
+      </div>
+    </div>
+    <div className="flex-1 rounded-xl p-2 flex items-center gap-2"
+         style={{ background: pu.skips > 0 ? '#E0F5EC' : 'rgba(255,255,255,0.5)',
+                  border: `1px solid ${pu.skips > 0 ? '#A8E6CF' : '#E8E0F0'}`, opacity: pu.skips > 0 ? 1 : 0.55 }}>
+      <span className="text-lg">⏭️</span>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold tracking-wider uppercase" style={{ color: '#2D2D3F' }}>{t('skip')}</p>
+        <p className="text-[11px]" style={{ color: '#7B7B9A' }}>x{pu.skips}</p>
+      </div>
+    </div>
+  </div>
+);
 
 /* ==========================================================================
    AUTH SCREEN — login / register with hashed passwords
@@ -1937,7 +2676,7 @@ const ResultIcon = ({ type, size = 24 }) => {
    HOME SCREEN
    ========================================================================== */
 
-const HomeScreen = ({ profile, progress, onPlay, weekPts, streak = 0 }) => {
+const HomeScreen = ({ profile, progress, onPlay, weekPts, streak = 0, powerups = { hints: 1, skips: 1 }, challengeSeed, onDismissChallenge, onOpenLeagues }) => {
   const modes = [
     { id: 'guess', name: 'Higher Sale', desc: 'Which Doodle sold for more ETH?', tint: '#E8D5F5', icon: <MagnifierIcon size={40} />, accent: '#C5B3E6' },
     { id: 'price', name: 'Rarity Duel', desc: 'Which Doodle is rarer?',          tint: '#FFECE0', icon: <ArrowsIcon size={40} />,    accent: '#FFAB91' },
@@ -1960,10 +2699,10 @@ const HomeScreen = ({ profile, progress, onPlay, weekPts, streak = 0 }) => {
 
   const doneCount = Object.values(progress).filter(Boolean).length;
   const hour = new Date().getHours();
-  const greet = hour < 5 ? 'happy late night'
-              : hour < 12 ? 'good morning'
-              : hour < 18 ? 'good afternoon'
-              : 'good evening';
+  const greet = hour < 5 ? t('happy_late_night')
+              : hour < 12 ? t('good_morning')
+              : hour < 18 ? t('good_afternoon')
+              : t('good_evening');
 
   return (
     <div className="px-4 pt-3 pb-28 max-w-[480px] mx-auto">
@@ -1996,18 +2735,31 @@ const HomeScreen = ({ profile, progress, onPlay, weekPts, streak = 0 }) => {
         </div>
       </div>
 
+      {challengeSeed && <ChallengeBanner onDismiss={onDismissChallenge} />}
+
+      {/* Daily power-ups */}
+      <PowerupsBar pu={powerups} />
+
       {/* Mood of the day — poetic line from a random Doodle */}
       <MoodCard />
+
+      <div className="mb-3">
+        <button onClick={onOpenLeagues}
+                className="w-full rounded-xl py-2.5 text-sm font-bold flex items-center justify-center gap-2"
+                style={{ background: 'rgba(255,255,255,0.75)', border: '1px solid #E8E0F0', color: '#2D2D3F' }}>
+          <span>🏆</span> {t('private_leagues')}
+        </button>
+      </div>
 
       {/* Daily challenge — hero card with animated ring */}
       <FrostedCard className="p-5 mb-5 anim-float-in" style={{ animationDelay: '0.06s' }}>
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#7B7B9A' }}>
-              Daily Challenge
+              {t('daily_challenge')}
             </p>
             <h3 className="font-display font-semibold text-2xl" style={{ color: '#2D2D3F' }}>
-              Day #{dayNumber()}
+              {t('day')} #{dayNumber()}
             </h3>
           </div>
           <ProgressRing value={doneCount} total={3} size={66} />
@@ -2612,8 +3364,9 @@ const TraitMode = ({ seed, onFinish }) => {
    RESULTS / SHARE CARD
    ========================================================================== */
 
-const ResultsScreen = ({ result, profile, onBack }) => {
+const ResultsScreen = ({ result, profile, onBack, onShare, onChallenge }) => {
   const { mode, points, icons } = result;
+  const clutch = !!result.clutch;
   const modeMeta = {
     guess: { name: 'Higher Sale', icon: <MagnifierIcon size={32} /> },
     price: { name: 'Rarity Duel', icon: <ArrowsIcon size={32} /> },
@@ -2658,11 +3411,27 @@ const ResultsScreen = ({ result, profile, onBack }) => {
     'tough-day':    'Tough day. Tomorrow awaits.'
   }[tier];
 
-  const showConfetti = points >= 10 || perfectCount >= 2;
+  const showConfetti = points >= 10 || perfectCount >= 2 || clutch;
+  const confettiCount = tier === 'legendary' ? 120
+                      : tier === 'great'     ? 72
+                      : tier === 'solid'     ? 44
+                      : 20;
+  const confettiPalette =
+      tier === 'legendary' ? ['#FFE082','#FFB7C5','#C5B3E6','#A8E6CF','#90CAF9','#FFAB91','#4140FF']
+    : tier === 'great'     ? ['#FFE082','#FFB7C5','#A8E6CF','#C5B3E6']
+    : tier === 'solid'     ? ['#FFE082','#A8E6CF','#90CAF9']
+                           : ['#FFB7C5','#FFE082'];
 
   return (
     <div className="px-4 pt-6 pb-10 max-w-[480px] mx-auto relative">
-      {showConfetti && <Confetti />}
+      {showConfetti && <Confetti count={confettiCount} palette={confettiPalette} />}
+      {clutch && (
+        <div className="rounded-xl p-3 mb-3 text-center anim-pop-in"
+             style={{ background: 'linear-gradient(135deg,#FFE082aa,#A8E6CFaa)', border: '1.5px solid #FFE082' }}>
+          <p className="font-display font-semibold text-lg" style={{ color: '#2D2D3F' }}>✨ {t('clutch_bonus')}</p>
+          <p className="text-[11px]" style={{ color: '#2D2D3F' }}>{t('no_petals')} · +2 bonus</p>
+        </div>
+      )}
 
       <FrostedCard className="p-6 text-center relative overflow-hidden anim-pop-in">
         {/* Decorative gradient wash */}
@@ -2671,7 +3440,7 @@ const ResultsScreen = ({ result, profile, onBack }) => {
 
         <div className="relative">
           <p className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: '#7B7B9A' }}>
-            {modeMeta.name} · Day #{dayNumber()}
+            {modeMeta.name} · {t('day')} #{dayNumber()}
           </p>
           <h2 className="font-display font-semibold text-3xl mt-1 mb-5" style={{ color: '#2D2D3F' }}>
             {headline}
@@ -2708,10 +3477,18 @@ const ResultsScreen = ({ result, profile, onBack }) => {
           </div>
 
           <div className="space-y-2">
-            <PrimaryButton onClick={copy} className="w-full flex items-center justify-center gap-2">
+            <PrimaryButton onClick={onShare} className="w-full flex items-center justify-center gap-2">
               <ShareIcon size={18} />
-              {copied ? 'Copied!' : 'Share your score'}
+              {t('share')}
             </PrimaryButton>
+            <div className="grid grid-cols-2 gap-2">
+              <SoftButton onClick={copy} className="w-full">
+                {copied ? 'Copied!' : 'Copy text'}
+              </SoftButton>
+              <SoftButton onClick={onChallenge} className="w-full">
+                🎯 {t('challenge_friend')}
+              </SoftButton>
+            </div>
             <SoftButton onClick={onBack} className="w-full">Back to home</SoftButton>
           </div>
         </div>
@@ -2724,12 +3501,11 @@ const ResultsScreen = ({ result, profile, onBack }) => {
    CONFETTI — lightweight CSS-only celebration burst
    ========================================================================== */
 
-const Confetti = () => {
+const Confetti = ({ count = 36, palette = ['#FFB7C5', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6', '#FFAB91', '#4140FF'] }) => {
   const pieces = useRef(null);
   if (!pieces.current) {
     const rng = mulberry32(Date.now() & 0xffffffff);
-    const palette = ['#FFB7C5', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6', '#FFAB91', '#4140FF'];
-    pieces.current = Array.from({ length: 36 }, (_, i) => ({
+    pieces.current = Array.from({ length: count }, (_, i) => ({
       left: rng() * 100,
       delay: rng() * 0.6,
       duration: 1.6 + rng() * 1.4,
@@ -2782,6 +3558,29 @@ const MOCK_LEADERBOARD = [
 
 const LeaderboardScreen = ({ profile, weekPts }) => {
   const [tab, setTab] = useState('this');
+
+  // Empty state: user is brand new AND nobody else is on the board yet
+  // (we keep the mock board so it's never literally empty in practice; only
+  // trigger the empty illustration when the user hasn't played and selected "last week")
+  if (tab === 'last' && (weekPts || 0) === 0) {
+    return (
+      <div className="px-4 pt-6 pb-28 max-w-[480px] mx-auto">
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <TrophyIcon size={28} />
+          <h1 className="font-display font-semibold text-3xl" style={{ color: '#2D2D3F' }}>Leaderboard</h1>
+        </div>
+        <p className="text-xs text-center mb-5" style={{ color: '#7B7B9A' }}>Weekly rankings · resets Monday 00:00 UTC</p>
+        <div className="flex gap-2 mb-5 justify-center">
+          <Pill active={tab === 'this'} onClick={() => setTab('this')}>This week</Pill>
+          <Pill active={tab === 'last'} onClick={() => setTab('last')}>Last week</Pill>
+        </div>
+        <FrostedCard className="p-4">
+          <EmptyState title={t('league_empty')} subtitle={t('be_first')} />
+        </FrostedCard>
+      </div>
+    );
+  }
+
   const merged = [...MOCK_LEADERBOARD, { name: profile.name, color: profile.color, pts: weekPts, avatar: profile.avatar, me: true }]
     .sort((a, b) => b.pts - a.pts);
   const myRank = merged.findIndex(r => r.me) + 1;
@@ -2936,12 +3735,17 @@ const ProfileScreen = ({ profile, stats, streak = 0, achievements = [], onEdit, 
         {/* XP / level bar */}
         {(() => {
           const lvl = levelFromXp(xpFromPoints(stats.totalPts || 0));
+          const tier = tierFromLevel(lvl.level);
           return (
             <div className="mt-5 text-left">
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#7B7B9A' }}>Level</span>
+                  <span className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#7B7B9A' }}>{t('level')}</span>
                   <span className="font-display font-semibold text-xl tabular-nums" style={{ color: '#2D2D3F' }}>{lvl.level}</span>
+                  <span className="rounded-full px-2 py-0.5 text-[10px] font-bold flex items-center gap-1"
+                        style={{ background: `${tier.color}aa`, border: '1px solid #E8E0F0', color: '#2D2D3F' }}>
+                    <span>{tier.icon}</span>{tier.name}
+                  </span>
                 </div>
                 <span className="text-[11px] font-semibold tabular-nums" style={{ color: '#7B7B9A' }}>
                   {lvl.into} / {lvl.need} XP
@@ -3025,24 +3829,33 @@ const ProfileScreen = ({ profile, stats, streak = 0, achievements = [], onEdit, 
         <div className="grid grid-cols-2 gap-2">
           {ACHIEVEMENTS.map(a => {
             const unlocked = achievements.includes(a.id);
+            const prog = unlocked ? 1 : achievementProgress(a.id, { stats, streak: { count: streak }, progress: {}, dexCount: dexIds.length });
             return (
               <div key={a.id}
-                   className="rounded-xl p-2.5 flex items-center gap-2.5 transition-all"
+                   className="rounded-xl p-2.5 transition-all"
                    style={{
                      background: unlocked ? `${a.tint}cc` : 'rgba(255,255,255,0.5)',
                      border: `1.5px solid ${unlocked ? STROKE : '#E8E0F0'}`,
-                     opacity: unlocked ? 1 : 0.55,
-                     filter: unlocked ? 'none' : 'grayscale(0.6)'
+                     opacity: unlocked ? 1 : 0.8,
+                     filter: unlocked ? 'none' : 'grayscale(0.45)'
                    }}>
-                <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center"
-                     style={{ background: unlocked ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.35)',
-                              border: `1px solid ${unlocked ? STROKE : '#E8E0F0'}` }}>
-                  <CrownIcon size={18} />
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <div className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center"
+                       style={{ background: unlocked ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)',
+                                border: `1px solid ${unlocked ? STROKE : '#E8E0F0'}` }}>
+                    <CrownIcon size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold truncate" style={{ color: '#2D2D3F' }}>{a.name}</p>
+                    <p className="text-[10px] truncate" style={{ color: '#7B7B9A' }}>{a.desc}</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold truncate" style={{ color: '#2D2D3F' }}>{a.name}</p>
-                  <p className="text-[10px] truncate" style={{ color: '#7B7B9A' }}>{a.desc}</p>
-                </div>
+                {!unlocked && (
+                  <div className="w-full h-1 rounded-full overflow-hidden"
+                       style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid #E8E0F0' }}>
+                    <div className="h-full" style={{ width: `${Math.round(prog * 100)}%`, background: a.tint }} />
+                  </div>
+                )}
               </div>
             );
           })}
@@ -3128,9 +3941,9 @@ const ProfileScreen = ({ profile, stats, streak = 0, achievements = [], onEdit, 
 
 const BottomNav = ({ tab, onTab }) => {
   const items = [
-    { id: 'home',    label: 'Play',    icon: (a) => <StarNavIcon size={24} fill={a ? '#A8E6CF' : 'rgba(255,255,255,0.5)'} /> },
-    { id: 'board',   label: 'Ranks',   icon: (a) => <TrophyIcon size={24} /> },
-    { id: 'profile', label: 'Profile', icon: (a) => <FaceIcon size={24} fill={a ? '#FFAB91' : 'rgba(255,255,255,0.5)'} /> }
+    { id: 'home',    label: t('play'),    icon: (a) => <StarNavIcon size={24} fill={a ? '#A8E6CF' : 'rgba(255,255,255,0.5)'} /> },
+    { id: 'board',   label: t('ranks'),   icon: (a) => <TrophyIcon size={24} /> },
+    { id: 'profile', label: t('profile'), icon: (a) => <FaceIcon size={24} fill={a ? '#FFAB91' : 'rgba(255,255,255,0.5)'} /> }
   ];
   const idx = Math.max(0, items.findIndex(it => it.id === tab));
   return (
@@ -3160,7 +3973,7 @@ const BottomNav = ({ tab, onTab }) => {
    MAIN APP
    ========================================================================== */
 
-function DoodleOrNot() {
+export default function DoodleOrNot() {
   // ---- SESSION ----
   const [session, setSessionState] = useState(() => getSession());
   const username = session?.username || null;
@@ -3206,11 +4019,21 @@ function DoodleOrNot() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [dexOpen, setDexOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [leaguesOpen, setLeaguesOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [sharePayload, setSharePayload] = useState(null);
+  const [detailDoodle, setDetailDoodle] = useState(null);
+  const [recapOpen, setRecapOpen] = useState(false);
+  const [recapData, setRecapData] = useState(null);
+  const [installable, setInstallable] = useState(false);
+  const [challengeSeed, setChallengeSeed] = useState(() => readChallengeSeed());
+  const [wipeTrigger, setWipeTrigger] = useState(0);
   const [prevLevel, setPrevLevel] = useState(() =>
     levelFromXp(xpFromPoints(username ? (storage.get(userStatsKey(username), { totalPts: 0 }).totalPts || 0) : 0)).level
   );
 
-  // Apply prefs: propagate to Sound/Haptics + CSS root
+  // Apply prefs: propagate to Sound/Haptics + CSS root + dark mode
   useEffect(() => {
     Sound.setEnabled && Sound.setEnabled(prefs.sound);
     Haptics.setEnabled && Haptics.setEnabled(prefs.haptics);
@@ -3218,8 +4041,71 @@ function DoodleOrNot() {
     if (typeof document !== 'undefined') {
       document.documentElement.style.fontSize = `${16 * (prefs.fontScale || 1)}px`;
       document.documentElement.dataset.reducedMotion = prefs.reducedMotion ? '1' : '0';
+      const mode = prefs.darkMode || 'auto';
+      if (mode === 'dark') document.documentElement.dataset.theme = 'dark';
+      else if (mode === 'light') document.documentElement.dataset.theme = 'light';
+      else document.documentElement.dataset.theme = '';
     }
   }, [prefs]);
+
+  // PWA install prompt availability
+  useEffect(() => {
+    const h = () => setInstallable(true);
+    window.addEventListener('don:installable', h);
+    return () => window.removeEventListener('don:installable', h);
+  }, []);
+
+  // Daily recap — show once per day on first visit
+  useEffect(() => {
+    if (!username) return;
+    const rec = getLastRecap(username);
+    if (rec.lastShown === today) return;
+    // Was there activity yesterday?
+    const yest = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const yProgress = storage.get(userProgressKey(username, yest), null);
+    if (!yProgress) { setLastRecap(username, { lastShown: today, snapshot: null }); return; }
+    const doneCount = Object.values(yProgress).filter(Boolean).length;
+    if (doneCount === 0) { setLastRecap(username, { lastShown: today, snapshot: null }); return; }
+    setRecapData({
+      pts: stats.weekPts || 0,
+      weekPts: stats.weekPts || 0,
+      streak: streak.count || 0
+    });
+    setRecapOpen(true);
+    setLastRecap(username, { lastShown: today, snapshot: { doneCount } });
+  }, [username]);
+
+  // Keyboard: '?' overlay + Esc close + 'M' mute
+  useEffect(() => {
+    const onKey = (e) => {
+      const target = e.target;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+      if (e.key === '?') { e.preventDefault(); setShortcutsOpen(v => !v); }
+      else if (e.key === 'Escape') {
+        setShortcutsOpen(false); setSettingsOpen(false); setDexOpen(false);
+        setLeaguesOpen(false); setShareOpen(false); setDetailDoodle(null); setRecapOpen(false);
+      } else if (e.key === 'm' || e.key === 'M') {
+        setPrefsState(p => ({ ...p, sound: !p.sound }));
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Water-wipe on tab/mode change
+  useEffect(() => { setWipeTrigger(x => x + 1); }, [tab, mode, lastResult, adminMode, editing]);
+
+  // Notifications toggle handler
+  const onNotifToggle = async (v) => {
+    if (!v) { setPrefsState(p => ({ ...p, notifications: false })); return; }
+    const res = await requestNotifPermission();
+    if (res === 'granted') {
+      setPrefsState(p => ({ ...p, notifications: true }));
+      scheduleDailyReminder();
+    } else {
+      setPrefsState(p => ({ ...p, notifications: false }));
+    }
+  };
 
   // Onboarding gate after login
   useEffect(() => {
@@ -3300,6 +4186,13 @@ function DoodleOrNot() {
 
   const finishMode = (result) => {
     if (!username) return;
+    // Clutch bonus: no "wrong" or "down" icons, and at least 3 rounds played.
+    const badIcons = new Set(['wrong', 'down']);
+    const clean = Array.isArray(result.icons) && result.icons.length >= 3
+                && !result.icons.some(i => badIcons.has(i));
+    if (clean) {
+      result = { ...result, points: (result.points || 0) + 2, clutch: true };
+    }
     const prevProgress = progress;
     const newProgress = { ...prevProgress, [result.mode]: true };
     setProgress(newProgress);
@@ -3358,7 +4251,7 @@ function DoodleOrNot() {
 
   const dismissToast = (key) => setToasts(prev => prev.filter(t => t.key !== key));
 
-  const seedBase = hashCode(today + 'doodleornot');
+  const seedBase = challengeSeed != null ? challengeSeed : hashCode(today + 'doodleornot');
 
   // ---- NOT LOGGED IN ----
   if (!profile) {
@@ -3388,6 +4281,7 @@ function DoodleOrNot() {
   const overlays = (
     <>
       {!prefs.reducedMotion && <ParticleOverlay />}
+      <WipeTransition trigger={wipeTrigger} />
       <TopActions
         sound={prefs.sound}
         onToggleSound={() => setPrefsState(p => ({ ...p, sound: !p.sound }))}
@@ -3397,11 +4291,21 @@ function DoodleOrNot() {
         onClose={() => setSettingsOpen(false)}
         prefs={prefs}
         onChange={(patch) => setPrefsState(p => ({ ...p, ...patch }))}
-        onWipe={wipeLocalData} />
+        onWipe={wipeLocalData}
+        installable={installable}
+        onInstall={async () => { await promptInstall(); setInstallable(false); }}
+        onNotifToggle={onNotifToggle} />
       <DexModal
         open={dexOpen}
         onClose={() => setDexOpen(false)}
+        onOpenDoodle={setDetailDoodle}
         ids={username ? getDex(username) : []} />
+      <DoodleDetailModal doodle={detailDoodle} onClose={() => setDetailDoodle(null)} />
+      <ShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      <LeaguesModal open={leaguesOpen} onClose={() => setLeaguesOpen(false)}
+                    username={username} weekPts={stats.weekPts} />
+      <ShareCardModal open={shareOpen} onClose={() => setShareOpen(false)} payload={sharePayload} />
+      <DailyRecapModal open={recapOpen} onClose={() => setRecapOpen(false)} recap={recapData} />
     </>
   );
 
@@ -3468,6 +4372,24 @@ function DoodleOrNot() {
         </div>
         <div className="anim-page-in">
           <ResultsScreen result={lastResult} profile={profile}
+                         onShare={() => {
+                           const modeNames = { guess: 'Higher Sale', price: 'Rarity Duel', trait: 'Trait Roulette' };
+                           setSharePayload({
+                             modeName: modeNames[lastResult.mode] || 'Doodle',
+                             points: lastResult.points,
+                             icons: lastResult.icons,
+                             profileName: profile.name,
+                             avatarColor: profile.color || '#C5B3E6',
+                             day: dayNumber(),
+                             url: 'doodleornot.xyz'
+                           });
+                           setShareOpen(true);
+                         }}
+                         onChallenge={async () => {
+                           const link = writeChallengeLink(seedBase);
+                           try { await navigator.clipboard.writeText(link); } catch {}
+                           alert(t('play_my_game') + ' — link copied.');
+                         }}
                          onBack={() => { setMode(null); setLastResult(null); setTab('home'); }} />
         </div>
         <AchievementToast toasts={toasts} onDone={dismissToast} />
@@ -3502,6 +4424,10 @@ function DoodleOrNot() {
         {tab === 'home' && (
           <HomeScreen profile={profile} progress={progress} weekPts={stats.weekPts}
                       streak={streak.count}
+                      powerups={username ? getPowerups(username) : { hints: 1, skips: 1 }}
+                      challengeSeed={challengeSeed}
+                      onDismissChallenge={() => setChallengeSeed(null)}
+                      onOpenLeagues={() => setLeaguesOpen(true)}
                       onPlay={(m) => setMode(m)} />
         )}
         {tab === 'board' && (
@@ -3674,6 +4600,16 @@ const FontLoader = () => (
       pointer-events: none;
     }
 
+    /* Dark mode override (manual) */
+    html[data-theme="dark"] body,
+    html[data-theme="dark"] #root {
+      background: #15131E !important;
+    }
+    html[data-theme="dark"] .frosted-dark-aware {
+      background: rgba(30,28,40,0.85) !important;
+      color: #E8E0F0 !important;
+    }
+
     /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce) {
       .doodle-letter, .degos-letter, .avatar-glow, .anim-rainbow-spin-slow,
@@ -3684,8 +4620,6 @@ const FontLoader = () => (
   `}</style>
 );
 
-
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(DoodleOrNot));
 </script>
 </body>
 </html>
