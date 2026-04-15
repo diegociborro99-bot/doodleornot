@@ -2541,11 +2541,25 @@ const AuthScreen = ({ onAuth }) => {
 
   return (
     <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
-      <div className="flex flex-col items-center mb-6 anim-float-in">
-        <WaterTitle text="Doodle or Not" size="text-6xl" />
-        <div className="mt-2 opacity-90 anim-rainbow-spin-slow"><RainbowIcon size={72} /></div>
-        <p className="mt-3 text-sm" style={{ color: '#2D2D3F', opacity: 0.7 }}>
-          {mode === 'login' ? 'Welcome back, Doodle.' : 'Create your account to start playing.'}
+      <div className="flex flex-col items-center mb-6 anim-float-in relative z-10" style={{ maxWidth: '100%' }}>
+        <div style={{
+          textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
+          filter: 'drop-shadow(0 6px 24px rgba(197,179,230,0.35))'
+        }}>
+          <WaterTitle text="Doodle or Not" size="text-6xl" />
+        </div>
+        <div className="mt-3 opacity-95 anim-rainbow-spin-slow"><RainbowIcon size={64} /></div>
+        <p className="mt-3 text-sm px-3 py-1 rounded-full"
+           style={{
+             color: '#2D2D3F',
+             fontWeight: 500,
+             background: 'rgba(255,255,255,0.55)',
+             backdropFilter: 'blur(8px)',
+             WebkitBackdropFilter: 'blur(8px)',
+             border: '1px solid rgba(255,255,255,0.7)',
+             boxShadow: '0 2px 12px rgba(45,45,63,0.08)'
+           }}>
+          {mode === 'login' ? 'Welcome back, Doodle' : 'Create your account to start playing'}
         </p>
       </div>
 
@@ -2880,11 +2894,26 @@ const SplashScreen = ({ onCreate, initial, editMode = false }) => {
 
   return (
     <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
-      <div className="flex flex-col items-center mb-6 anim-float-in">
-        <WaterTitle text="Doodle or Not" size="text-6xl" />
-        <div className="mt-2 opacity-90 anim-rainbow-spin-slow"><RainbowIcon size={72} /></div>
-        <p className="mt-3 text-sm" style={{ color: '#2D2D3F', opacity: 0.7 }}>
-          {isEdit ? 'Edit your Doodle identity.' : 'A daily Doodles trivia game. No wallet. Just vibes.'}
+      <div className="flex flex-col items-center mb-6 anim-float-in relative z-10" style={{ maxWidth: '100%' }}>
+        <div style={{
+          textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
+          filter: 'drop-shadow(0 6px 24px rgba(197,179,230,0.35))'
+        }}>
+          <WaterTitle text="Doodle or Not" size="text-6xl" />
+        </div>
+        <div className="mt-3 opacity-95 anim-rainbow-spin-slow"><RainbowIcon size={64} /></div>
+        <p className="mt-3 text-sm px-3 py-1 rounded-full text-center"
+           style={{
+             color: '#2D2D3F',
+             fontWeight: 500,
+             background: 'rgba(255,255,255,0.55)',
+             backdropFilter: 'blur(8px)',
+             WebkitBackdropFilter: 'blur(8px)',
+             border: '1px solid rgba(255,255,255,0.7)',
+             boxShadow: '0 2px 12px rgba(45,45,63,0.08)',
+             maxWidth: '320px'
+           }}>
+          {isEdit ? 'Edit your Doodle identity' : 'A daily Doodles trivia game · No wallet, just vibes'}
         </p>
       </div>
 
