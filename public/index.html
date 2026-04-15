@@ -1149,6 +1149,9 @@ const SkyBackground = () => {
         </div>
       ))}
 
+      {/* Dreamy illustrated landscape */}
+      <DreamLandscape isNight={isNight} />
+
       <style>{`
         @keyframes cloudDrift {
           0%   { transform: translateX(-30px) translateY(0); }
@@ -1159,7 +1162,238 @@ const SkyBackground = () => {
           0%,100% { opacity: 0.25; transform: scale(0.85); }
           50%     { opacity: 1;    transform: scale(1.15); }
         }
+        @keyframes flutter {
+          0%,100% { transform: translate(0,0) rotate(-6deg); }
+          25%     { transform: translate(6px,-4px) rotate(4deg); }
+          50%     { transform: translate(12px,-2px) rotate(-3deg); }
+          75%     { transform: translate(4px,-6px) rotate(6deg); }
+        }
+        @keyframes hillBreathe {
+          0%,100% { transform: translateY(0); }
+          50%     { transform: translateY(-2px); }
+        }
+        @keyframes rainbowShimmer {
+          0%,100% { opacity: 0.95; }
+          50%     { opacity: 0.75; }
+        }
+        @keyframes riverFlow {
+          0%   { stroke-dashoffset: 0; }
+          100% { stroke-dashoffset: -120; }
+        }
+        @keyframes flowerBob {
+          0%,100% { transform: translateY(0) rotate(0deg); }
+          50%     { transform: translateY(-3px) rotate(2deg); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .landscape-motion, .landscape-motion * { animation: none !important; }
+        }
       `}</style>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   DREAM LANDSCAPE — illustrated scene: hills, rainbow path, river, mountains,
+   flowers & butterflies. Inspired by Doodles brand scenery.
+   ========================================================================== */
+const DreamLandscape = ({ isNight }) => {
+  // night palette dims the whole scene
+  const dim = isNight ? 0.55 : 1;
+  return (
+    <div className="absolute inset-x-0 bottom-0 pointer-events-none landscape-motion"
+         style={{ height: '62vh', minHeight: 420, opacity: dim }}>
+      <svg viewBox="0 0 1000 620" preserveAspectRatio="xMidYMax slice"
+           width="100%" height="100%"
+           style={{ display: 'block' }}>
+        <defs>
+          {/* Mountain gradient (snow) */}
+          <linearGradient id="mtnA" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0"   stopColor="#D6CEF0"/>
+            <stop offset="0.55" stopColor="#B9AFE0"/>
+            <stop offset="1"   stopColor="#8E82C9"/>
+          </linearGradient>
+          <linearGradient id="mtnB" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0"   stopColor="#E6DDF6"/>
+            <stop offset="1"   stopColor="#A89ED4"/>
+          </linearGradient>
+          {/* Green hill gradients */}
+          <linearGradient id="hillG1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#C8EBC0"/>
+            <stop offset="1" stopColor="#8FD59A"/>
+          </linearGradient>
+          <linearGradient id="hillG2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#B7E3BA"/>
+            <stop offset="1" stopColor="#76C888"/>
+          </linearGradient>
+          {/* Pink hill */}
+          <linearGradient id="hillP" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#FFD9E3"/>
+            <stop offset="1" stopColor="#F9A8C1"/>
+          </linearGradient>
+          {/* Purple foreground hill */}
+          <linearGradient id="hillV" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#CBB8EE"/>
+            <stop offset="1" stopColor="#9782D2"/>
+          </linearGradient>
+          {/* River */}
+          <linearGradient id="river" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#CDE7FA"/>
+            <stop offset="1" stopColor="#8FC8F0"/>
+          </linearGradient>
+          {/* Rainbow stripes (stacked paths) */}
+          <linearGradient id="rainbow1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#FFB7C5"/>
+            <stop offset="1" stopColor="#FFD6DE"/>
+          </linearGradient>
+        </defs>
+
+        {/* ===== Back mountain range (snow caps) ===== */}
+        <g style={{ animation: 'hillBreathe 16s ease-in-out infinite' }}>
+          <path d="M -20 340 L 90 220 L 160 280 L 240 180 L 330 270 L 420 210 L 520 300 L 620 200 L 720 280 L 820 230 L 920 310 L 1020 260 L 1020 460 L -20 460 Z"
+                fill="url(#mtnA)" stroke="#2D2D3F" strokeWidth="2.2" strokeLinejoin="round"/>
+          {/* Snow caps */}
+          <path d="M 90 220 L 120 245 L 80 255 L 60 240 Z" fill="#FFFFFF" stroke="#2D2D3F" strokeWidth="2"/>
+          <path d="M 240 180 L 278 215 L 225 225 L 205 200 Z" fill="#FFFFFF" stroke="#2D2D3F" strokeWidth="2"/>
+          <path d="M 420 210 L 455 240 L 400 250 L 380 230 Z" fill="#FFFFFF" stroke="#2D2D3F" strokeWidth="2"/>
+          <path d="M 620 200 L 660 235 L 605 245 L 580 220 Z" fill="#FFFFFF" stroke="#2D2D3F" strokeWidth="2"/>
+          <path d="M 820 230 L 855 258 L 805 268 L 785 248 Z" fill="#FFFFFF" stroke="#2D2D3F" strokeWidth="2"/>
+          {/* Sparkles on big mountain */}
+          <g fill="#FFFFFF" opacity="0.9">
+            <circle cx="135" cy="300" r="3"/>
+            <circle cx="170" cy="320" r="2"/>
+            <circle cx="200" cy="285" r="2.3"/>
+            <path d="M 180 340 l 0 -8 M 176 336 l 8 0" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round"/>
+          </g>
+        </g>
+
+        {/* ===== Mid hills (blue-green) ===== */}
+        <g>
+          <path d="M -20 400 Q 120 330 260 380 T 540 370 T 820 360 T 1020 380 L 1020 500 L -20 500 Z"
+                fill="#A8C8E8" stroke="#2D2D3F" strokeWidth="2.4" strokeLinejoin="round"/>
+        </g>
+
+        {/* ===== Rolling green hills ===== */}
+        <g>
+          <path d="M -20 430 Q 140 360 300 400 Q 420 428 560 395 Q 700 360 860 410 Q 960 440 1020 420 L 1020 560 L -20 560 Z"
+                fill="url(#hillG1)" stroke="#2D2D3F" strokeWidth="2.6" strokeLinejoin="round"/>
+          <path d="M -20 470 Q 160 410 320 450 Q 480 490 640 440 Q 800 395 1020 470 L 1020 580 L -20 580 Z"
+                fill="url(#hillG2)" stroke="#2D2D3F" strokeWidth="2.6" strokeLinejoin="round"/>
+        </g>
+
+        {/* ===== Rainbow path (winding) ===== */}
+        <g style={{ animation: 'rainbowShimmer 5s ease-in-out infinite' }}>
+          {[
+            { c: '#FFB7C5', dy: 0 },
+            { c: '#FFD89B', dy: 7 },
+            { c: '#FFF4B1', dy: 14 },
+            { c: '#B9E8BF', dy: 21 },
+            { c: '#A8D8F0', dy: 28 },
+            { c: '#C5B3E6', dy: 35 }
+          ].map((s, i) => (
+            <path key={i}
+                  d={`M -30 ${560 + s.dy} Q 220 ${470 + s.dy} 360 ${500 + s.dy} Q 540 ${540 + s.dy} 620 ${470 + s.dy} Q 720 ${410 + s.dy} 860 ${450 + s.dy} Q 960 ${475 + s.dy} 1030 ${460 + s.dy}`}
+                  fill="none" stroke={s.c} strokeWidth="9" strokeLinecap="round" opacity="0.95"/>
+          ))}
+          {/* Dark edge line for definition */}
+          <path d="M -30 560 Q 220 470 360 500 Q 540 540 620 470 Q 720 410 860 450 Q 960 475 1030 460"
+                fill="none" stroke="#2D2D3F" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
+          <path d="M -30 602 Q 220 512 360 542 Q 540 582 620 512 Q 720 452 860 492 Q 960 517 1030 502"
+                fill="none" stroke="#2D2D3F" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
+        </g>
+
+        {/* ===== River (right side) ===== */}
+        <g>
+          <path d="M 720 500 Q 760 540 820 555 Q 900 575 1020 570 L 1020 620 L 700 620 Z"
+                fill="url(#river)" stroke="#2D2D3F" strokeWidth="2.4" strokeLinejoin="round"/>
+          {/* Flowing highlights */}
+          <path d="M 760 530 Q 820 545 900 555"
+                fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" opacity="0.7"
+                strokeDasharray="12 18"
+                style={{ animation: 'riverFlow 8s linear infinite' }}/>
+          <path d="M 800 565 Q 880 575 980 578"
+                fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" opacity="0.5"
+                strokeDasharray="8 22"
+                style={{ animation: 'riverFlow 12s linear infinite' }}/>
+        </g>
+
+        {/* ===== Purple foreground hills ===== */}
+        <g>
+          <path d="M -40 540 Q 60 470 180 530 Q 260 570 320 545 Q 400 515 470 560 Q 520 590 580 580 L 580 640 L -40 640 Z"
+                fill="url(#hillV)" stroke="#2D2D3F" strokeWidth="2.8" strokeLinejoin="round"/>
+          {/* Foreground pink mound */}
+          <path d="M 680 595 Q 760 560 840 590 Q 920 618 1040 600 L 1040 640 L 680 640 Z"
+                fill="url(#hillP)" stroke="#2D2D3F" strokeWidth="2.6" strokeLinejoin="round"/>
+        </g>
+
+        {/* ===== Pink tree on right ===== */}
+        <g transform="translate(870 495)" style={{ animation: 'hillBreathe 9s ease-in-out infinite' }}>
+          <path d="M 0 40 Q -5 10 5 -20 Q 15 -10 10 20" stroke="#2D2D3F" strokeWidth="3.5"
+                fill="#7A5AB6" strokeLinecap="round"/>
+          <circle cx="-14" cy="-22" r="14" fill="#FBD3E0" stroke="#2D2D3F" strokeWidth="2.5"/>
+          <circle cx="8"   cy="-30" r="16" fill="#F9BBD0" stroke="#2D2D3F" strokeWidth="2.5"/>
+          <circle cx="20"  cy="-12" r="13" fill="#FBD3E0" stroke="#2D2D3F" strokeWidth="2.5"/>
+          <circle cx="-4"  cy="-6"  r="11" fill="#F9BBD0" stroke="#2D2D3F" strokeWidth="2.5"/>
+        </g>
+
+        {/* ===== Flowers (bottom left) ===== */}
+        <g transform="translate(40 560)" style={{ animation: 'flowerBob 5s ease-in-out infinite' }}>
+          <g transform="translate(0 0)">
+            <circle r="6" fill="#FBD3E0"/>
+            {[0, 60, 120, 180, 240, 300].map(a => (
+              <ellipse key={a} cx={Math.cos(a*Math.PI/180)*14} cy={Math.sin(a*Math.PI/180)*14}
+                       rx="10" ry="7" transform={`rotate(${a})`}
+                       fill="#FFFFFF" stroke="#2D2D3F" strokeWidth="2"/>
+            ))}
+            <circle r="6" fill="#F9BBD0" stroke="#2D2D3F" strokeWidth="2"/>
+          </g>
+        </g>
+        <g transform="translate(95 605)" style={{ animation: 'flowerBob 6s ease-in-out infinite 0.6s' }}>
+          <g>
+            <circle r="5" fill="#FBD3E0"/>
+            {[0, 72, 144, 216, 288].map(a => (
+              <ellipse key={a} cx={Math.cos(a*Math.PI/180)*11} cy={Math.sin(a*Math.PI/180)*11}
+                       rx="8" ry="6" transform={`rotate(${a})`}
+                       fill="#FFFFFF" stroke="#2D2D3F" strokeWidth="1.8"/>
+            ))}
+            <circle r="4.5" fill="#F9A8C1" stroke="#2D2D3F" strokeWidth="1.6"/>
+          </g>
+        </g>
+
+        {/* Sparkles scattered */}
+        <g fill="#FFFFFF" opacity="0.85">
+          <path d="M 460 430 l 0 -8 M 456 426 l 8 0" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round"/>
+          <path d="M 720 400 l 0 -6 M 717 397 l 6 0" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round"/>
+          <circle cx="330" cy="460" r="2.5"/>
+          <circle cx="580" cy="450" r="2"/>
+          <circle cx="880" cy="500" r="2.4"/>
+        </g>
+
+        {/* ===== Butterflies ===== */}
+        <g transform="translate(230 380)" style={{ animation: 'flutter 5.4s ease-in-out infinite' }}>
+          <g>
+            <ellipse cx="-6" cy="0" rx="7" ry="10" fill="#FFE082" stroke="#2D2D3F" strokeWidth="2"/>
+            <ellipse cx="6"  cy="0" rx="7" ry="10" fill="#FFE082" stroke="#2D2D3F" strokeWidth="2"/>
+            <ellipse cx="-4" cy="7" rx="5" ry="7" fill="#FFCE66" stroke="#2D2D3F" strokeWidth="2"/>
+            <ellipse cx="4"  cy="7" rx="5" ry="7" fill="#FFCE66" stroke="#2D2D3F" strokeWidth="2"/>
+            <line x1="0" y1="-6" x2="0" y2="8" stroke="#2D2D3F" strokeWidth="2" strokeLinecap="round"/>
+          </g>
+        </g>
+        <g transform="translate(690 540)" style={{ animation: 'flutter 6.2s ease-in-out infinite 1.3s' }}>
+          <g>
+            <ellipse cx="-5" cy="0" rx="6" ry="9" fill="#C5B3E6" stroke="#2D2D3F" strokeWidth="1.8"/>
+            <ellipse cx="5"  cy="0" rx="6" ry="9" fill="#C5B3E6" stroke="#2D2D3F" strokeWidth="1.8"/>
+            <ellipse cx="-3" cy="6" rx="4" ry="6" fill="#A89ED4" stroke="#2D2D3F" strokeWidth="1.8"/>
+            <ellipse cx="3"  cy="6" rx="4" ry="6" fill="#A89ED4" stroke="#2D2D3F" strokeWidth="1.8"/>
+            <line x1="0" y1="-5" x2="0" y2="7" stroke="#2D2D3F" strokeWidth="1.8" strokeLinecap="round"/>
+          </g>
+        </g>
+
+        {/* ===== Birds (distant V shapes) ===== */}
+        <g stroke="#2D2D3F" strokeWidth="2.2" strokeLinecap="round" fill="none" opacity="0.7">
+          <path d="M 140 440 q 5 -4 10 0 q 5 -4 10 0"/>
+          <path d="M 175 455 q 4 -3 8 0 q 4 -3 8 0"/>
+        </g>
+      </svg>
     </div>
   );
 };
@@ -1574,17 +1808,30 @@ const MoodCard = () => {
   const d = DOODLES[doodleIdx];
   return (
     <FrostedCard className="p-4 mb-4 flex items-center gap-3 anim-float-in" style={{ animationDelay: '0.03s' }}>
-      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0"
-           style={{ border: `1.5px solid ${STROKE}`, background: 'linear-gradient(135deg,#FFE6C5,#FFB7C5)' }}>
-        {d && <DoodleAvatar doodle={d} size={56} />}
-      </div>
+      {d ? (
+        <a href={openseaUrl(d)} target="_blank" rel="noopener noreferrer"
+           aria-label={`Open Doodle #${d.id} on OpenSea`}
+           onClick={(e) => { try { navigator.vibrate && navigator.vibrate(6); } catch(_){} }}
+           className="w-14 h-14 rounded-xl overflow-hidden shrink-0 block transition-transform active:scale-95 hover:scale-105"
+           style={{ border: `1.5px solid ${STROKE}`, background: 'linear-gradient(135deg,#FFE6C5,#FFB7C5)', boxShadow: '0 3px 10px rgba(100,80,160,0.18)' }}>
+          <DoodleAvatar doodle={d} size={56} />
+        </a>
+      ) : (
+        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0"
+             style={{ border: `1.5px solid ${STROKE}`, background: 'linear-gradient(135deg,#FFE6C5,#FFB7C5)' }} />
+      )}
       <div className="min-w-0 flex-1">
         <p className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: '#7B7B9A' }}>
-          Mood of the day
+          Mood of the day{d ? ` · #${d.id}` : ''}
         </p>
         <p className="font-display text-[15px] leading-tight italic" style={{ color: '#2D2D3F' }}>
           "{MOOD_LINES[idx]}"
         </p>
+        {d && (
+          <p className="text-[10px] mt-0.5" style={{ color: '#4140FF' }}>
+            tap doodle → OpenSea ↗
+          </p>
+        )}
       </div>
     </FrostedCard>
   );
@@ -4531,8 +4778,8 @@ const FontLoader = () => (
     /* inputs on iOS: prevent auto-zoom by using 16px+ font */
     input, textarea, select { font-size: 16px; }
 
-    /* prevent accidental long-press context menus on images */
-    img { -webkit-touch-callout: none; pointer-events: none; }
+    /* prevent accidental long-press context menus on images (but keep clickable via parent) */
+    img { -webkit-touch-callout: none; -webkit-user-drag: none; user-drag: none; }
 
     /* smoother momentum scroll for lists / dex grid */
     .scroll-momentum {
