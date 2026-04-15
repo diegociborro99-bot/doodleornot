@@ -1282,7 +1282,8 @@ const CountUp = ({ value, duration = 900 }) => {
 const FooterSignature = () => {
   const full = 'vibe coded by Degos';
   return (
-    <div className="w-full flex justify-center pb-10 pt-8 select-none">
+    <div className="w-full flex justify-center pt-8 select-none"
+         style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
       <div className="degos-wrap">
         <span className="degos-sig">
           {[...full].map((ch, i) => (
@@ -1537,7 +1538,7 @@ const OnboardingFlow = ({ onDone }) => {
   ];
   const s = steps[step];
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 anim-fade-in">
+    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in">
       <FrostedCard className="w-full max-w-sm p-8 text-center anim-pop-in">
         <div className="flex justify-center mb-4">{s.icon}</div>
         <h2 className="font-display font-semibold text-3xl mb-2" style={{ color: '#2D2D3F' }}>{s.title}</h2>
@@ -1569,8 +1570,8 @@ const OnboardingFlow = ({ onDone }) => {
 /* Mood of the Day card — deterministic per day */
 const MoodCard = () => {
   const idx = hashCode(todayStr() + 'mood') % MOOD_LINES.length;
-  const doodleIdx = hashCode(todayStr() + 'mooddood') % Math.max(1, (window.DOODLES || []).length || 1);
-  const d = (window.DOODLES || [])[doodleIdx];
+  const doodleIdx = hashCode(todayStr() + 'mooddood') % Math.max(1, DOODLES.length || 1);
+  const d = DOODLES[doodleIdx];
   return (
     <FrostedCard className="p-4 mb-4 flex items-center gap-3 anim-float-in" style={{ animationDelay: '0.03s' }}>
       <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0"
@@ -1592,7 +1593,7 @@ const MoodCard = () => {
 /* DOODLE DEX MODAL */
 const DexModal = ({ open, onClose, ids, onOpenDoodle }) => {
   if (!open) return null;
-  const doodles = (window.DOODLES || []);
+  const doodles = DOODLES;
   const total = doodles.length;
   const seen = ids.length;
   return (
@@ -2231,7 +2232,7 @@ const AuthScreen = ({ onAuth }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
+    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
       <div className="flex flex-col items-center mb-6 anim-float-in">
         <WaterTitle text="Doodle or Not" size="text-6xl" />
         <div className="mt-2 opacity-90 anim-rainbow-spin-slow"><RainbowIcon size={72} /></div>
@@ -2570,7 +2571,7 @@ const SplashScreen = ({ onCreate, initial, editMode = false }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
+    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in" style={{ color: '#2D2D3F' }}>
       <div className="flex flex-col items-center mb-6 anim-float-in">
         <WaterTitle text="Doodle or Not" size="text-6xl" />
         <div className="mt-2 opacity-90 anim-rainbow-spin-slow"><RainbowIcon size={72} /></div>
@@ -2706,7 +2707,7 @@ const HomeScreen = ({ profile, progress, onPlay, weekPts, streak = 0, powerups =
               : t('good_evening');
 
   return (
-    <div className="px-4 pt-3 pb-28 max-w-[480px] mx-auto">
+    <div className="px-4 pt-3 pb-nav max-w-[480px] mx-auto scroll-momentum">
       {/* top bar */}
       <div className="flex items-center justify-between mb-5 anim-fade-in">
         <div className="flex items-center gap-3">
@@ -3565,7 +3566,7 @@ const LeaderboardScreen = ({ profile, weekPts }) => {
   // trigger the empty illustration when the user hasn't played and selected "last week")
   if (tab === 'last' && (weekPts || 0) === 0) {
     return (
-      <div className="px-4 pt-6 pb-28 max-w-[480px] mx-auto">
+      <div className="px-4 pt-6 pb-nav max-w-[480px] mx-auto scroll-momentum">
         <div className="flex items-center justify-center gap-2 mb-1">
           <TrophyIcon size={28} />
           <h1 className="font-display font-semibold text-3xl" style={{ color: '#2D2D3F' }}>Leaderboard</h1>
@@ -3595,7 +3596,7 @@ const LeaderboardScreen = ({ profile, weekPts }) => {
   const medalTint = { 1: '#FFE082', 2: '#E0E0E8', 3: '#FFAB91' };
 
   return (
-    <div className="px-4 pt-6 pb-28 max-w-[480px] mx-auto">
+    <div className="px-4 pt-6 pb-nav max-w-[480px] mx-auto scroll-momentum">
       <div className="flex items-center justify-center gap-2 mb-1">
         <TrophyIcon size={28} />
         <h1 className="font-display font-semibold text-3xl" style={{ color: '#2D2D3F' }}>Leaderboard</h1>
@@ -3717,7 +3718,7 @@ const ProfileScreen = ({ profile, stats, streak = 0, achievements = [], onEdit, 
   ];
 
   return (
-    <div className="px-4 pt-6 pb-28 max-w-[480px] mx-auto">
+    <div className="px-4 pt-6 pb-nav max-w-[480px] mx-auto scroll-momentum">
       {/* Cloud-shaped profile header */}
       <FrostedCard className="p-6 mb-5 text-center relative overflow-hidden anim-float-in"
                    style={{ background: `${profile.color}40`, animationDelay: '0.05s' }}>
@@ -3948,7 +3949,8 @@ const BottomNav = ({ tab, onTab }) => {
   ];
   const idx = Math.max(0, items.findIndex(it => it.id === tab));
   return (
-    <div className="fixed bottom-0 inset-x-0 pb-4 pt-2 px-4 z-20 flex justify-center">
+    <div className="fixed bottom-0 inset-x-0 pt-2 px-4 z-20 flex justify-center gpu"
+         style={{ paddingBottom: 'max(16px, calc(env(safe-area-inset-bottom) + 8px))' }}>
       <FrostedCard className="relative flex gap-1 p-1.5 w-full max-w-sm">
         <div className="nav-indicator" style={{ left: `calc(${idx * 33.333}% + 6px)` }} />
         {items.map(it => {
@@ -4257,7 +4259,7 @@ function DoodleOrNot() {
   // ---- NOT LOGGED IN ----
   if (!profile) {
     return (
-      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+      <div className="min-h-app font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
         <FontLoader />
         <SkyBackground />
         <AuthScreen onAuth={handleAuth} />
@@ -4269,7 +4271,7 @@ function DoodleOrNot() {
   // ---- ONBOARDING (first login, non-admin) ----
   if (showOnboarding && !profile.isAdmin) {
     return (
-      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+      <div className="min-h-app font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
         <FontLoader />
         <SkyBackground />
         <OnboardingFlow onDone={completeOnboarding} />
@@ -4313,7 +4315,7 @@ function DoodleOrNot() {
   // ---- ADMIN PANEL ----
   if (adminMode && profile.isAdmin) {
     return (
-      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+      <div className="min-h-app font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
         <FontLoader />
         <SkyBackground />
         <AppHeader />
@@ -4340,7 +4342,7 @@ function DoodleOrNot() {
       </div>
     );
     return (
-      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+      <div className="min-h-app font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
         <FontLoader />
         <SkyBackground />
         <AppHeader compact />
@@ -4360,7 +4362,7 @@ function DoodleOrNot() {
   // ---- RESULTS ----
   if (lastResult) {
     return (
-      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+      <div className="min-h-app font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
         <FontLoader />
         <SkyBackground />
         <AppHeader compact />
@@ -4403,7 +4405,7 @@ function DoodleOrNot() {
   // ---- EDIT PROFILE (cosmetics only now) ----
   if (editing) {
     return (
-      <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+      <div className="min-h-app font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
         <FontLoader />
         <SkyBackground />
         <SplashScreen initial={profile} editMode onCreate={(p) => {
@@ -4417,7 +4419,7 @@ function DoodleOrNot() {
 
   // ---- MAIN APP ----
   return (
-    <div className="min-h-screen font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+    <div className="min-h-app font-sans" style={{ fontFamily: "'Quicksand', sans-serif" }}>
       <FontLoader />
       <SkyBackground />
       <AppHeader />
@@ -4456,7 +4458,145 @@ function DoodleOrNot() {
 const FontLoader = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
-    body, html, #root, .font-sans { font-family: 'Quicksand', system-ui, sans-serif !important; letter-spacing: 0.01em; }
+
+    /* ============================================================
+       MOBILE-FIRST GLOBAL OPTIMIZATIONS
+       ============================================================ */
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+      --vh: 1vh;
+      --app-max-w: 440px;
+    }
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+      tap-highlight-color: transparent;
+      touch-action: manipulation;      /* no 300ms delay, no double-tap zoom */
+      overscroll-behavior-y: contain;  /* no pull-to-refresh page reload */
+      scroll-behavior: smooth;
+    }
+    body, html, #root {
+      font-family: 'Quicksand', system-ui, sans-serif !important;
+      letter-spacing: 0.01em;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-smooth: always;
+      text-rendering: optimizeLegibility;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    html, body { min-height: 100vh; min-height: 100svh; }
+    #root {
+      min-height: 100vh;
+      min-height: 100dvh;        /* dynamic viewport — accounts for iOS bar */
+      padding-top: var(--safe-top);
+      padding-left: var(--safe-left);
+      padding-right: var(--safe-right);
+      /* NOTE: bottom padding handled per-screen to leave room for fixed nav */
+      position: relative;
+    }
+    /* kill iOS Safari rubber-band glow & selection on tap */
+    body {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      overscroll-behavior: none;
+    }
+    /* but allow selection inside inputs / editable */
+    input, textarea, [contenteditable], .select-text, .select-text * {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    /* buttons: instant press feedback + no outline */
+    button {
+      -webkit-appearance: none;
+      appearance: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+      transition: transform 0.08s cubic-bezier(.2,.9,.3,1.2), opacity 0.15s ease;
+    }
+    button:active:not(:disabled) { transform: scale(0.965); }
+    button:focus-visible {
+      outline: 2px solid #C5B3E6;
+      outline-offset: 2px;
+      border-radius: 10px;
+    }
+    button:focus:not(:focus-visible) { outline: none; }
+
+    /* inputs on iOS: prevent auto-zoom by using 16px+ font */
+    input, textarea, select { font-size: 16px; }
+
+    /* prevent accidental long-press context menus on images */
+    img { -webkit-touch-callout: none; pointer-events: none; }
+
+    /* smoother momentum scroll for lists / dex grid */
+    .scroll-momentum {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+    }
+    .scroll-momentum::-webkit-scrollbar { display: none; }
+
+    /* horizontal scroll snap containers (carousels) */
+    .snap-x-mandatory {
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: 16px;
+    }
+    .snap-x-mandatory > * { scroll-snap-align: start; }
+
+    /* safe-area helpers */
+    .safe-bottom { padding-bottom: max(16px, calc(env(safe-area-inset-bottom) + 12px)); }
+    .safe-top    { padding-top: max(12px, calc(env(safe-area-inset-top) + 8px)); }
+
+    /* fluid typography — shrinks gracefully on small phones, grows on tablets */
+    .fluid-display-xl { font-size: clamp(28px, 8vw, 44px); line-height: 1.05; }
+    .fluid-display-l  { font-size: clamp(22px, 6.2vw, 32px); line-height: 1.1; }
+    .fluid-display-m  { font-size: clamp(18px, 4.8vw, 24px); line-height: 1.2; }
+
+    /* improve image smoothness on retina */
+    svg, img { image-rendering: -webkit-optimize-contrast; }
+
+    /* GPU hint for animated layers */
+    .gpu { transform: translateZ(0); will-change: transform, opacity; backface-visibility: hidden; }
+
+    /* Modal backdrop: lock body scroll & disable pull-to-refresh */
+    .modal-open { overflow: hidden; overscroll-behavior: none; touch-action: none; }
+
+    /* Nicer pressed state for icon buttons */
+    .tap-soft:active { transform: scale(0.92); opacity: 0.85; }
+
+    /* Bottom-nav aware padding — use on any screen that sits above the nav */
+    .pb-nav { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
+    .pt-safe { padding-top: max(12px, calc(env(safe-area-inset-top) + 8px)); }
+
+    /* Fullscreen modals / sheets: respect notch + home-bar */
+    .sheet-fullscreen {
+      position: fixed; inset: 0;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      height: 100vh; height: 100dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
+    /* min-h-app that plays nice with iOS dynamic toolbar */
+    .min-h-app { min-height: 100vh; min-height: 100dvh; }
+
+    /* respect prefers-color-scheme if prefs.darkMode=auto handled in JS */
+    @media (prefers-reduced-data: reduce) {
+      @import none;
+    }
+    @media (hover: none) and (pointer: coarse) {
+      /* touch-only device tweaks */
+      button, [role="button"] { min-height: 44px; min-width: 44px; }
+    }
+
     .font-display { font-family: 'Fraunces', 'Quicksand', serif; font-variation-settings: 'opsz' 144; letter-spacing: -0.02em; }
     input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height: 28px; }
     @keyframes waterBob {
