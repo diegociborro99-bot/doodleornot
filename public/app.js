@@ -8728,3 +8728,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
         { animation: none !important; transition: none !important; }
     }
   `);
+
+/* ---------- Mount ---------- */
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(DoodleOrNot));
+
