@@ -12,6 +12,8 @@
 <link rel="manifest" href="./manifest.json" />
 <link rel="icon" type="image/svg+xml" href="./icon.svg" />
 <link rel="apple-touch-icon" href="./icon-192.png" />
+<link rel="preconnect" href="https://i2c.seadn.io" crossorigin />
+<link rel="dns-prefetch" href="https://i2c.seadn.io" />
 <script>window.process = { env: { NODE_ENV: 'production' } };</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -1051,7 +1053,16 @@ const ProfileAvatar = ({ profile, size = 80, animated = true }) => {
 
 const DoodleAvatar = ({ doodle, size = 120, rounded = true, onFail }) => {
   const [failed, setFailed] = useState(false);
-  useEffect(() => { setFailed(false); }, [doodle && doodle.id]);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => { setFailed(false); setAttempt(0); }, [doodle && doodle.id]);
+  // Multiple CDN strategies; retry transparently before giving up.
+  const sources = doodle ? [
+    doodleImage(doodle),                                                                   // 0 — default seadn
+    doodleImage(doodle) + '?w=500&auto=format',                                            // 1 — seadn resized
+    `https://api.opensea.io/api/v1/asset/0x8a90cab2b38dba80c64b7734e58ee1db38b8992e/${doodle.i}/image`, // 2 — fallback
+    doodleImage(doodle) + '?retry=' + Date.now(),                                          // 3 — cache-bust last try
+  ] : [];
+  const currentSrc = sources[attempt] || sources[0];
   if (!doodle || failed) {
     // Nice colorful placeholder instead of a broken-image icon
     const palette = ['#FFB7C5', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6', '#FFAB91'];
@@ -1074,13 +1085,21 @@ const DoodleAvatar = ({ doodle, size = 120, rounded = true, onFail }) => {
   }
   return (
     <img
-      src={doodleImage(doodle)}
+      src={currentSrc}
       alt=""
       width={size}
       height={size}
       loading="lazy"
       draggable={false}
-      onError={() => { setFailed(true); if (onFail) onFail(doodle); }}
+      onError={() => {
+        // transparently try the next CDN/URL strategy before giving up
+        if (attempt < sources.length - 1) {
+          setAttempt(a => a + 1);
+        } else {
+          setFailed(true);
+          if (onFail) onFail(doodle);
+        }
+      }}
       className={rounded ? 'rounded-2xl' : ''}
       style={{
         display: 'block',
@@ -2760,7 +2779,7 @@ const AuthScreen = ({ onAuth }) => {
   };
 
   return (
-    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in lg:grid lg:grid-cols-2 lg:gap-16 lg:max-w-6xl lg:mx-auto lg:px-8" style={{ color: '#2D2D3F' }}>
+    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in lg:grid lg:grid-cols-2 lg:gap-20 lg:max-w-[1400px] lg:mx-auto lg:px-12" style={{ color: '#2D2D3F' }}>
       <div className="flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1" style={{ maxWidth: '100%' }}>
         <div className="relative lg:self-start" style={{
           textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
@@ -3131,7 +3150,7 @@ const SplashScreen = ({ onCreate, initial, editMode = false }) => {
   };
 
   return (
-    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in lg:grid lg:grid-cols-2 lg:gap-16 lg:max-w-6xl lg:mx-auto lg:px-8" style={{ color: '#2D2D3F' }}>
+    <div className="min-h-app flex flex-col items-center justify-center px-4 py-8 anim-fade-in lg:grid lg:grid-cols-2 lg:gap-20 lg:max-w-[1400px] lg:mx-auto lg:px-12" style={{ color: '#2D2D3F' }}>
       <div className="flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1" style={{ maxWidth: '100%' }}>
         <div className="relative lg:self-start" style={{
           textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
@@ -3283,7 +3302,7 @@ const HomeScreen = ({ profile, progress, onPlay, weekPts, streak = 0, powerups =
               : t('good_evening');
 
   return (
-    <div className="px-4 pt-3 pb-nav max-w-[480px] lg:max-w-6xl mx-auto scroll-momentum">
+    <div className="px-4 pt-3 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-8 mx-auto scroll-momentum">
       {/* top bar */}
       <div className="flex items-center justify-between mb-5 anim-fade-in">
         <div className="flex items-center gap-3">
@@ -3501,7 +3520,7 @@ const GuessMode = ({ seed, onFinish }) => {
   }, [revealed, round]);
 
   return (
-    <div className="px-4 pt-4 pb-10 max-w-[480px] mx-auto">
+    <div className="px-4 pt-4 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <MagnifierIcon size={28} />
@@ -3517,7 +3536,7 @@ const GuessMode = ({ seed, onFinish }) => {
         <h3 className="font-bold text-xl" style={{ color: '#4140FF' }}>MORE ETH most recently?</h3>
       </FrostedCard>
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 lg:gap-10 lg:max-w-5xl lg:mx-auto mb-4">
         {['a', 'b'].map(side => {
           const d = current[side];
           const isCorrect = revealed && side === correctSide;
@@ -3525,12 +3544,12 @@ const GuessMode = ({ seed, onFinish }) => {
           return (
             <FrostedCard key={side}
                          onClick={() => choose(side)}
-                         className={`p-3 cursor-pointer transition-all ${revealed ? '' : 'active:scale-95'}`}
+                         className={`p-3 lg:p-6 cursor-pointer transition-all ${revealed ? '' : 'active:scale-95 lg:hover:-translate-y-1'}`}
                          style={{
                            outline: isCorrect ? '3px solid #7DD8A0' : isWrong ? '3px solid #FF8A8A' : 'none',
                            outlineOffset: '2px'
                          }}>
-              <DoodleAvatar doodle={d} size={170} />
+              <div className="doodle-card-img"><DoodleAvatar doodle={d} size={170} /></div>
               <div className="mt-2 text-center">
                 <div className="text-[10px] font-bold" style={{ color: '#7B7B9A' }}>#{d.id}</div>
                 {revealed ? (
@@ -3649,7 +3668,7 @@ const PriceMode = ({ seed, onFinish }) => {
   };
 
   return (
-    <div className="px-4 pt-4 pb-10 max-w-[480px] mx-auto">
+    <div className="px-4 pt-4 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <ArrowsIcon size={28} />
@@ -3667,7 +3686,7 @@ const PriceMode = ({ seed, onFinish }) => {
         Which Doodle is <strong style={{ color: '#4140FF' }}>RARER</strong>?
       </p>
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 lg:gap-10 lg:max-w-5xl lg:mx-auto mb-4">
         {['a', 'b'].map(side => {
           const d = current[side];
           const isCorrect = revealed && side === correctSide;
@@ -3675,12 +3694,12 @@ const PriceMode = ({ seed, onFinish }) => {
           return (
             <FrostedCard key={side}
                          onClick={() => choose(side)}
-                         className={`p-3 cursor-pointer transition-all ${revealed ? '' : 'active:scale-95'}`}
+                         className={`p-3 lg:p-6 cursor-pointer transition-all ${revealed ? '' : 'active:scale-95 lg:hover:-translate-y-1'}`}
                          style={{
                            outline: isCorrect ? '3px solid #7DD8A0' : isWrong ? '3px solid #FF8A8A' : 'none',
                            outlineOffset: '2px'
                          }}>
-              <DoodleAvatar doodle={d} size={170} />
+              <div className="doodle-card-img"><DoodleAvatar doodle={d} size={170} /></div>
               <div className="mt-2 text-center">
                 <div className="text-[10px] font-bold" style={{ color: '#7B7B9A' }}>#{d.id}</div>
                 {revealed ? (
@@ -3854,7 +3873,7 @@ const TraitMode = ({ seed, onFinish }) => {
   }, [revealed, guess, round]);
 
   return (
-    <div className="px-4 pt-4 pb-10 max-w-[480px] mx-auto">
+    <div className="px-4 pt-4 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <WheelIcon size={28} />
@@ -4002,7 +4021,7 @@ const ResultsScreen = ({ result, profile, onBack, onShare, onChallenge }) => {
                            : ['#FFB7C5','#FFE082'];
 
   return (
-    <div className="px-4 pt-6 pb-10 max-w-[480px] mx-auto relative">
+    <div className="px-4 pt-6 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto relative">
       {showConfetti && <Confetti count={confettiCount} palette={confettiPalette} />}
       {clutch && (
         <div className="rounded-xl p-3 mb-3 text-center anim-pop-in"
@@ -4143,7 +4162,7 @@ const LeaderboardScreen = ({ profile, weekPts }) => {
   // trigger the empty illustration when the user hasn't played and selected "last week")
   if (tab === 'last' && (weekPts || 0) === 0) {
     return (
-      <div className="px-4 pt-6 pb-nav max-w-[480px] lg:max-w-3xl mx-auto scroll-momentum">
+      <div className="px-4 pt-6 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-8 mx-auto scroll-momentum">
         <div className="flex items-center justify-center gap-2 mb-1">
           <TrophyIcon size={28} />
           <h1 className="font-display font-semibold text-3xl" style={{ color: '#2D2D3F' }}>Leaderboard</h1>
@@ -4173,7 +4192,7 @@ const LeaderboardScreen = ({ profile, weekPts }) => {
   const medalTint = { 1: '#FFE082', 2: '#E0E0E8', 3: '#FFAB91' };
 
   return (
-    <div className="px-4 pt-6 pb-nav max-w-[480px] lg:max-w-3xl mx-auto scroll-momentum">
+    <div className="px-4 pt-6 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-8 mx-auto scroll-momentum">
       <div className="flex items-center justify-center gap-2 mb-1">
         <TrophyIcon size={28} />
         <h1 className="font-display font-semibold text-3xl" style={{ color: '#2D2D3F' }}>Leaderboard</h1>
@@ -4295,7 +4314,7 @@ const ProfileScreen = ({ profile, stats, streak = 0, achievements = [], onEdit, 
   ];
 
   return (
-    <div className="px-4 pt-6 pb-nav max-w-[480px] lg:max-w-3xl mx-auto scroll-momentum">
+    <div className="px-4 pt-6 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-8 mx-auto scroll-momentum">
       {/* Cloud-shaped profile header */}
       <FrostedCard className="p-6 mb-5 text-center relative overflow-hidden anim-float-in"
                    style={{ background: `${profile.color}40`, animationDelay: '0.05s' }}>
@@ -4976,7 +4995,7 @@ function DoodleOrNot() {
   // ---- IN-GAME ----
   if (mode && !lastResult) {
     const commonHeader = (
-      <div className="pt-4 px-4 max-w-[480px] mx-auto">
+      <div className="pt-4 px-4 lg:px-12 max-w-[480px] lg:max-w-[1400px] mx-auto">
         <button onClick={() => setMode(null)}
                 className="flex items-center gap-1 text-sm font-semibold active:scale-95"
                 style={{ color: '#2D2D3F' }}>
@@ -5009,7 +5028,7 @@ function DoodleOrNot() {
         <FontLoader />
         <SkyBackground />
         <AppHeader compact />
-        <div className="pt-4 px-4 max-w-[480px] mx-auto">
+        <div className="pt-4 px-4 lg:px-12 max-w-[480px] lg:max-w-[1400px] mx-auto">
           <button onClick={() => { setMode(null); setLastResult(null); }}
                   className="flex items-center gap-1 text-sm font-semibold active:scale-95"
                   style={{ color: '#2D2D3F' }}>
@@ -5287,6 +5306,13 @@ const FontLoader = () => (
       50%     { box-shadow: 0 8px 26px rgba(65,64,255,0.28), 0 0 0 6px rgba(65,64,255,0); }
     }
     .avatar-glow { animation: avatarPulse 3.2s ease-in-out infinite; }
+
+    /* ===== Doodle card image — scales up on desktop to fill 2-col layout ===== */
+    .doodle-card-img { width: 100%; display: flex; justify-content: center; }
+    .doodle-card-img > img, .doodle-card-img > div { width: 100% !important; height: auto !important; aspect-ratio: 1 / 1; max-width: 170px; }
+    @media (min-width: 1024px) {
+      .doodle-card-img > img, .doodle-card-img > div { max-width: 380px; }
+    }
 
     /* ===== Rainbow slow spin ===== */
     @keyframes rainbowSway { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
