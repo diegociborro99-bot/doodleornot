@@ -3223,11 +3223,12 @@ const TopActions = ({
   onToggleSound,
   onSettings
 }) => /*#__PURE__*/React.createElement("div", {
-  className: "fixed top-3 right-3 z-40 flex gap-2"
+  className: "fixed right-3 z-40 flex gap-2",
+  style: { top: 'max(12px, calc(env(safe-area-inset-top, 0px) + 8px))' }
 }, /*#__PURE__*/React.createElement("button", {
   onClick: onToggleSound,
   "aria-label": sound ? 'Mute sound' : 'Unmute sound',
-  className: "w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition-transform",
+  className: "w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-transform",
   style: {
     background: 'rgba(255,255,255,0.72)',
     border: '1px solid #E8E0F0',
@@ -3263,7 +3264,7 @@ const TopActions = ({
 })))), /*#__PURE__*/React.createElement("button", {
   onClick: onSettings,
   "aria-label": "Settings",
-  className: "w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition-transform",
+  className: "w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-transform",
   style: {
     background: 'rgba(255,255,255,0.72)',
     border: '1px solid #E8E0F0',
@@ -3366,12 +3367,13 @@ const SettingsModal = ({
     },
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full max-w-md rounded-2xl p-5 anim-pop-in",
+    className: "w-full max-w-md rounded-2xl p-5 anim-pop-in overflow-y-auto",
     onClick: e => e.stopPropagation(),
     style: {
       background: 'rgba(255,255,255,0.96)',
       border: '1px solid #E8E0F0',
-      boxShadow: '0 20px 50px rgba(45,45,63,0.3)'
+      boxShadow: '0 20px 50px rgba(45,45,63,0.3)',
+      maxHeight: '85vh'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-3"
@@ -3382,7 +3384,7 @@ const SettingsModal = ({
     }
   }, "Settings"), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
-    className: "w-8 h-8 rounded-full active:scale-90 font-bold",
+    className: "w-10 h-10 rounded-full active:scale-90 font-bold text-lg",
     style: {
       background: 'rgba(255,255,255,0.6)',
       border: '1px solid #E8E0F0',
@@ -3601,7 +3603,7 @@ const MoodCard = () => {
   }), /*#__PURE__*/React.createElement("div", {
     className: "min-w-0 flex-1"
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-[0.2em] uppercase",
+    className: "text-[11px] font-bold tracking-[0.15em] uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -3647,7 +3649,7 @@ const DexModal = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-2"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-[0.2em] uppercase",
+    className: "text-[11px] font-bold tracking-[0.15em] uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -3784,7 +3786,7 @@ const WeeklyReading = ({
     size: 18,
     fill: "#FFE082"
   }), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-[0.2em] uppercase",
+    className: "text-[11px] font-bold tracking-[0.15em] uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -3808,7 +3810,7 @@ const WeeklyReading = ({
       border: '1px solid #E8E0F0'
     }
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-wider uppercase",
+    className: "text-[11px] font-bold tracking-wider uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -3824,7 +3826,7 @@ const WeeklyReading = ({
       border: '1px solid #E8E0F0'
     }
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-wider uppercase",
+    className: "text-[11px] font-bold tracking-wider uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -3840,7 +3842,7 @@ const WeeklyReading = ({
       border: '1px solid #E8E0F0'
     }
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-wider uppercase",
+    className: "text-[11px] font-bold tracking-wider uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -3938,7 +3940,7 @@ const ShortcutsOverlay = ({
     }
   }, t('shortcuts')), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
-    className: "w-8 h-8 rounded-full font-bold",
+    className: "w-10 h-10 rounded-full font-bold text-lg",
     style: {
       background: 'rgba(255,255,255,0.6)',
       border: '1px solid #E8E0F0',
@@ -4017,7 +4019,7 @@ const DoodleDetailModal = ({
   })), /*#__PURE__*/React.createElement("div", {
     className: "min-w-0 flex-1"
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-[0.2em] uppercase",
+    className: "text-[11px] font-bold tracking-[0.15em] uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -4035,7 +4037,7 @@ const DoodleDetailModal = ({
     className: "font-bold"
   }, doodle.lastSale, " ETH"))), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
-    className: "w-8 h-8 rounded-full font-bold shrink-0",
+    className: "w-10 h-10 rounded-full font-bold text-lg shrink-0",
     style: {
       background: 'rgba(255,255,255,0.6)',
       border: '1px solid #E8E0F0',
@@ -4053,7 +4055,7 @@ const DoodleDetailModal = ({
       border: '1px solid #E8E0F0'
     }
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-wider uppercase truncate",
+    className: "text-[11px] font-bold tracking-wider uppercase truncate",
     style: {
       color: '#7B7B9A'
     }
@@ -4113,12 +4115,13 @@ const ShareCardModal = ({
     },
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full max-w-md rounded-2xl p-4 anim-pop-in",
+    className: "w-full max-w-md rounded-2xl p-4 anim-pop-in overflow-y-auto",
     onClick: e => e.stopPropagation(),
     style: {
       background: 'rgba(255,255,255,0.97)',
       border: '1px solid #E8E0F0',
-      boxShadow: '0 20px 50px rgba(45,45,63,0.35)'
+      boxShadow: '0 20px 50px rgba(45,45,63,0.35)',
+      maxHeight: '90vh'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-3"
@@ -4129,7 +4132,7 @@ const ShareCardModal = ({
     }
   }, t('share')), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
-    className: "w-8 h-8 rounded-full font-bold",
+    className: "w-10 h-10 rounded-full font-bold text-lg",
     style: {
       background: 'rgba(255,255,255,0.6)',
       border: '1px solid #E8E0F0',
@@ -4238,7 +4241,7 @@ const LeaguesModal = ({
     }
   }, t('private_leagues')), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
-    className: "w-8 h-8 rounded-full font-bold",
+    className: "w-10 h-10 rounded-full font-bold text-lg",
     style: {
       background: 'rgba(255,255,255,0.6)',
       border: '1px solid #E8E0F0',
@@ -4391,15 +4394,16 @@ const DailyRecapModal = ({
     },
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full max-w-sm rounded-2xl p-5 anim-pop-in",
+    className: "w-full max-w-sm rounded-2xl p-5 anim-pop-in overflow-y-auto",
     onClick: e => e.stopPropagation(),
     style: {
       background: 'rgba(255,255,255,0.98)',
       border: '1px solid #E8E0F0',
+      maxHeight: '85vh',
       boxShadow: '0 20px 50px rgba(45,45,63,0.3)'
     }
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-[0.2em] uppercase text-center",
+    className: "text-[11px] font-bold tracking-[0.15em] uppercase text-center",
     style: {
       color: '#7B7B9A'
     }
@@ -4417,7 +4421,7 @@ const DailyRecapModal = ({
       border: '1px solid #E8E0F0'
     }
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-wider uppercase",
+    className: "text-[11px] font-bold tracking-wider uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -4433,7 +4437,7 @@ const DailyRecapModal = ({
       border: '1px solid #E8E0F0'
     }
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-wider uppercase",
+    className: "text-[11px] font-bold tracking-wider uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -4473,7 +4477,7 @@ const ChallengeBanner = ({
 }, "\uD83C\uDFAF"), /*#__PURE__*/React.createElement("div", {
   className: "flex-1 min-w-0"
 }, /*#__PURE__*/React.createElement("p", {
-  className: "text-[10px] font-bold tracking-[0.18em] uppercase",
+  className: "text-[11px] font-bold tracking-[0.15em] uppercase",
   style: {
     color: '#2D2D3F'
   }
@@ -4583,7 +4587,7 @@ const EmptyState = ({
 const PowerupsBar = ({
   pu
 }) => /*#__PURE__*/React.createElement("div", {
-  className: "flex gap-2 mt-3 mb-4",
+  className: "flex gap-1.5 mt-3 mb-4",
   title: "Use these inside a game"
 }, /*#__PURE__*/React.createElement("div", {
   className: "flex-1 rounded-xl p-2 flex items-center gap-2",
@@ -4597,7 +4601,7 @@ const PowerupsBar = ({
 }, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0"
 }, /*#__PURE__*/React.createElement("p", {
-  className: "text-[10px] font-bold tracking-wider uppercase",
+  className: "text-[11px] font-bold tracking-wider uppercase",
   style: {
     color: '#2D2D3F'
   }
@@ -4618,7 +4622,7 @@ const PowerupsBar = ({
 }, "\u23ED\uFE0F"), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0"
 }, /*#__PURE__*/React.createElement("p", {
-  className: "text-[10px] font-bold tracking-wider uppercase",
+  className: "text-[11px] font-bold tracking-wider uppercase",
   style: {
     color: '#2D2D3F'
   }
@@ -4639,7 +4643,7 @@ const PowerupsBar = ({
 }, "\u2744\uFE0F"), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0"
 }, /*#__PURE__*/React.createElement("p", {
-  className: "text-[10px] font-bold tracking-wider uppercase",
+  className: "text-[11px] font-bold tracking-wider uppercase",
   style: {
     color: '#2D2D3F'
   }
@@ -4662,12 +4666,12 @@ const GamePowerBar = ({
   freezeActive,
   hintHint = "Eliminate a wrong option"
 }) => /*#__PURE__*/React.createElement("div", {
-  className: "flex gap-2 mb-4"
+  className: "flex gap-1.5 mb-3"
 }, /*#__PURE__*/React.createElement("button", {
   onClick: onHint,
   disabled: hintDisabled || pu.hints <= 0,
   title: hintHint,
-  className: "flex-1 rounded-xl p-2.5 flex items-center gap-2 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
+  className: "flex-1 rounded-xl p-2 flex items-center gap-1.5 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
   style: {
     background: !hintDisabled && pu.hints > 0 ? '#FFF4E0' : 'rgba(255,255,255,0.5)',
     border: `1.5px solid ${!hintDisabled && pu.hints > 0 ? '#FFE082' : '#E8E0F0'}`
@@ -4677,7 +4681,7 @@ const GamePowerBar = ({
 }, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0 text-left"
 }, /*#__PURE__*/React.createElement("p", {
-  className: "text-[10px] font-bold tracking-wider uppercase",
+  className: "text-[11px] font-bold tracking-wider uppercase",
   style: {
     color: '#2D2D3F'
   }
@@ -4690,7 +4694,7 @@ const GamePowerBar = ({
   onClick: onSkip,
   disabled: skipDisabled || pu.skips <= 0,
   title: "Skip this question (no points)",
-  className: "flex-1 rounded-xl p-2.5 flex items-center gap-2 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
+  className: "flex-1 rounded-xl p-2 flex items-center gap-1.5 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
   style: {
     background: !skipDisabled && pu.skips > 0 ? '#E0F5EC' : 'rgba(255,255,255,0.5)',
     border: `1.5px solid ${!skipDisabled && pu.skips > 0 ? '#A8E6CF' : '#E8E0F0'}`
@@ -4700,7 +4704,7 @@ const GamePowerBar = ({
 }, "\u23ED\uFE0F"), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0 text-left"
 }, /*#__PURE__*/React.createElement("p", {
-  className: "text-[10px] font-bold tracking-wider uppercase",
+  className: "text-[11px] font-bold tracking-wider uppercase",
   style: {
     color: '#2D2D3F'
   }
@@ -4713,7 +4717,7 @@ const GamePowerBar = ({
   onClick: onFreeze,
   disabled: freezeDisabled || pu.freezes <= 0,
   title: "Second chance — wrong answer won\u2019t count",
-  className: "flex-1 rounded-xl p-2.5 flex items-center gap-2 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
+  className: "flex-1 rounded-xl p-2 flex items-center gap-1.5 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
   style: {
     background: freezeActive ? '#B3D4FC' : (!freezeDisabled && pu.freezes > 0 ? '#E0EEFF' : 'rgba(255,255,255,0.5)'),
     border: `1.5px solid ${freezeActive ? '#4140FF' : (!freezeDisabled && pu.freezes > 0 ? '#90CAF9' : '#E8E0F0')}`,
@@ -4724,7 +4728,7 @@ const GamePowerBar = ({
 }, "\u2744\uFE0F"), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0 text-left"
 }, /*#__PURE__*/React.createElement("p", {
-  className: "text-[10px] font-bold tracking-wider uppercase",
+  className: "text-[11px] font-bold tracking-wider uppercase",
   style: {
     color: freezeActive ? '#4140FF' : '#2D2D3F'
   }
@@ -5318,7 +5322,7 @@ const AdminPanel = ({
   const [confirmResetStats, setConfirmResetStats] = useState(null);
   const [confirmResetDex, setConfirmResetDex] = useState(null);
   return /*#__PURE__*/React.createElement("div", {
-    className: "px-4 pt-6 pb-10 max-w-[720px] lg:max-w-[1100px] lg:px-8 mx-auto"
+    className: "px-4 pt-6 pb-nav max-w-[720px] lg:max-w-[1100px] lg:px-8 mx-auto"
   }, /*#__PURE__*/React.createElement(FrostedCard, {
     className: "p-5 mb-5 anim-float-in"
   }, /*#__PURE__*/React.createElement("div", {
@@ -5332,7 +5336,7 @@ const AdminPanel = ({
       color: '#fff'
     }
   }, ADMIN_USERNAME.slice(0, 1).toUpperCase()), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-[0.2em] uppercase",
+    className: "text-[11px] font-bold tracking-[0.15em] uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -5564,7 +5568,8 @@ const AchievementToast = ({
   }, [toasts, onDone]);
   if (toasts.length === 0) return null;
   return /*#__PURE__*/React.createElement("div", {
-    className: "fixed top-3 inset-x-0 flex flex-col items-center gap-2 z-50 pointer-events-none px-3"
+    className: "fixed inset-x-0 flex flex-col items-center gap-2 z-50 pointer-events-none px-3",
+    style: { top: 'max(12px, calc(env(safe-area-inset-top, 0px) + 8px))' }
   }, toasts.map(t => {
     const def = ACHIEVEMENTS.find(a => a.id === t.id) || {
       name: t.id,
@@ -5593,7 +5598,7 @@ const AchievementToast = ({
     })), /*#__PURE__*/React.createElement("div", {
       className: "min-w-0"
     }, /*#__PURE__*/React.createElement("p", {
-      className: "text-[10px] font-bold tracking-[0.2em] uppercase",
+      className: "text-[11px] font-bold tracking-[0.15em] uppercase",
       style: {
         color: '#7B7B9A'
       }
@@ -5723,7 +5728,7 @@ const SplashScreen = ({
     size: 72
   }), avatar && /*#__PURE__*/React.createElement("button", {
     onClick: () => setAvatar(null),
-    className: "absolute -top-1 -right-1 w-6 h-6 rounded-full text-xs font-bold transition-transform hover:scale-110 active:scale-90",
+    className: "absolute -top-1 -right-1 w-8 h-8 rounded-full text-sm font-bold transition-transform hover:scale-110 active:scale-90",
     title: "Remove photo",
     style: {
       background: '#FFF',
@@ -6016,7 +6021,7 @@ const HomeScreen = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-[0.18em] uppercase",
+    className: "text-[11px] font-bold tracking-[0.15em] uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -6284,7 +6289,7 @@ const GuessMode = ({
     return () => window.removeEventListener('keydown', h);
   }, [revealed, round, hintedSide]);
   return /*#__PURE__*/React.createElement("div", {
-    className: "px-4 pt-4 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
+    className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -6540,7 +6545,7 @@ const PriceMode = ({
     });
   };
   return /*#__PURE__*/React.createElement("div", {
-    className: "px-4 pt-4 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
+    className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -6894,7 +6899,7 @@ const TraitMode = ({
     return () => window.removeEventListener('keydown', h);
   }, [revealed, guess, round, submit]);
   return /*#__PURE__*/React.createElement("div", {
-    className: "px-4 pt-4 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
+    className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -7129,7 +7134,7 @@ const ResultsScreen = ({
     }
   }, []);
   return /*#__PURE__*/React.createElement("div", {
-    className: "px-4 pt-6 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto relative"
+    className: "px-4 pt-6 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto relative"
   }, showConfetti && /*#__PURE__*/React.createElement(Confetti, {
     count: confettiCount,
     palette: confettiPalette
@@ -7159,7 +7164,7 @@ const ResultsScreen = ({
   }), /*#__PURE__*/React.createElement("div", {
     className: "relative"
   }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-[0.2em] uppercase",
+    className: "text-[11px] font-bold tracking-[0.15em] uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -7667,7 +7672,7 @@ const ProfileScreen = ({
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-2"
     }, /*#__PURE__*/React.createElement("span", {
-      className: "text-[10px] font-bold tracking-[0.18em] uppercase",
+      className: "text-[11px] font-bold tracking-[0.15em] uppercase",
       style: {
         color: '#7B7B9A'
       }
@@ -7713,7 +7718,7 @@ const ProfileScreen = ({
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-2xl"
   }, "\uD83D\uDD25"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold tracking-[0.2em] uppercase",
+    className: "text-[11px] font-bold tracking-[0.15em] uppercase",
     style: {
       color: '#7B7B9A'
     }
@@ -8005,7 +8010,7 @@ const BottomNav = ({
         transform: active ? 'translateY(-1px) scale(1.05)' : 'none'
       }
     }, it.icon(active)), /*#__PURE__*/React.createElement("span", {
-      className: "text-[10px] lg:text-[11px] font-bold tracking-wider uppercase",
+      className: "text-[11px] lg:text-xs font-bold tracking-wider uppercase",
       style: {
         color: active ? '#4140FF' : '#7B7B9A'
       }

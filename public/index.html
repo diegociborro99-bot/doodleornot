@@ -26,7 +26,32 @@
 <script src="./api.js"></script>
 <style>
   html, body, #root { height: 100%; margin: 0; }
-  body { font-family: 'Fredoka', system-ui, sans-serif; color: #2D2D3F; }
+  body {
+    font-family: 'Fredoka', system-ui, sans-serif;
+    color: #2D2D3F;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+    overflow-x: hidden;
+  }
+  /* Safe area CSS variables for JS components */
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  /* Prevent iOS rubber-banding on fixed layouts */
+  #root { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  /* Better touch targets on mobile */
+  @media (hover: none) and (pointer: coarse) {
+    button, [role="button"], a { min-height: 44px; min-width: 44px; }
+    input[type="range"] { min-height: 44px; }
+    input[type="range"]::-webkit-slider-thumb { width: 36px; height: 36px; }
+    input[type="range"]::-moz-range-thumb { width: 36px; height: 36px; }
+  }
+  /* Prevent pull-to-refresh in PWA */
+  @media (display-mode: standalone) {
+    body { overscroll-behavior-y: none; }
+  }
 
   /* ---------- BOOT SPLASH (visible before React mounts) ---------- */
   #boot-splash {
