@@ -670,9 +670,7 @@ const consumePowerup = kind => {
   savePowerups(u, pu);
   if (window.DON_API && window.DON_API.usePowerup) {
     try {
-      window.DON_API.usePowerup({
-        kind
-      });
+      window.DON_API.usePowerup(kind);
     } catch (_) {}
   }
   return true;
@@ -1510,6 +1508,13 @@ const prefetchDoodleImages = doodles => {
     if (_imgCache.has(url) || _imgFailed.has(url)) return;
     const img = new Image();
     img.onload = () => _imgCache.add(url);
+    img.onerror = () => {
+      // Try alternate CDN before marking as failed
+      const alt = new Image();
+      alt.onload = () => _imgCache.add(url);
+      alt.onerror = () => _imgFailed.add(url);
+      alt.src = url + '?w=500&auto=format';
+    };
     img.src = url;
   });
 };
@@ -1517,6 +1522,7 @@ const DoodleAvatar = ({
   doodle,
   size = 120,
   rounded = true,
+  eager = false,
   onFail
 }) => {
   const [status, setStatus] = useState('loading'); // loading | loaded | retrying | failed
@@ -1538,6 +1544,7 @@ const DoodleAvatar = ({
 
   // IntersectionObserver — only load when near viewport
   useEffect(() => {
+    if (eager) { setVisible(true); return; }
     const el = wrapRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') {
       setVisible(true);
@@ -1656,7 +1663,7 @@ const DoodleAvatar = ({
     alt: doodle ? `Doodle #${doodle.id}` : '',
     width: size,
     height: size,
-    loading: "lazy",
+    loading: eager ? "eager" : "lazy",
     draggable: false,
     onLoad: () => {
       _imgCache.add(doodleImage(doodle));
@@ -6173,7 +6180,8 @@ const GuessMode = ({
       className: "doodle-card-img"
     }, /*#__PURE__*/React.createElement(DoodleAvatar, {
       doodle: d,
-      size: 170
+      size: 170,
+      eager: true
     })), /*#__PURE__*/React.createElement("div", {
       className: "mt-2 text-center"
     }, /*#__PURE__*/React.createElement("div", {
@@ -6288,6 +6296,7 @@ const PriceMode = ({
     if (revealed) return;
     if (!consumePowerup('skips')) return;
     setPu(currentPowerups());
+    setHintedSide(null);
     const newIcons = [...icons, 'skip'];
     setIcons(newIcons);
     if (round + 1 >= pairs.current.length) {
@@ -6408,7 +6417,8 @@ const PriceMode = ({
       className: "doodle-card-img"
     }, /*#__PURE__*/React.createElement(DoodleAvatar, {
       doodle: d,
-      size: 170
+      size: 170,
+      eager: true
     })), /*#__PURE__*/React.createElement("div", {
       className: "mt-2 text-center"
     }, /*#__PURE__*/React.createElement("div", {
@@ -6486,6 +6496,7 @@ const TraitExamples = ({
   }, /*#__PURE__*/React.createElement(DoodleAvatar, {
     doodle: d,
     size: 84,
+    eager: true,
     onFail: bad => setFailed(f => ({
       ...f,
       [bad.id]: true
@@ -6593,6 +6604,7 @@ const TraitMode = ({
       setRound(round + 1);
       setRevealed(false);
       setGuess(20);
+      setHintRange(null);
     }
   };
   const submit = () => {
