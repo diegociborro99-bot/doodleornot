@@ -2466,36 +2466,41 @@ const DreamLandscape = ({
       animation: 'hillBreathe 16s ease-in-out infinite'
     }
   }, /*#__PURE__*/React.createElement("path", {
-    d: "M -20 340 L 90 220 L 160 280 L 240 180 L 330 270 L 420 210 L 520 300 L 620 200 L 720 280 L 820 230 L 920 310 L 1020 260 L 1020 460 L -20 460 Z",
+    d: "M -20 340 Q 40 240 90 220 Q 125 248 160 280 Q 200 210 240 180 Q 285 222 330 270 Q 375 230 420 210 Q 470 255 520 300 Q 570 230 620 200 Q 670 240 720 280 Q 770 245 820 230 Q 870 270 920 310 Q 970 278 1020 260 L 1020 460 L -20 460 Z",
     fill: "url(#mtnA)",
     stroke: "#2D2D3F",
     strokeWidth: "2.2",
     strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
-    d: "M 90 220 L 120 245 L 80 255 L 60 240 Z",
+    d: "M 78 232 Q 90 220 102 232 Q 95 248 78 248 Z",
     fill: "#FFFFFF",
     stroke: "#2D2D3F",
-    strokeWidth: "2"
+    strokeWidth: "1.8",
+    strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
-    d: "M 240 180 L 278 215 L 225 225 L 205 200 Z",
+    d: "M 225 195 Q 240 180 255 195 Q 248 218 225 218 Z",
     fill: "#FFFFFF",
     stroke: "#2D2D3F",
-    strokeWidth: "2"
+    strokeWidth: "1.8",
+    strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
-    d: "M 420 210 L 455 240 L 400 250 L 380 230 Z",
+    d: "M 405 222 Q 420 210 435 222 Q 428 242 405 242 Z",
     fill: "#FFFFFF",
     stroke: "#2D2D3F",
-    strokeWidth: "2"
+    strokeWidth: "1.8",
+    strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
-    d: "M 620 200 L 660 235 L 605 245 L 580 220 Z",
+    d: "M 605 212 Q 620 200 635 212 Q 628 232 605 232 Z",
     fill: "#FFFFFF",
     stroke: "#2D2D3F",
-    strokeWidth: "2"
+    strokeWidth: "1.8",
+    strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
-    d: "M 820 230 L 855 258 L 805 268 L 785 248 Z",
+    d: "M 805 242 Q 820 230 835 242 Q 828 258 805 258 Z",
     fill: "#FFFFFF",
     stroke: "#2D2D3F",
-    strokeWidth: "2"
+    strokeWidth: "1.8",
+    strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("g", {
     fill: "#FFFFFF",
     opacity: "0.9"
@@ -2517,7 +2522,7 @@ const DreamLandscape = ({
     strokeWidth: "1.8",
     strokeLinecap: "round"
   }))), /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
-    d: "M -20 400 Q 120 330 260 380 T 540 370 T 820 360 T 1020 380 L 1020 500 L -20 500 Z",
+    d: "M -20 400 Q 80 340 180 365 Q 280 395 380 375 Q 480 350 580 370 Q 700 395 820 365 Q 920 345 1020 380 L 1020 500 L -20 500 Z",
     fill: "#A8C8E8",
     stroke: "#2D2D3F",
     strokeWidth: "2.4",
