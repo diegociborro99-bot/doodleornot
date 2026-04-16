@@ -2970,40 +2970,26 @@ const CountUp = ({
    FOOTER SIGNATURE — "vibe coded by Degos" with neon animated letters
    ========================================================================== */
 
-/* DegosDoodle — renders a deterministic doodle directly (no lazy-load / IntersectionObserver)
-   so it always appears in the footer regardless of scroll position */
+/* DegosDoodle — renders Degos's own doodle image from /public/degos-doodle.png */
 const DegosDoodle = () => {
-  const d = (Array.isArray(DOODLES) && DOODLES.length)
-    ? DOODLES[Math.abs(hashCode('degos-signature')) % DOODLES.length] : null;
-  const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
-  const fallbacks = d ? [
-    doodleImage(d),
-    doodleImage(d) + '?w=500&auto=format',
-    doodleImage(d) + '?cb=' + Date.now()
-  ] : [];
-  if (!d || failed) {
-    const palette = ['#FFB7C5','#FFE082','#A8E6CF','#90CAF9','#C5B3E6'];
-    const c = palette[(d ? d.id : 0) % palette.length];
+  if (failed) {
     return /*#__PURE__*/React.createElement("div", { className: "degos-doodle-wrap" },
       /*#__PURE__*/React.createElement("div", { className: "degos-doodle-halo", "aria-hidden": "true" }),
       /*#__PURE__*/React.createElement("div", { className: "degos-doodle-img", style: {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, ' + c + ', #C5B3E6)'
-      }}, /*#__PURE__*/React.createElement(FaceIcon, { size: 60, fill: c }))
+        background: 'linear-gradient(135deg, #A8E6CF, #C5B3E6)'
+      }}, /*#__PURE__*/React.createElement(FaceIcon, { size: 60, fill: '#A8E6CF' }))
     );
   }
   return /*#__PURE__*/React.createElement("div", { className: "degos-doodle-wrap" },
     /*#__PURE__*/React.createElement("div", { className: "degos-doodle-halo", "aria-hidden": "true" }),
     /*#__PURE__*/React.createElement("img", {
-      src: fallbacks[attempt] || fallbacks[0],
-      alt: 'Doodle #' + d.id,
+      src: './degos-doodle.png',
+      alt: "Degos's Doodle",
       className: "degos-doodle-img",
       loading: "eager",
-      onError: () => {
-        if (attempt < fallbacks.length - 1) setAttempt(a => a + 1);
-        else setFailed(true);
-      }
+      onError: () => setFailed(true)
     })
   );
 };
@@ -7123,6 +7109,20 @@ const LeaderboardScreen = ({
   weekPts
 }) => {
   const [tab, setTab] = useState('this');
+  const [serverRows, setServerRows] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const api = typeof window !== 'undefined' ? window.DON_API : null;
+
+  useEffect(() => {
+    if (!api) { setLoading(false); return; }
+    setLoading(true);
+    api.leaderboard('weekly', 50)
+      .then(data => {
+        if (data && Array.isArray(data.rows)) setServerRows(data.rows);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [tab]);
 
   // Empty state: user is brand new AND nobody else is on the board yet
   // (we keep the mock board so it's never literally empty in practice; only
@@ -7159,13 +7159,27 @@ const LeaderboardScreen = ({
       subtitle: t('be_first')
     })));
   }
-  const merged = [...MOCK_LEADERBOARD, {
-    name: profile.name,
-    color: profile.color,
-    pts: weekPts,
-    avatar: profile.avatar,
-    me: true
-  }].sort((a, b) => b.pts - a.pts);
+  // Use server leaderboard if available; fall back to mock data
+  const baseBoard = (serverRows && serverRows.length > 0)
+    ? serverRows.map(r => ({
+        name: r.username,
+        color: r.avatarColor || '#C5B3E6',
+        pts: r.points,
+        me: r.username === profile.name
+      }))
+    : [...MOCK_LEADERBOARD];
+  // Ensure current user is on the board
+  const alreadyOnBoard = baseBoard.some(r => r.me);
+  if (!alreadyOnBoard) {
+    baseBoard.push({
+      name: profile.name,
+      color: profile.color,
+      pts: weekPts,
+      avatar: profile.avatar,
+      me: true
+    });
+  }
+  const merged = baseBoard.sort((a, b) => b.pts - a.pts);
   const myRank = merged.findIndex(r => r.me) + 1;
   const top3 = merged.slice(0, 3);
   const rest = merged.slice(3, 20);
