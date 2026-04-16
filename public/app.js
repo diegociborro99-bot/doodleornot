@@ -4799,13 +4799,13 @@ const AuthScreen = ({
     className: "flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1",
     style: {
       maxWidth: '100%',
-      background: 'rgba(255,255,255,0.72)',
-      backdropFilter: 'blur(18px) saturate(1.3)',
-      WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
+      background: 'rgba(255,255,255,0.82)',
+      backdropFilter: 'blur(24px) saturate(1.4)',
+      WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
       borderRadius: '28px',
-      padding: '28px 32px',
-      border: '1.5px solid rgba(255,255,255,0.85)',
-      boxShadow: '0 8px 32px rgba(15,13,46,0.12), 0 2px 8px rgba(15,13,46,0.08)'
+      padding: '32px 36px',
+      border: '1.5px solid rgba(255,255,255,0.9)',
+      boxShadow: '0 8px 32px rgba(15,13,46,0.10), 0 2px 8px rgba(15,13,46,0.06)'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "relative lg:self-start",
@@ -5511,13 +5511,13 @@ const SplashScreen = ({
     className: "flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1",
     style: {
       maxWidth: '100%',
-      background: 'rgba(255,255,255,0.72)',
-      backdropFilter: 'blur(18px) saturate(1.3)',
-      WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
+      background: 'rgba(255,255,255,0.82)',
+      backdropFilter: 'blur(24px) saturate(1.4)',
+      WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
       borderRadius: '28px',
-      padding: '28px 32px',
-      border: '1.5px solid rgba(255,255,255,0.85)',
-      boxShadow: '0 8px 32px rgba(15,13,46,0.12), 0 2px 8px rgba(15,13,46,0.08)'
+      padding: '32px 36px',
+      border: '1.5px solid rgba(255,255,255,0.9)',
+      boxShadow: '0 8px 32px rgba(15,13,46,0.10), 0 2px 8px rgba(15,13,46,0.06)'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "relative lg:self-start",
