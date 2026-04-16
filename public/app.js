@@ -10,6 +10,15 @@ const {
    No emojis — all iconography is custom inline SVG in Doodles line-art style.
    ========================================================================== */
 
+/* ---------- Body scroll lock hook for modals (mobile) ---------- */
+const useBodyScrollLock = (active) => {
+  useEffect(() => {
+    if (!active) return;
+    document.body.classList.add('modal-open');
+    return () => document.body.classList.remove('modal-open');
+  }, [active]);
+};
+
 /* ---------- Storage helper: localStorage with in-memory fallback ---------- */
 const _mem = {};
 const storage = {
@@ -768,9 +777,9 @@ const consumePowerup = kind => {
   if ((pu[kind] || 0) <= 0) return false;
   pu[kind] = Math.max(0, (pu[kind] || 0) - 1);
   savePowerups(u, pu);
-  if (kind !== 'freezes' && window.DON_API && window.DON_API.usePowerup) {
-    // Server expects singular ('hint'/'skip'), client uses plural ('hints'/'skips')
-    const serverKind = kind === 'hints' ? 'hint' : kind === 'skips' ? 'skip' : kind;
+  if (window.DON_API && window.DON_API.usePowerup) {
+    // Server expects singular ('hint'/'skip'/'freeze'), client uses plural
+    const serverKind = kind === 'hints' ? 'hint' : kind === 'skips' ? 'skip' : kind === 'freezes' ? 'freeze' : kind;
     window.DON_API.usePowerup(serverKind).catch(() => {});
   }
   return true;
@@ -1904,7 +1913,8 @@ const ParticleOverlay = () => {
       ['--dx']: p.dx + 'px',
       ['--dy']: p.dy + 'px',
       ['--rot']: p.rot + 'deg',
-      boxShadow: `0 0 6px ${p.color}88`
+      boxShadow: `0 0 6px ${p.color}88`,
+      pointerEvents: 'none'
     }
   })), /*#__PURE__*/React.createElement("style", null, `
         @keyframes partRise {
@@ -3355,6 +3365,7 @@ const SettingsModal = ({
   installable,
   onNotifToggle
 }) => {
+  useBodyScrollLock(open);
   if (!open) return null;
   const Row = ({
     label,
@@ -3428,7 +3439,7 @@ const SettingsModal = ({
       background: 'rgba(255,255,255,0.96)',
       border: '1px solid #E8E0F0',
       boxShadow: '0 20px 50px rgba(45,45,63,0.3)',
-      maxHeight: '85vh'
+      maxHeight: '85dvh'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-3"
@@ -3682,6 +3693,7 @@ const DexModal = ({
   ids,
   onOpenDoodle
 }) => {
+  useBodyScrollLock(open);
   if (!open) return null;
   const doodles = DOODLES;
   const total = doodles.length;
@@ -3694,7 +3706,7 @@ const DexModal = ({
     },
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full max-w-lg rounded-2xl p-5 max-h-[85vh] flex flex-col anim-pop-in",
+    className: "w-full max-w-lg rounded-2xl p-5 max-h-[85dvh] flex flex-col anim-pop-in",
     onClick: e => e.stopPropagation(),
     style: {
       background: 'rgba(255,255,255,0.96)',
@@ -3969,6 +3981,7 @@ const ShortcutsOverlay = ({
   open,
   onClose
 }) => {
+  useBodyScrollLock(open);
   if (!open) return null;
   const rows = [['A / ← ', 'Pick left (Duel & Higher)'], ['L / →', 'Pick right (Duel & Higher)'], ['↑ / ↓', 'Adjust % in Trait Roulette'], ['Shift + ↑/↓', 'Jump by 5%'], ['Enter', 'Lock answer / reveal'], ['H', 'Use daily hint'], ['S', 'Skip this round (daily)'], ['M', 'Mute / unmute sound'], ['?', 'Toggle this overlay'], ['Esc', 'Close modal']];
   return /*#__PURE__*/React.createElement("div", {
@@ -4131,6 +4144,7 @@ const ShareCardModal = ({
   payload
 }) => {
   const [url, setUrl] = useState(null);
+  useBodyScrollLock(open);
   useEffect(() => {
     let revoked = null;
     if (open && payload) {
@@ -4239,6 +4253,7 @@ const LeaguesModal = ({
   const [refresh, setRefresh] = useState(0);
   const [joinCode, setJoinCode] = useState('');
   const [createdCode, setCreatedCode] = useState(null);
+  useBodyScrollLock(open);
   if (!open) return null;
   const myCodes = getUserLeagues(username);
   const all = getLeagues();
@@ -4280,7 +4295,7 @@ const LeaguesModal = ({
     },
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full max-w-md rounded-2xl p-5 max-h-[85vh] overflow-auto anim-pop-in",
+    className: "w-full max-w-md rounded-2xl p-5 max-h-[85dvh] overflow-auto anim-pop-in",
     onClick: e => e.stopPropagation(),
     style: {
       background: 'rgba(255,255,255,0.98)',
@@ -4440,6 +4455,7 @@ const DailyRecapModal = ({
   onClose,
   recap
 }) => {
+  useBodyScrollLock(open);
   if (!open || !recap) return null;
   return /*#__PURE__*/React.createElement("div", {
     className: "fixed inset-0 z-[65] flex items-center justify-center p-4",
@@ -4454,7 +4470,7 @@ const DailyRecapModal = ({
     style: {
       background: 'rgba(255,255,255,0.98)',
       border: '1px solid #E8E0F0',
-      maxHeight: '85vh',
+      maxHeight: '85dvh',
       boxShadow: '0 20px 50px rgba(45,45,63,0.3)'
     }
   }, /*#__PURE__*/React.createElement("p", {
@@ -6402,7 +6418,7 @@ const GuessMode = ({
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, [revealed, round, hintedSide]);
+  }, [revealed, round, hintedSide, freezeActive]);
   return /*#__PURE__*/React.createElement("div", {
     className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto",
     style: { position: 'relative' }
@@ -6662,7 +6678,7 @@ const PriceMode = ({
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, [revealed, round, streak, icons]);
+  }, [revealed, round, streak, icons, freezeActive, hintedSide]);
   const finish = (finalStreak, finalIcons) => {
     const hits = finalIcons.filter(i => i === 'up').length;
     const finalMult = finalStreak >= 10 ? 3 : finalStreak >= 5 ? 2 : 1;
@@ -7529,9 +7545,9 @@ const LeaderboardScreen = ({
     pts: r.points,
     me: r.username === profile.name
   }));
-  // Always ensure current user is on the board
+  // Always ensure current user is on the board (only for current week)
   const alreadyOnBoard = baseBoard.some(r => r.me);
-  if (!alreadyOnBoard) {
+  if (!alreadyOnBoard && tab === 'this') {
     baseBoard.push({
       name: profile.name,
       color: profile.color,
@@ -8334,6 +8350,11 @@ function DoodleOrNot() {
         setSession(sess);
         setSessionState(sess);
         setProfile(hydrated);
+        // Sync React state from hydrated localStorage so UI reflects server data
+        setStats(storage.get(userStatsKey(uname), { totalPts: 0, gamesPlayed: 0, bestWeek: 0, weekPts: 0, weekKey: getWeekKey() }));
+        setStreakState(storage.get(userStreakKey(uname), { count: 0, lastDate: null }));
+        setAchievements(storage.get(userAchvKey(uname), []));
+        setProgress(storage.get(userProgressKey(uname, todayStr()), { guess: false, price: false, trait: false }));
       } catch (_) {/* not logged in or offline — stay on auth screen */}
     })();
     return () => {
@@ -8546,7 +8567,7 @@ function DoodleOrNot() {
   const finishMode = result => {
     if (!username) return;
     // Clutch bonus: no "wrong" or "down" icons, and at least 3 rounds played.
-    const badIcons = new Set(['wrong', 'down']);
+    const badIcons = new Set(['wrong', 'down', 'skip']);
     const clean = Array.isArray(result.icons) && result.icons.length >= 3 && !result.icons.some(i => badIcons.has(i));
     if (clean) {
       result = {
@@ -8908,7 +8929,7 @@ function DoodleOrNot() {
 
 /* ---------- Load fonts ---------- */
 const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
-    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Paytone+One&display=swap');
+    /* Fonts loaded via <link> in index.html — no duplicate @import needed */
 
     /* ============================================================
        MOBILE-FIRST GLOBAL OPTIMIZATIONS
@@ -9040,9 +9061,6 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     .min-h-app { min-height: 100vh; min-height: 100dvh; }
 
     /* respect prefers-color-scheme if prefs.darkMode=auto handled in JS */
-    @media (prefers-reduced-data: reduce) {
-      @import none;
-    }
     @media (hover: none) and (pointer: coarse) {
       /* touch-only device tweaks */
       button, [role="button"] { min-height: 44px; min-width: 44px; }

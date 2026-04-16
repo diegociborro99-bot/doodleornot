@@ -63,6 +63,7 @@ model Score {
   icons      String[] @default([])
   createdAt  DateTime @default(now())
 
+  @@unique([userId, day, mode])
   @@index([day, mode])
   @@index([userId])
 }
@@ -137,8 +138,9 @@ model Powerup {
   user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
   day        String
-  hintsUsed  Int    @default(0)
-  skipsUsed  Int    @default(0)
+  hintsUsed   Int    @default(0)
+  skipsUsed   Int    @default(0)
+  freezesUsed Int    @default(0)
 
   @@id([userId, day])
 }

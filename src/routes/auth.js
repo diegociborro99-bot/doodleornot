@@ -13,12 +13,15 @@ router.post('/signup', async (req, res) => {
     const existing = await prisma.user.findUnique({ where: { username } });
     if (existing) return res.status(409).json({ error: 'username_taken' });
     const passwordHash = await hashPassword(password);
+    // Validate avatarColor format
+    const safeColor = (typeof avatarColor === 'string' && /^#[0-9A-Fa-f]{3,8}$/.test(avatarColor)) ? avatarColor : '#C5B3E6';
+    const safeFace = ['round', 'square', 'oval'].includes(faceShape) ? faceShape : 'round';
     const user = await prisma.user.create({
       data: {
         username,
         passwordHash,
-        avatarColor: avatarColor || '#C5B3E6',
-        faceShape: faceShape || 'round',
+        avatarColor: safeColor,
+        faceShape: safeFace,
         stats: { create: {} },
         streak: { create: {} },
         preferences: { create: {} }
@@ -28,6 +31,8 @@ router.post('/signup', async (req, res) => {
     setAuthCookie(res, token);
     res.json({ id: user.id, username: user.username, avatarColor: user.avatarColor, avatarData: user.avatarData, faceShape: user.faceShape });
   } catch (err) {
+    // Catch race condition: another request created the same username
+    if (err.code === 'P2002') return res.status(409).json({ error: 'username_taken' });
     console.error('POST /signup error:', err);
     res.status(500).json({ error: 'server_error' });
   }
@@ -96,8 +101,8 @@ router.patch('/me', requireAuth, async (req, res) => {
   try {
     const { avatarColor, faceShape, avatarData } = req.body || {};
     const data = {};
-    if (typeof avatarColor === 'string') data.avatarColor = avatarColor;
-    if (typeof faceShape === 'string') data.faceShape = faceShape;
+    if (typeof avatarColor === 'string' && /^#[0-9A-Fa-f]{3,8}$/.test(avatarColor)) data.avatarColor = avatarColor;
+    if (typeof faceShape === 'string' && ['round', 'square', 'oval'].includes(faceShape)) data.faceShape = faceShape;
     // avatarData: base64 data URL or null (to clear)
     if (avatarData === null) data.avatarData = null;
     else if (typeof avatarData === 'string' && avatarData.startsWith('data:image/') && avatarData.length < 200000) {

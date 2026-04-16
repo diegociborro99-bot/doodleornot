@@ -5,12 +5,20 @@ const { todayISO, weekStartISO } = require('../util');
 
 const router = express.Router();
 
-// POST /api/progress   { day, mode, points, icons, clutch? }
+// Maximum points per mode per round (prevents client-sent inflated scores)
+const MAX_POINTS_PER_MODE = 25;
+
+// POST /api/progress   { mode, points, icons, clutch? }
 // mode: 'higher' | 'rarity' | 'trait'
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { mode, points = 0, icons = [], clutch = false } = req.body || {};
-    const day = (req.body && req.body.day) || todayISO();
+    const { mode, icons = [], clutch = false } = req.body || {};
+    // Always use server-computed day — never trust client
+    const day = todayISO();
+    // Clamp points to prevent manipulation
+    const rawPoints = parseInt(req.body && req.body.points, 10) || 0;
+    const points = Math.max(0, Math.min(rawPoints, MAX_POINTS_PER_MODE));
+
     if (!['higher', 'rarity', 'trait'].includes(mode)) return res.status(400).json({ error: 'bad_mode' });
 
     // Guard: prevent duplicate submission for same user/mode/day
@@ -22,13 +30,20 @@ router.post('/', requireAuth, async (req, res) => {
       return res.json({ ok: true, progress: existingProgress, duplicate: true });
     }
 
-    // 1) insert a Score row (for replay/history)
-    await prisma.score.create({
-      data: { userId: req.userId, day, mode, points, icons: Array.isArray(icons) ? icons : [] }
-    });
+    // 1) insert a Score row (for replay/history) — catch duplicate constraint
+    try {
+      await prisma.score.create({
+        data: { userId: req.userId, day, mode, points, icons: Array.isArray(icons) ? icons : [] }
+      });
+    } catch (e) {
+      // P2002 = unique constraint violation — duplicate score, skip
+      if (e.code === 'P2002') {
+        return res.json({ ok: true, duplicate: true });
+      }
+      throw e;
+    }
 
     // 2) upsert DailyProgress — mark this mode completed
-    // (field already computed above for duplicate guard)
     const existing = existingProgress;
     const badIcons = new Set(['wrong', 'down']);
     const wrongIconsToday = (Array.isArray(icons) ? icons : []).filter(i => badIcons.has(i));
@@ -114,8 +129,11 @@ router.post('/', requireAuth, async (req, res) => {
 // GET /api/progress/:day
 router.get('/:day', requireAuth, async (req, res) => {
   try {
+    const day = req.params.day;
+    // Validate day format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return res.status(400).json({ error: 'bad_date' });
     const progress = await prisma.dailyProgress.findUnique({
-      where: { userId_day: { userId: req.userId, day: req.params.day } }
+      where: { userId_day: { userId: req.userId, day } }
     });
     res.json(progress || null);
   } catch (err) {
