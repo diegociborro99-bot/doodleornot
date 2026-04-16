@@ -4835,9 +4835,16 @@ const AuthScreen = ({
       maxWidth: '420px'
     }
   }, mode === 'login' ? 'Welcome back, Doodle' : 'Create your account to start playing'), /*#__PURE__*/React.createElement("div", {
-    className: "hidden lg:flex flex-col gap-3 mt-8",
+    className: "hidden lg:flex flex-col gap-4 mt-8",
     style: {
-      maxWidth: '440px'
+      maxWidth: '460px',
+      background: 'rgba(255,255,255,0.88)',
+      backdropFilter: 'blur(20px) saturate(1.3)',
+      WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
+      borderRadius: '20px',
+      padding: '20px 24px',
+      border: '1.5px solid rgba(255,255,255,0.92)',
+      boxShadow: '0 4px 20px rgba(15,13,46,0.10)'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 text-sm font-semibold",
