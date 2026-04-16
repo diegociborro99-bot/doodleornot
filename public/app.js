@@ -6698,25 +6698,36 @@ const TraitMode = ({
   const rng = useRef(mulberry32(seed + 33));
   const questions = useRef([]);
   if (questions.current.length === 0) {
-    // Flatten all (type, value, pct) and pick 5 varied, non-extreme traits
-    const all = [];
+    // Flatten all (type, value, pct) into rarity buckets for balanced difficulty
+    const buckets = { rare: [], uncommon: [], mid: [], common: [] };
     for (const t of TRAIT_TYPES) {
       const map = RARITY[t] || {};
       for (const [value, pct] of Object.entries(map)) {
         if (value === '__none__') continue;
-        if (pct >= 0.2 && pct <= 50) all.push({
-          type: t,
-          value,
-          pct
-        });
+        if (pct < 0.2) continue;
+        const entry = { type: t, value, pct };
+        if (pct <= 2) buckets.rare.push(entry);
+        else if (pct <= 5) buckets.uncommon.push(entry);
+        else if (pct <= 8) buckets.mid.push(entry);
+        else buckets.common.push(entry); // 8%+
       }
     }
-    // shuffle
-    for (let i = all.length - 1; i > 0; i--) {
-      const j = Math.floor(rng.current() * (i + 1));
-      [all[i], all[j]] = [all[j], all[i]];
+    // Seeded shuffle each bucket
+    const shuf = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rng.current() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } };
+    Object.values(buckets).forEach(shuf);
+    // Pick 5 questions: 1 rare, 2 uncommon, 1 mid, 1 common — fallback if bucket empty
+    const pick1 = b => b.length ? b.pop() : null;
+    const wanted = [pick1(buckets.rare), pick1(buckets.uncommon), pick1(buckets.uncommon), pick1(buckets.mid), pick1(buckets.common)].filter(Boolean);
+    // If we didn't fill 5, top up from any remaining
+    const remaining = [...buckets.rare, ...buckets.uncommon, ...buckets.mid, ...buckets.common];
+    shuf(remaining);
+    while (wanted.length < 5 && remaining.length) {
+      const next = remaining.pop();
+      if (!wanted.some(w => w.type === next.type && w.value === next.value)) wanted.push(next);
     }
-    const picked = all.slice(0, 5);
+    // Shuffle the final question order so player can't predict bucket position
+    shuf(wanted);
+    const picked = wanted;
     // For each picked trait, collect up to 3 example Doodles that have it (deterministic)
     for (const q of picked) {
       const matches = [];
@@ -6736,7 +6747,7 @@ const TraitMode = ({
     prefetchDoodleImages(picked.flatMap(q => q.exampleCandidates || []));
   }
   const [round, setRound] = useState(0);
-  const [guess, setGuess] = useState(20);
+  const [guess, setGuess] = useState(25);
   const [revealed, setRevealed] = useState(false);
   const [results, setResults] = useState([]);
   const [pu, setPu] = useState(() => currentPowerups());
@@ -6764,9 +6775,10 @@ const TraitMode = ({
     if (revealed || hintRange) return;
     if (!consumePowerup('hints')) return;
     setPu(currentPowerups());
-    // reveal a ±6% window around the actual value
-    const lo = Math.max(0, Math.round(actual) - 6);
-    const hi = Math.min(50, Math.round(actual) + 6);
+    // reveal a scaled window around the actual value (±5 base, wider for common traits)
+    const hintW = Math.max(5, Math.round(5 * Math.max(1, actual / 5)));
+    const lo = Math.max(0, Math.round(actual) - hintW);
+    const hi = Math.min(50, Math.round(actual) + hintW);
     setHintRange({
       lo,
       hi
@@ -6792,7 +6804,7 @@ const TraitMode = ({
     } else {
       setRound(round + 1);
       setRevealed(false);
-      setGuess(20);
+      setGuess(25);
       setHintRange(null);
     }
   };
@@ -6807,14 +6819,21 @@ const TraitMode = ({
   const submit = () => {
     if (revealed) return;
     const diff = Math.abs(guess - actual);
+    // Scaled thresholds: harder for low-rarity traits, more forgiving for common ones
+    // Base: perfect <=1, correct <=3, near <=8 (for a ~5% trait)
+    // Scale factor: max(1, actual/5) so a 10% trait gets 2x tolerance, 1% stays at 1x
+    const scale = Math.max(1, actual / 5);
+    const tPerfect = Math.max(1, Math.round(1 * scale));
+    const tCorrect = Math.max(2, Math.round(3 * scale));
+    const tNear = Math.max(4, Math.round(8 * scale));
     let type, pts;
-    if (diff <= 1) {
+    if (diff <= tPerfect) {
       type = 'perfect';
       pts = 3;
-    } else if (diff <= 3) {
+    } else if (diff <= tCorrect) {
       type = 'correct';
       pts = 2;
-    } else if (diff <= 8) {
+    } else if (diff <= tNear) {
       type = 'near';
       pts = 1;
     } else {
@@ -6853,21 +6872,25 @@ const TraitMode = ({
       } else {
         setRound(round + 1);
         setRevealed(false);
-        setGuess(20);
+        setGuess(25);
       }
     }, 1800);
   };
   const lastResult = revealed ? (() => {
     const diff = Math.abs(guess - actual);
-    if (diff <= 1) return {
+    const sc = Math.max(1, actual / 5);
+    const tP = Math.max(1, Math.round(1 * sc));
+    const tC = Math.max(2, Math.round(3 * sc));
+    const tN = Math.max(4, Math.round(8 * sc));
+    if (diff <= tP) return {
       type: 'perfect',
       label: 'Bullseye!'
     };
-    if (diff <= 3) return {
+    if (diff <= tC) return {
       type: 'correct',
       label: 'Close!'
     };
-    if (diff <= 8) return {
+    if (diff <= tN) return {
       type: 'near',
       label: 'Near miss'
     };
