@@ -17,4 +17,15 @@ const LEAGUE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const makeLeagueCode = () =>
   Array.from({ length: 6 }, () => LEAGUE_CHARS[Math.floor(Math.random() * LEAGUE_CHARS.length)]).join('');
 
-module.exports = { todayISO, weekStartISO, isValidUsername, isValidPassword, makeLeagueCode };
+// Week number: Week 1 = week of 2026-04-13 (Monday). All UTC.
+const WEEK1_EPOCH = Date.UTC(2026, 3, 13); // Monday Apr 13, 2026 00:00 UTC
+const getWeekNumber = () => {
+  const d = new Date();
+  const day = d.getUTCDay();
+  const diff = (day + 6) % 7;
+  const monUTC = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - diff);
+  const weeksSince = Math.floor((monUTC - WEEK1_EPOCH) / (7 * 86400000));
+  return Math.max(1, weeksSince + 1);
+};
+
+module.exports = { todayISO, weekStartISO, getWeekNumber, isValidUsername, isValidPassword, makeLeagueCode };

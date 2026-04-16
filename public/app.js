@@ -941,11 +941,23 @@ const dayNumber = () => {
   const start = new Date('2025-01-01').getTime();
   return Math.floor((Date.now() - start) / 86400000) + 1;
 };
+// Monday-based week key matching server's weekStartISO (all UTC)
 const getWeekKey = () => {
   const d = new Date();
-  const yearStart = new Date(d.getFullYear(), 0, 1);
-  const wk = Math.ceil(((d - yearStart) / 86400000 + yearStart.getDay() + 1) / 7);
-  return `${d.getFullYear()}-W${String(wk).padStart(2, '0')}`;
+  const day = d.getUTCDay(); // 0=Sun
+  const diff = (day + 6) % 7; // Mon=0
+  const mon = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - diff));
+  return mon.toISOString().slice(0, 10); // e.g. "2026-04-13"
+};
+// Week number: Week 1 = week of 2026-04-13 (Monday). Increments every Monday.
+const WEEK1_EPOCH = Date.UTC(2026, 3, 13); // Monday Apr 13, 2026 00:00 UTC
+const getWeekNumber = () => {
+  const d = new Date();
+  const day = d.getUTCDay();
+  const diff = (day + 6) % 7;
+  const monUTC = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - diff);
+  const weeksSince = Math.floor((monUTC - WEEK1_EPOCH) / (7 * 86400000));
+  return Math.max(1, weeksSince + 1);
 };
 
 /* ==========================================================================
@@ -7292,6 +7304,7 @@ const LeaderboardScreen = ({
   const [serverRows, setServerRows] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchKey, setFetchKey] = useState(0);
+  const [weekNum, setWeekNum] = useState(() => getWeekNumber());
   const api = typeof window !== 'undefined' ? window.DON_API : null;
 
   // Expose refetch so admin reset can trigger it
@@ -7305,6 +7318,7 @@ const LeaderboardScreen = ({
       .then(data => {
         if (data && Array.isArray(data.rows)) setServerRows(data.rows);
         else setServerRows([]);
+        if (data && data.weekNumber) setWeekNum(data.weekNumber);
       })
       .catch(() => setServerRows([]))
       .finally(() => setLoading(false));
@@ -7345,7 +7359,7 @@ const LeaderboardScreen = ({
     }, "Leaderboard")), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-center mb-5",
       style: { color: '#7B7B9A' }
-    }, "Weekly rankings \xB7 resets Monday 00:00 UTC"), /*#__PURE__*/React.createElement(FrostedCard, {
+    }, "Week ", weekNum, " \xB7 Mon\u2013Sun \xB7 resets Monday 00:00 UTC"), /*#__PURE__*/React.createElement(FrostedCard, {
       className: "p-8 text-center anim-pop-in"
     }, /*#__PURE__*/React.createElement(EmptyState, {
       title: "No scores yet this week",
@@ -7381,7 +7395,7 @@ const LeaderboardScreen = ({
     style: {
       color: '#7B7B9A'
     }
-  }, "Weekly rankings \xB7 resets Monday 00:00 UTC"), /*#__PURE__*/React.createElement("div", {
+  }, "Week ", weekNum, " \xB7 Mon\u2013Sun \xB7 resets Monday 00:00 UTC"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2 mb-5 justify-center"
   }, /*#__PURE__*/React.createElement(Pill, {
     active: tab === 'this',

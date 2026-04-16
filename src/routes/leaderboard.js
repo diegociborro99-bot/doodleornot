@@ -1,7 +1,7 @@
 const express = require('express');
 const prisma = require('../db');
 const { optionalAuth, requireAuth } = require('../auth');
-const { weekStartISO } = require('../util');
+const { weekStartISO, getWeekNumber } = require('../util');
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.get('/', optionalAuth, async (req, res) => {
           user: { select: { username: true, avatarColor: true } }
         }
       });
-      return res.json({ scope, weekStart, rows: rows.map((r, i) => ({
+      return res.json({ scope, weekStart, weekNumber: getWeekNumber(), rows: rows.map((r, i) => ({
         rank: i + 1,
         username: r.user.username,
         avatarColor: r.user.avatarColor,
