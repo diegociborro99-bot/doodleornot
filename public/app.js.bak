@@ -1464,9 +1464,7 @@ const ProfileAvatar = ({
     border: `${borderW}px solid ${STROKE}`,
     boxShadow: animated ? `0 8px 22px ${profile.color}66` : 'none'
   };
-  const hasValidAvatar = profile.avatar && typeof profile.avatar === 'string'
-    && (profile.avatar.startsWith('data:') || profile.avatar.startsWith('http'));
-  if (hasValidAvatar) {
+  if (profile.avatar) {
     return /*#__PURE__*/React.createElement("div", {
       className: `rounded-full overflow-hidden flex items-center justify-center ${animated ? 'avatar-glow' : ''}`,
       style: style
@@ -1474,7 +1472,6 @@ const ProfileAvatar = ({
       src: profile.avatar,
       alt: "avatar",
       draggable: false,
-      onError: function(e) { e.currentTarget.style.display = 'none'; },
       style: {
         width: '100%',
         height: '100%',
@@ -2969,58 +2966,71 @@ const CountUp = ({
    FOOTER SIGNATURE — "vibe coded by Degos" with neon animated letters
    ========================================================================== */
 
-/* DegosDoodle — renders a deterministic doodle directly (no lazy-load / IntersectionObserver)
-   so it always appears in the footer regardless of scroll position */
+/* Degos' Doodle — picks a deterministic doodle and renders it directly (no lazy-load)
+   so it always shows in the footer regardless of scroll position. Multiple fallback URLs. */
 const DegosDoodle = () => {
-  const d = (Array.isArray(DOODLES) && DOODLES.length)
-    ? DOODLES[Math.abs(hashCode('degos-signature')) % DOODLES.length] : null;
+  const d = Array.isArray(DOODLES) && DOODLES.length ? DOODLES[Math.abs(hashCode('degos-signature')) % DOODLES.length] : null;
+  const [src, setSrc] = useState(() => d ? doodleImage(d) : null);
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
-  const fallbacks = d ? [
-    doodleImage(d),
-    doodleImage(d) + '?w=500&auto=format',
-    doodleImage(d) + '?cb=' + Date.now()
-  ] : [];
+  const fallbacks = d ? [doodleImage(d), doodleImage(d) + '?w=500&auto=format', doodleImage(d) + '?cb=' + Date.now()] : [];
   if (!d || failed) {
-    const palette = ['#FFB7C5','#FFE082','#A8E6CF','#90CAF9','#C5B3E6'];
+    // Colorful placeholder with FaceIcon
+    const palette = ['#FFB7C5', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6'];
     const c = palette[(d ? d.id : 0) % palette.length];
-    return /*#__PURE__*/React.createElement("div", { className: "degos-doodle-wrap" },
-      /*#__PURE__*/React.createElement("div", { className: "degos-doodle-halo", "aria-hidden": "true" }),
-      /*#__PURE__*/React.createElement("div", { className: "degos-doodle-img", style: {
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, ' + c + ', #C5B3E6)'
-      }}, /*#__PURE__*/React.createElement(FaceIcon, { size: 60, fill: c }))
-    );
-  }
-  return /*#__PURE__*/React.createElement("div", { className: "degos-doodle-wrap" },
-    /*#__PURE__*/React.createElement("div", { className: "degos-doodle-halo", "aria-hidden": "true" }),
-    /*#__PURE__*/React.createElement("img", {
-      src: fallbacks[attempt] || fallbacks[0],
-      alt: 'Doodle #' + d.id,
+    return /*#__PURE__*/React.createElement("div", {
+      className: "degos-doodle-wrap"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "degos-doodle-halo",
+      "aria-hidden": "true"
+    }), /*#__PURE__*/React.createElement("div", {
       className: "degos-doodle-img",
-      loading: "eager",
-      onError: () => {
-        if (attempt < fallbacks.length - 1) setAttempt(a => a + 1);
-        else setFailed(true);
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: `linear-gradient(135deg, ${c}, #C5B3E6)`
       }
-    })
-  );
+    }, /*#__PURE__*/React.createElement(FaceIcon, {
+      size: 60,
+      fill: c
+    })));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "degos-doodle-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "degos-doodle-halo",
+    "aria-hidden": "true"
+  }), /*#__PURE__*/React.createElement("img", {
+    src: fallbacks[attempt] || fallbacks[0],
+    alt: `Doodle #${d.id}`,
+    className: "degos-doodle-img",
+    loading: "eager",
+    onError: () => {
+      if (attempt < fallbacks.length - 1) setAttempt(a => a + 1);else setFailed(true);
+    }
+  }));
 };
-
 const FooterSignature = () => {
   const full = 'vibe coded by Degos';
   return /*#__PURE__*/React.createElement("div", {
     className: "w-full flex flex-col items-center justify-center pt-8 select-none gap-4",
-    style: { paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }
+    style: {
+      paddingBottom: 'calc(120px + env(safe-area-inset-bottom))'
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "degos-wrap"
   }, /*#__PURE__*/React.createElement("span", {
     className: "degos-sig"
   }, [...full].map((ch, i) => /*#__PURE__*/React.createElement("span", {
-    key: i, className: "degos-letter",
-    style: { animationDelay: (i * 0.08 % 1.6) + 's' }
+    key: i,
+    className: "degos-letter",
+    style: {
+      animationDelay: `${i * 0.08 % 1.6}s`
+    }
   }, ch === ' ' ? '\u00A0' : ch))), /*#__PURE__*/React.createElement("span", {
-    className: "degos-underline", "aria-hidden": "true"
+    className: "degos-underline",
+    "aria-hidden": "true"
   })), /*#__PURE__*/React.createElement(DegosDoodle, null));
 };
 
@@ -4655,9 +4665,9 @@ const AuthScreen = ({
             name: serverUser.username,
             passHash: 'server',
             color: serverUser.avatarColor || existing.color || '#C5B3E6',
-            // Use server avatarData if available; fall back to local data URL
-            avatar: serverUser.avatarData
-              || (existing.avatar && typeof existing.avatar === 'string' && existing.avatar.startsWith('data:') ? existing.avatar : null),
+            // Preserve locally-uploaded avatar (data URL). Server only stores a faceShape hint,
+            // which is NOT an image src — keep it separate so ProfileAvatar falls back cleanly.
+            avatar: existing.avatar && typeof existing.avatar === 'string' && existing.avatar.startsWith('data:') ? existing.avatar : null,
             faceShape: serverUser.faceShape || existing.faceShape || 'round',
             joined: existing.joined || Date.now(),
             isAdmin: isAdminUser,
@@ -6661,7 +6671,7 @@ const TraitMode = ({
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, [revealed, guess, round, submit]);
+  }, [revealed, guess, round]);
   return /*#__PURE__*/React.createElement("div", {
     className: "px-4 pt-4 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
   }, /*#__PURE__*/React.createElement("div", {
@@ -7870,7 +7880,6 @@ function DoodleOrNot() {
           ...existing,
           username: uname,
           avatarColor: u.avatarColor || existing.avatarColor || '#C5B3E6',
-          avatar: u.avatarData || existing.avatar || null,
           faceShape: u.faceShape || existing.faceShape || 'round',
           createdAt: existing.createdAt || Date.now(),
           isAdmin: !!existing.isAdmin
@@ -8005,7 +8014,7 @@ function DoodleOrNot() {
     }
     const done = storage.get(userOnboardedKey(username), false);
     setShowOnboarding(!done);
-  }, [username, !!(profile && profile.isAdmin)]);
+  }, [username, profile && profile.isAdmin]);
   const completeOnboarding = () => {
     if (username) storage.set(userOnboardedKey(username), true);
     setShowOnboarding(false);
@@ -8095,16 +8104,6 @@ function DoodleOrNot() {
     users[username] = u;
     saveUsers(users);
     setProfile(u);
-    // Persist avatar + color to server DB
-    const api = window.DON_API;
-    if (api) {
-      const serverPatch = {};
-      if (patch.color) serverPatch.avatarColor = patch.color;
-      if (patch.avatar !== undefined) serverPatch.avatarData = patch.avatar; // data URL or null
-      if (Object.keys(serverPatch).length > 0) {
-        api.updateMe(serverPatch).catch(() => {}); // fire-and-forget
-      }
-    }
   };
   const finishMode = result => {
     if (!username) return;
@@ -8728,7 +8727,6 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     }
     .degos-doodle-img {
       position: relative;
-      display: block;
       width: 120px; height: 120px;
       object-fit: cover;
       border-radius: 50%;
@@ -9175,6 +9173,9 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
         { animation: none !important; transition: none !important; }
     }
   `);
+
+/* ---------- Mount ---------- */
+ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(DoodleOrNot, null));
 
 /* ---------- Mount with Error Boundary ---------- */
 function __showFatal(title, err, extra) {

@@ -25,7 +25,7 @@ router.post('/signup', async (req, res) => {
   });
   const token = signToken(user.id);
   setAuthCookie(res, token);
-  res.json({ id: user.id, username: user.username, avatarColor: user.avatarColor, faceShape: user.faceShape });
+  res.json({ id: user.id, username: user.username, avatarColor: user.avatarColor, avatarData: user.avatarData, faceShape: user.faceShape });
 });
 
 router.post('/login', async (req, res) => {
@@ -37,7 +37,7 @@ router.post('/login', async (req, res) => {
   if (!ok) return res.status(401).json({ error: 'bad_credentials' });
   const token = signToken(user.id);
   setAuthCookie(res, token);
-  res.json({ id: user.id, username: user.username, avatarColor: user.avatarColor, faceShape: user.faceShape });
+  res.json({ id: user.id, username: user.username, avatarColor: user.avatarColor, avatarData: user.avatarData, faceShape: user.faceShape });
 });
 
 router.post('/logout', (_req, res) => {
@@ -66,6 +66,7 @@ router.get('/me', requireAuth, async (req, res) => {
     id: user.id,
     username: user.username,
     avatarColor: user.avatarColor,
+    avatarData: user.avatarData,
     faceShape: user.faceShape,
     stats: user.stats,
     streak: user.streak,
@@ -77,12 +78,17 @@ router.get('/me', requireAuth, async (req, res) => {
 });
 
 router.patch('/me', requireAuth, async (req, res) => {
-  const { avatarColor, faceShape } = req.body || {};
+  const { avatarColor, faceShape, avatarData } = req.body || {};
   const data = {};
   if (typeof avatarColor === 'string') data.avatarColor = avatarColor;
   if (typeof faceShape === 'string') data.faceShape = faceShape;
+  // avatarData: base64 data URL or null (to clear)
+  if (avatarData === null) data.avatarData = null;
+  else if (typeof avatarData === 'string' && avatarData.startsWith('data:image/') && avatarData.length < 200000) {
+    data.avatarData = avatarData;
+  }
   const user = await prisma.user.update({ where: { id: req.userId }, data });
-  res.json({ id: user.id, username: user.username, avatarColor: user.avatarColor, faceShape: user.faceShape });
+  res.json({ id: user.id, username: user.username, avatarColor: user.avatarColor, avatarData: user.avatarData, faceShape: user.faceShape });
 });
 
 module.exports = router;

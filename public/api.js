@@ -35,8 +35,8 @@
               req('/api/auth/login',  { method: 'POST', body: { username, password } }),
     logout:  () => req('/api/auth/logout', { method: 'POST' }),
     me:      () => req('/api/auth/me'),
-    updateMe: ({ avatarColor, faceShape }) =>
-              req('/api/auth/me', { method: 'PATCH', body: { avatarColor, faceShape } }),
+    updateMe: ({ avatarColor, faceShape, avatarData }) =>
+              req('/api/auth/me', { method: 'PATCH', body: { avatarColor, faceShape, avatarData } }),
 
     // ----- progress -----
     saveProgress: ({ mode, points, icons, clutch, day }) =>
