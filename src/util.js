@@ -28,4 +28,10 @@ const getWeekNumber = () => {
   return Math.max(1, weeksSince + 1);
 };
 
-module.exports = { todayISO, weekStartISO, getWeekNumber, isValidUsername, isValidPassword, makeLeagueCode };
+const lastWeekStartISO = () => {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - 7);
+  return weekStartISO(d);
+};
+
+module.exports = { todayISO, weekStartISO, lastWeekStartISO, getWeekNumber, isValidUsername, isValidPassword, makeLeagueCode };

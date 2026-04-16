@@ -2349,10 +2349,12 @@ const DreamLandscape = ({
   return /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-x-0 bottom-0 pointer-events-none landscape-motion",
     style: {
-      height: '62vh',
-      minHeight: 420,
+      height: '72vh',
+      minHeight: 480,
       opacity: dim,
-      contain: 'layout style paint'
+      contain: 'layout style paint',
+      WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, transparent 5%, rgba(0,0,0,0.05) 12%, rgba(0,0,0,0.15) 18%, rgba(0,0,0,0.35) 25%, rgba(0,0,0,0.6) 32%, rgba(0,0,0,0.85) 40%, black 50%)',
+      maskImage: 'linear-gradient(to bottom, transparent 0%, transparent 5%, rgba(0,0,0,0.05) 12%, rgba(0,0,0,0.15) 18%, rgba(0,0,0,0.35) 25%, rgba(0,0,0,0.6) 32%, rgba(0,0,0,0.85) 40%, black 50%)'
     }
   }, /*#__PURE__*/React.createElement("svg", {
     viewBox: "0 0 1000 620",
@@ -2468,9 +2470,7 @@ const DreamLandscape = ({
   }, /*#__PURE__*/React.createElement("path", {
     d: "M -20 340 Q 40 240 90 220 Q 125 248 160 280 Q 200 210 240 180 Q 285 222 330 270 Q 375 230 420 210 Q 470 255 520 300 Q 570 230 620 200 Q 670 240 720 280 Q 770 245 820 230 Q 870 270 920 310 Q 970 278 1020 260 L 1020 460 L -20 460 Z",
     fill: "url(#mtnA)",
-    stroke: "#2D2D3F",
-    strokeWidth: "2.2",
-    strokeLinejoin: "round"
+    stroke: "none"
   }), /*#__PURE__*/React.createElement("path", {
     d: "M 78 232 Q 90 220 102 232 Q 95 248 78 248 Z",
     fill: "#FFFFFF",
@@ -7511,7 +7511,7 @@ const LeaderboardScreen = ({
   useEffect(() => {
     if (!api) { setLoading(false); return; }
     setLoading(true);
-    api.leaderboard('weekly', 50)
+    api.leaderboard(tab === 'last' ? 'lastweekly' : 'weekly', 50)
       .then(data => {
         if (data && Array.isArray(data.rows)) setServerRows(data.rows);
         else setServerRows([]);

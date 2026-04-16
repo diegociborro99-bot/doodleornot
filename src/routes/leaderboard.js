@@ -1,18 +1,19 @@
 const express = require('express');
 const prisma = require('../db');
 const { optionalAuth, requireAuth } = require('../auth');
-const { weekStartISO, getWeekNumber } = require('../util');
+const { weekStartISO, lastWeekStartISO, getWeekNumber } = require('../util');
 
 const router = express.Router();
 
-// GET /api/leaderboard?scope=weekly|alltime&limit=50
+// GET /api/leaderboard?scope=weekly|lastweekly|alltime&limit=50
 router.get('/', optionalAuth, async (req, res) => {
   try {
-    const scope = req.query.scope === 'alltime' ? 'alltime' : 'weekly';
+    const validScopes = ['weekly', 'lastweekly', 'alltime'];
+    const scope = validScopes.includes(req.query.scope) ? req.query.scope : 'weekly';
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '50', 10)));
 
-    if (scope === 'weekly') {
-      const weekStart = weekStartISO();
+    if (scope === 'weekly' || scope === 'lastweekly') {
+      const weekStart = scope === 'lastweekly' ? lastWeekStartISO() : weekStartISO();
       const rows = await prisma.stats.findMany({
         where: { weekStart },
         orderBy: [{ weekPoints: 'desc' }],
