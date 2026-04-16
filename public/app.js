@@ -5058,7 +5058,14 @@ const AdminPanel = ({
     refresh();
     setConfirmWipe(null);
   };
-  const resetAllWeekly = () => {
+  const resetAllWeekly = async () => {
+    if (!window.confirm('Reset weekly leaderboard for ALL users?')) return;
+    // Reset server DB
+    const api = typeof window !== 'undefined' ? window.DON_API : null;
+    if (api) {
+      try { await api.resetWeeklyLeaderboard(); } catch(e) { console.warn('Server reset failed:', e); }
+    }
+    // Also reset localStorage
     for (const [key] of Object.entries(getUsers())) {
       const s = storage.get(userStatsKey(key), null);
       if (s) {
@@ -5067,6 +5074,7 @@ const AdminPanel = ({
       }
     }
     refresh();
+    alert('Weekly leaderboard reset!');
   };
   const unlockAllToday = () => {
     storage.set(userProgressKey(profile.name.toLowerCase(), todayStr()), {

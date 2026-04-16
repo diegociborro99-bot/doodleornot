@@ -46,6 +46,8 @@
     // ----- leaderboard -----
     leaderboard: (scope = 'weekly', limit = 50) =>
               req(`/api/leaderboard?scope=${scope}&limit=${limit}`),
+    resetWeeklyLeaderboard: () =>
+              req('/api/leaderboard/reset-weekly', { method: 'POST' }),
 
     // ----- dex -----
     dexAdd:  (ids) => req('/api/dex', { method: 'POST', body: { ids } }),

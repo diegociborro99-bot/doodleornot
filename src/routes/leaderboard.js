@@ -1,6 +1,6 @@
 const express = require('express');
 const prisma = require('../db');
-const { optionalAuth } = require('../auth');
+const { optionalAuth, requireAuth } = require('../auth');
 const { weekStartISO } = require('../util');
 
 const router = express.Router();
@@ -45,6 +45,14 @@ router.get('/', optionalAuth, async (req, res) => {
     avatarColor: r.user.avatarColor,
     points: r.totalPoints
   })) });
+});
+
+// POST /api/leaderboard/reset-weekly — admin action to zero out weekly points
+router.post('/reset-weekly', requireAuth, async (req, res) => {
+  await prisma.stats.updateMany({
+    data: { weekPoints: 0, weekStart: '' }
+  });
+  res.json({ ok: true, message: 'All weekly points reset to 0' });
 });
 
 module.exports = router;
