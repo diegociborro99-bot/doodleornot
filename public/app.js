@@ -1057,11 +1057,18 @@ const DATA = typeof window !== 'undefined' && window.DOODLES_DATA || {
   rarity: {},
   doodles: []
 };
-const DOODLES = DATA.doodles;
 const RARITY = DATA.rarity;
 const IMG_PREFIX = DATA.imgPrefix;
 const TRAIT_TYPES = ['face', 'head', 'background', 'body', 'hair', 'piercing'];
-const doodleImage = d => d.i.startsWith('http') ? d.i : IMG_PREFIX + d.i;
+
+// Filter out doodles with bad/foreign-contract image URLs (238 entries point to matic/base contracts)
+// Only keep doodles whose .i is a plain filename (hash.png) — these use the correct Doodles Ethereum CDN
+const DOODLES = DATA.doodles.filter(d => d.i && !d.i.startsWith('http'));
+
+const doodleImage = d => {
+  if (!d || !d.i) return IMG_PREFIX + 'missing.png';
+  return d.i.startsWith('http') ? d.i : IMG_PREFIX + d.i;
+};
 const openseaUrl = d => `https://opensea.io/assets/ethereum/0x8a90cab2b38dba80c64b7734e58ee1db38b8992e/${d.id}`;
 
 /* Rarity % for a (type, value). Returns 100 when unknown (very common fallback). */
@@ -1656,16 +1663,24 @@ const _imgFailed = new Set();
 const prefetchDoodleImages = doodles => {
   if (!Array.isArray(doodles)) return;
   doodles.forEach(d => {
-    if (!d) return;
+    if (!d || !d.i) return;
     const url = doodleImage(d);
-    if (_imgCache.has(url) || _imgFailed.has(url)) return;
+    if (_imgCache.has(url)) return;
+    // Clear from failed set — allow retries during prefetch
+    _imgFailed.delete(url);
     const img = new Image();
     img.onload = () => _imgCache.add(url);
     img.onerror = () => {
-      // Try alternate CDN before marking as failed
+      // Try resized variant
       const alt = new Image();
       alt.onload = () => _imgCache.add(url);
-      alt.onerror = () => _imgFailed.add(url);
+      alt.onerror = () => {
+        // Try cache-bust before giving up
+        const alt2 = new Image();
+        alt2.onload = () => _imgCache.add(url);
+        alt2.onerror = () => _imgFailed.add(url);
+        alt2.src = url + (url.includes('?') ? '&' : '?') + 'cb=' + Date.now();
+      };
       alt.src = url + (url.includes('?') ? '&' : '?') + 'w=500&auto=format';
     };
     img.src = url;
@@ -1721,7 +1736,11 @@ const DoodleAvatar = ({
   // primary CDN
   primaryUrl + (primaryUrl.includes('?') ? '&' : '?') + 'w=500&auto=format',
   // resized variant
-  primaryUrl + (primaryUrl.includes('?') ? '&' : '?') + 'cb=' + Date.now() // cache-bust retry
+  primaryUrl + (primaryUrl.includes('?') ? '&' : '?') + 'cb=' + Date.now(),
+  // cache-bust retry
+  primaryUrl + (primaryUrl.includes('?') ? '&' : '?') + 'cb=' + (Date.now() + 1) + '&w=250',
+  // second cache-bust with smaller size
+  primaryUrl  // final retry with original URL
   ] : [];
   const currentSrc = sources[attempt] || sources[0];
 
@@ -1753,37 +1772,49 @@ const DoodleAvatar = ({
       animation: 'shimmer 1.5s ease-in-out infinite'
     }
   }));
-  if (!doodle || status === 'failed') {
+  if (!doodle) {
+    return shimmer;
+  }
+  if (status === 'failed') {
+    // Auto-retry after 2s instead of showing a static fallback
+    const retryFn = () => {
+      _imgFailed.delete(doodleImage(doodle));
+      setAttempt(0);
+      setStatus('loading');
+    };
+    setTimeout(retryFn, 2500);
     return /*#__PURE__*/React.createElement("div", {
       ref: wrapRef,
       className: rounded ? 'rounded-2xl' : '',
+      onClick: retryFn,
       style: {
         width: size,
         height: size,
-        background: `linear-gradient(135deg, ${c1}, ${c2})`,
+        background: `linear-gradient(135deg, ${c1}66, ${c2}66)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#2D2D3F',
-        fontWeight: 700,
-        fontSize: Math.max(10, size * 0.14),
+        flexDirection: 'column',
+        gap: 4,
+        color: '#7B7B9A',
+        fontWeight: 600,
+        fontSize: Math.max(9, size * 0.1),
         userSelect: 'none',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        cursor: 'pointer'
       }
-    }, /*#__PURE__*/React.createElement(FaceIcon, {
-      size: Math.round(size * 0.55),
-      fill: c1
-    }), doodle && /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
         position: 'absolute',
-        bottom: 4,
-        fontSize: 9,
-        fontWeight: 600,
-        color: 'rgba(45,45,63,0.5)',
-        letterSpacing: '0.04em'
+        inset: 0,
+        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+        backgroundSize: '200% 100%',
+        animation: 'shimmer 1.5s ease-in-out infinite'
       }
-    }, "#", doodle.id));
+    }), /*#__PURE__*/React.createElement("span", {
+      style: { fontSize: Math.max(9, size * 0.09), opacity: 0.6 }
+    }, "Loading #", doodle.id, "..."));
   }
   if (!visible) return shimmer;
   return /*#__PURE__*/React.createElement("div", {
@@ -6536,34 +6567,36 @@ const PriceMode = ({
   onFinish
 }) => {
   const rng = useRef(mulberry32(seed + 99));
-  const pairs = useRef([]);
-  if (pairs.current.length === 0 && DOODLES.length > 0) {
+  const triplets = useRef([]);
+  if (triplets.current.length === 0 && DOODLES.length > 0) {
     const used = new Set();
     let tries = 0;
-    while (pairs.current.length < 15 && tries < 500) {
+    while (triplets.current.length < 10 && tries < 800) {
       tries++;
       const a = DOODLES[Math.floor(rng.current() * DOODLES.length)];
       const b = DOODLES[Math.floor(rng.current() * DOODLES.length)];
-      if (a.id === b.id || used.has(a.id) || used.has(b.id)) continue;
-      if (a.r === b.r) continue;
-      // Allow pairs with rank diff >= 100 (progressive difficulty will sort them)
-      const ra = a.rank || 1;
-      const rb = b.rank || 1;
-      if (Math.abs(ra - rb) < 100) continue;
+      const c = DOODLES[Math.floor(rng.current() * DOODLES.length)];
+      if (a.id === b.id || a.id === c.id || b.id === c.id) continue;
+      if (used.has(a.id) || used.has(b.id) || used.has(c.id)) continue;
+      // All three must have different rarity scores
+      if (a.r === b.r || a.r === c.r || b.r === c.r) continue;
+      // Min rank spread: rarest vs least-rare must differ by >= 150
+      const ranks = [a.rank || 1, b.rank || 1, c.rank || 1];
+      if (Math.max(...ranks) - Math.min(...ranks) < 150) continue;
       used.add(a.id);
       used.add(b.id);
-      pairs.current.push({
-        a,
-        b
-      });
+      used.add(c.id);
+      triplets.current.push({ options: [a, b, c] });
     }
-    // Progressive difficulty: sort easiest (largest rank difference) first
-    pairs.current.sort((p1, p2) => {
-      const d1 = Math.abs((p1.a.rank || 1) - (p1.b.rank || 1));
-      const d2 = Math.abs((p2.a.rank || 1) - (p2.b.rank || 1));
-      return d2 - d1;
+    // Progressive difficulty: sort easiest (largest rank spread) first
+    triplets.current.sort((t1, t2) => {
+      const r1 = t1.options.map(d => d.rank || 1);
+      const r2 = t2.options.map(d => d.rank || 1);
+      const spread1 = Math.max(...r1) - Math.min(...r1);
+      const spread2 = Math.max(...r2) - Math.min(...r2);
+      return spread2 - spread1;
     });
-    prefetchDoodleImages(pairs.current.flatMap(p => [p.a, p.b]));
+    prefetchDoodleImages(triplets.current.flatMap(t => t.options));
   }
   const [round, setRound] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -6571,11 +6604,11 @@ const PriceMode = ({
   const [gameOver, setGameOver] = useState(false);
   const [icons, setIcons] = useState([]);
   const [pu, setPu] = useState(() => currentPowerups());
-  const [hintedSide, setHintedSide] = useState(null);
+  const [hintedIdx, setHintedIdx] = useState(null); // index of eliminated option (0,1,2)
   const [freezeActive, setFreezeActive] = useState(false);
   const [popup, setPopup] = useState(null);
-  const [animSide, setAnimSide] = useState(null);
-  const current = pairs.current[round];
+  const [animIdx, setAnimIdx] = useState(null);
+  const current = triplets.current[round];
   if (!current) {
     return /*#__PURE__*/React.createElement("div", {
       className: "p-10 text-center",
@@ -6584,32 +6617,36 @@ const PriceMode = ({
       }
     }, "Loading dataset\u2026");
   }
-  // rarer = higher score = LOWER rank number
-  const correctSide = current.a.r > current.b.r ? 'a' : 'b';
-  const wrongSide = correctSide === 'a' ? 'b' : 'a';
+  const opts = current.options;
+  // rarer = higher rarity score = LOWER rank number
+  const correctIdx = opts.reduce((best, d, i) => d.r > opts[best].r ? i : best, 0);
+  // Pick a wrong option to eliminate with hint (not the correct one)
+  const wrongIndices = [0, 1, 2].filter(i => i !== correctIdx);
   const mult = streak >= 10 ? 3 : streak >= 5 ? 2 : 1;
 
-  // Dex hook: record both doodles shown
+  // Dex hook: record all doodles shown
   useEffect(() => {
-    if (current) recordDexGlobal([current.a.id, current.b.id]);
+    if (current) recordDexGlobal(opts.map(d => d.id));
   }, [round]);
   useEffect(() => {
-    setHintedSide(null);
+    setHintedIdx(null);
   }, [round]);
   const doHint = () => {
-    if (revealed || hintedSide) return;
+    if (revealed || hintedIdx !== null) return;
     if (!consumePowerup('hints')) return;
     setPu(currentPowerups());
-    setHintedSide(wrongSide);
+    // Eliminate the worst wrong option (highest rank = least rare)
+    const worstWrong = wrongIndices.reduce((w, i) => (opts[i].rank || 1) > (opts[w].rank || 1) ? i : w, wrongIndices[0]);
+    setHintedIdx(worstWrong);
   };
   const doSkip = () => {
     if (revealed) return;
     if (!consumePowerup('skips')) return;
     setPu(currentPowerups());
-    setHintedSide(null);
+    setHintedIdx(null);
     const newIcons = [...icons, 'skip'];
     setIcons(newIcons);
-    if (round + 1 >= pairs.current.length) {
+    if (round + 1 >= triplets.current.length) {
       finish(streak, newIcons);
     } else {
       setRound(round + 1);
@@ -6624,10 +6661,10 @@ const PriceMode = ({
     Sound.shimmer();
     Haptics.buzz(14);
   };
-  const choose = side => {
+  const choose = idx => {
     if (revealed) return;
-    if (side === hintedSide) return;
-    const correct = side === correctSide;
+    if (idx === hintedIdx) return;
+    const correct = idx === correctIdx;
     if (!correct && freezeActive) {
       // Freeze absorbs the wrong answer — streak preserved, try again
       setFreezeActive(false);
@@ -6636,7 +6673,7 @@ const PriceMode = ({
       return;
     }
     setRevealed(true);
-    setAnimSide(side);
+    setAnimIdx(idx);
     if (correct) {
       setPopup({ points: 2 * mult, type: 'up' });
       if (streak >= 2) { Sound.streak(); } else { Sound.correct(); }
@@ -6649,12 +6686,12 @@ const PriceMode = ({
     setTimeout(() => {
       setFreezeActive(false);
       setPopup(null);
-      setAnimSide(null);
+      setAnimIdx(null);
       if (correct) {
         const newStreak = streak + 1;
         setStreak(newStreak);
         setIcons([...icons, 'up']);
-        if (round + 1 >= pairs.current.length) {
+        if (round + 1 >= triplets.current.length) {
           finish(newStreak, [...icons, 'up']);
         } else {
           setRound(round + 1);
@@ -6669,16 +6706,17 @@ const PriceMode = ({
     }, 1500);
   };
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts: 1/A/Left = first, 2/S/Down = second, 3/D/Right = third
   useEffect(() => {
     const h = e => {
       if (revealed) return;
-      if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') choose('a');
-      if (e.key === 'l' || e.key === 'L' || e.key === 'ArrowRight') choose('b');
+      if (e.key === '1' || e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') choose(0);
+      if (e.key === '2' || e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') choose(1);
+      if (e.key === '3' || e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') choose(2);
     };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
-  }, [revealed, round, streak, icons, freezeActive, hintedSide]);
+  }, [revealed, round, streak, icons, freezeActive, hintedIdx]);
   const finish = (finalStreak, finalIcons) => {
     const hits = finalIcons.filter(i => i === 'up').length;
     const finalMult = finalStreak >= 10 ? 3 : finalStreak >= 5 ? 2 : 1;
@@ -6726,21 +6764,21 @@ const PriceMode = ({
     onHint: doHint,
     onSkip: doSkip,
     onFreeze: doFreeze,
-    hintDisabled: revealed || !!hintedSide,
+    hintDisabled: revealed || hintedIdx !== null,
     skipDisabled: revealed,
     freezeDisabled: revealed,
     freezeActive: freezeActive
   }), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 gap-3 lg:gap-10 lg:max-w-5xl lg:mx-auto mb-4"
-  }, ['a', 'b'].map(side => {
-    const d = current[side];
-    const isCorrect = revealed && side === correctSide;
-    const isWrong = revealed && side !== correctSide;
-    const isHintedOut = hintedSide === side;
+    className: "grid grid-cols-3 gap-2 lg:gap-6 lg:max-w-5xl lg:mx-auto mb-4"
+  }, [0, 1, 2].map(idx => {
+    const d = opts[idx];
+    const isCorrect = revealed && idx === correctIdx;
+    const isWrong = revealed && idx !== correctIdx;
+    const isHintedOut = hintedIdx === idx;
     return /*#__PURE__*/React.createElement(FrostedCard, {
-      key: side,
-      onClick: () => choose(side),
-      className: `p-3 lg:p-6 transition-all ${revealed || isHintedOut ? '' : 'cursor-pointer active:scale-95 lg:hover:-translate-y-1'} ${animSide === side && side === correctSide ? 'anim-correct-pulse' : ''} ${animSide === side && side !== correctSide ? 'anim-shake' : ''}`,
+      key: idx,
+      onClick: () => choose(idx),
+      className: `p-2 lg:p-4 transition-all ${revealed || isHintedOut ? '' : 'cursor-pointer active:scale-95 lg:hover:-translate-y-1'} ${animIdx === idx && idx === correctIdx ? 'anim-correct-pulse' : ''} ${animIdx === idx && idx !== correctIdx ? 'anim-shake' : ''}`,
       style: {
         outline: isCorrect ? '3px solid #7DD8A0' : isWrong ? '3px solid #FF8A8A' : 'none',
         outlineOffset: '2px',
@@ -6752,22 +6790,22 @@ const PriceMode = ({
       className: "doodle-card-img"
     }, /*#__PURE__*/React.createElement(DoodleAvatar, {
       doodle: d,
-      size: 170,
+      size: 130,
       eager: true
     })), /*#__PURE__*/React.createElement("div", {
-      className: "mt-2 text-center"
+      className: "mt-1 text-center"
     }, /*#__PURE__*/React.createElement("div", {
-      className: "text-[10px] font-bold",
+      className: "text-[9px] font-bold",
       style: {
         color: '#7B7B9A'
       }
     }, "#", d.id), revealed ? /*#__PURE__*/React.createElement("div", {
-      className: "font-bold text-xl",
+      className: "font-bold text-sm lg:text-xl",
       style: {
         color: isCorrect ? '#7DD8A0' : '#2D2D3F'
       }
     }, "Rank #", d.rank) : /*#__PURE__*/React.createElement("div", {
-      className: "font-bold text-xl",
+      className: "font-bold text-sm lg:text-xl",
       style: {
         color: '#C5B3E6'
       }
