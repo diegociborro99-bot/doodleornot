@@ -306,13 +306,16 @@ const Sound = {
   correct() {
     this._play((s, T) => {
       const n = T.now();
-      s.triggerAttackRelease('E5', '16n', n);
-      s.triggerAttackRelease('A5', '16n', n + 0.06);
+      s.triggerAttackRelease('C5', '16n', n);
+      s.triggerAttackRelease('E5', '16n', n + 0.07);
+      s.triggerAttackRelease('G5', '8n', n + 0.14);
     });
   },
   wrong() {
     this._play((s, T) => {
-      s.triggerAttackRelease('E3', '8n', T.now());
+      const n = T.now();
+      s.triggerAttackRelease('Eb3', '16n', n);
+      s.triggerAttackRelease('Bb2', '8n', n + 0.1);
     });
   },
   shimmer() {
@@ -321,7 +324,8 @@ const Sound = {
       s.triggerAttackRelease('E5', '32n', n);
       s.triggerAttackRelease('G5', '32n', n + 0.05);
       s.triggerAttackRelease('B5', '32n', n + 0.1);
-      s.triggerAttackRelease('D6', '16n', n + 0.15);
+      s.triggerAttackRelease('E6', '16n', n + 0.15);
+      s.triggerAttackRelease('G6', '16n', n + 0.22);
     });
   },
   levelUp() {
@@ -330,7 +334,25 @@ const Sound = {
       s.triggerAttackRelease('C5', '16n', n);
       s.triggerAttackRelease('E5', '16n', n + 0.1);
       s.triggerAttackRelease('G5', '16n', n + 0.2);
-      s.triggerAttackRelease('C6', '4n', n + 0.3);
+      s.triggerAttackRelease('C6', '8n', n + 0.3);
+      s.triggerAttackRelease('E6', '4n', n + 0.42);
+    });
+  },
+  streak() {
+    this._play((s, T) => {
+      const n = T.now();
+      s.triggerAttackRelease('G5', '32n', n);
+      s.triggerAttackRelease('A5', '32n', n + 0.04);
+      s.triggerAttackRelease('B5', '32n', n + 0.08);
+      s.triggerAttackRelease('D6', '16n', n + 0.12);
+    });
+  },
+  freeze() {
+    this._play((s, T) => {
+      const n = T.now();
+      s.triggerAttackRelease('B5', '32n', n);
+      s.triggerAttackRelease('E6', '16n', n + 0.06);
+      s.triggerAttackRelease('B5', '32n', n + 0.14);
     });
   },
   tap() {
@@ -471,6 +493,7 @@ const I18N = {
     lives_left: 'lives',
     hint: 'Hint',
     skip: 'Skip',
+    freeze: 'Freeze',
     no_hints: 'out of hints today',
     no_skips: 'out of skips today',
     share: 'Share',
@@ -539,6 +562,7 @@ const I18N = {
     lives_left: 'vidas',
     hint: 'Pista',
     skip: 'Saltar',
+    freeze: 'Congelar',
     no_hints: 'sin pistas hoy',
     no_skips: 'sin saltos hoy',
     share: 'Compartir',
@@ -607,6 +631,7 @@ const I18N = {
     lives_left: 'Leben',
     hint: 'Tipp',
     skip: 'Skip',
+    freeze: 'Einfrieren',
     no_hints: 'Keine Tipps mehr',
     no_skips: 'Keine Skips mehr',
     share: 'Teilen',
@@ -647,9 +672,11 @@ const t = key => {
 const POWERUPS_KEY = (u, d) => `don:pu:${u}:${d}`;
 const HINTS_PER_DAY = 1;
 const SKIPS_PER_DAY = 1;
+const FREEZES_PER_DAY = 1;
 const getPowerups = u => storage.get(POWERUPS_KEY(u, todayStr()), {
   hints: HINTS_PER_DAY,
-  skips: SKIPS_PER_DAY
+  skips: SKIPS_PER_DAY,
+  freezes: FREEZES_PER_DAY
 });
 const savePowerups = (u, pu) => storage.set(POWERUPS_KEY(u, todayStr()), pu);
 /* Helpers for consuming powerups from inside game modes. Server-side sync is
@@ -679,7 +706,8 @@ const currentPowerups = () => {
   const u = getActiveUsername();
   return u ? getPowerups(u) : {
     hints: 0,
-    skips: 0
+    skips: 0,
+    freezes: 0
   };
 };
 
@@ -748,6 +776,7 @@ const renderShareCard = ({
   icons,
   profileName,
   avatarColor,
+  streak,
   day,
   url
 }) => new Promise(resolve => {
@@ -765,17 +794,17 @@ const renderShareCard = ({
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
   // Cloud bubble
-  ctx.fillStyle = 'rgba(255,255,255,0.82)';
+  ctx.fillStyle = 'rgba(255,255,255,0.88)';
   const rx = 80,
     rw = W - 160,
-    rh = H - 360;
+    rh = H - 300;
   ctx.beginPath();
   const r = 60;
-  ctx.moveTo(rx + r, 220);
-  ctx.arcTo(rx + rw, 220, rx + rw, 220 + rh, r);
-  ctx.arcTo(rx + rw, 220 + rh, rx, 220 + rh, r);
-  ctx.arcTo(rx, 220 + rh, rx, 220, r);
-  ctx.arcTo(rx, 220, rx + rw, 220, r);
+  ctx.moveTo(rx + r, 200);
+  ctx.arcTo(rx + rw, 200, rx + rw, 200 + rh, r);
+  ctx.arcTo(rx + rw, 200 + rh, rx, 200 + rh, r);
+  ctx.arcTo(rx, 200 + rh, rx, 200, r);
+  ctx.arcTo(rx, 200, rx + rw, 200, r);
   ctx.closePath();
   ctx.fill();
   ctx.strokeStyle = '#2D2D3F';
@@ -785,29 +814,36 @@ const renderShareCard = ({
   ctx.fillStyle = '#2D2D3F';
   ctx.font = '700 72px Fredoka, system-ui, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Doodle or Not', W / 2, 150);
+  ctx.fillText('Doodle or Not', W / 2, 130);
   ctx.font = '500 36px Fredoka, system-ui, sans-serif';
   ctx.fillStyle = '#7B7B9A';
-  ctx.fillText(`Day #${day}`, W / 2, 195);
-  // Avatar dot + username
+  ctx.fillText(`Day #${day}`, W / 2, 175);
+  // Avatar circle with smiley face
   ctx.beginPath();
   ctx.fillStyle = avatarColor || '#C5B3E6';
-  ctx.arc(W / 2, 340, 54, 0, Math.PI * 2);
+  ctx.arc(W / 2, 310, 54, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = '#2D2D3F';
   ctx.lineWidth = 5;
   ctx.stroke();
+  // Draw smiley face on avatar
   ctx.fillStyle = '#2D2D3F';
-  ctx.font = '700 56px Fredoka, system-ui, sans-serif';
-  ctx.fillText('@' + profileName, W / 2, 470);
+  ctx.beginPath(); ctx.arc(W / 2 - 18, 300, 6, 0, Math.PI * 2); ctx.fill(); // left eye
+  ctx.beginPath(); ctx.arc(W / 2 + 18, 300, 6, 0, Math.PI * 2); ctx.fill(); // right eye
+  ctx.beginPath(); ctx.arc(W / 2, 322, 18, 0.1 * Math.PI, 0.9 * Math.PI); ctx.lineWidth = 4; ctx.strokeStyle = '#2D2D3F'; ctx.stroke(); // smile
+  // Username
+  ctx.fillStyle = '#2D2D3F';
+  ctx.font = '700 52px Fredoka, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('@' + profileName, W / 2, 430);
   // Mode
   ctx.font = '600 40px Fredoka, system-ui, sans-serif';
   ctx.fillStyle = '#4140FF';
-  ctx.fillText(modeName, W / 2, 540);
+  ctx.fillText(modeName, W / 2, 490);
   // Score big
-  ctx.font = "700 200px 'Paytone One', Fredoka, sans-serif";
+  ctx.font = "700 180px 'Paytone One', Fredoka, sans-serif";
   ctx.fillStyle = '#2D2D3F';
-  ctx.fillText(String(points) + ' pts', W / 2, 750);
+  ctx.fillText(String(points) + ' pts', W / 2, 680);
   // Icons row
   const sym = {
     perfect: '◉',
@@ -816,15 +852,22 @@ const renderShareCard = ({
     near: '✦',
     wrong: '·',
     up: '▲',
-    down: '▼'
+    down: '▼',
+    skip: '⊘'
   };
-  ctx.font = '600 72px Fredoka, system-ui, sans-serif';
+  ctx.font = '600 64px Fredoka, system-ui, sans-serif';
   ctx.fillStyle = '#4140FF';
-  ctx.fillText((icons || []).map(i => sym[i] || '·').join('  '), W / 2, 850);
+  ctx.fillText((icons || []).map(i => sym[i] || '·').join('  '), W / 2, 770);
+  // Streak badge (if any)
+  if (streak && streak > 0) {
+    ctx.font = '600 38px Fredoka, system-ui, sans-serif';
+    ctx.fillStyle = '#FF8A50';
+    ctx.fillText('\uD83D\uDD25 ' + streak + ' day streak', W / 2, 840);
+  }
   // URL footer
   ctx.font = '500 32px Fredoka, system-ui, sans-serif';
   ctx.fillStyle = '#7B7B9A';
-  ctx.fillText(url || 'doodleornot.xyz', W / 2, 990);
+  ctx.fillText(url || 'doodleornot.xyz', W / 2, 960);
   canvas.toBlob(b => resolve(b), 'image/png', 0.95);
 });
 
@@ -4534,15 +4577,39 @@ const PowerupsBar = ({
   style: {
     color: '#7B7B9A'
   }
-}, "x", pu.skips, " \xB7 use in-game"))));
+}, "x", pu.skips, " \xB7 use in-game"))), /*#__PURE__*/React.createElement("div", {
+  className: "flex-1 rounded-xl p-2 flex items-center gap-2",
+  style: {
+    background: pu.freezes > 0 ? '#E0EEFF' : 'rgba(255,255,255,0.5)',
+    border: `1px solid ${pu.freezes > 0 ? '#90CAF9' : '#E8E0F0'}`,
+    opacity: pu.freezes > 0 ? 1 : 0.55
+  }
+}, /*#__PURE__*/React.createElement("span", {
+  className: "text-lg"
+}, "\u2744\uFE0F"), /*#__PURE__*/React.createElement("div", {
+  className: "min-w-0"
+}, /*#__PURE__*/React.createElement("p", {
+  className: "text-[10px] font-bold tracking-wider uppercase",
+  style: {
+    color: '#2D2D3F'
+  }
+}, t('freeze') || 'Freeze'), /*#__PURE__*/React.createElement("p", {
+  className: "text-[11px]",
+  style: {
+    color: '#7B7B9A'
+  }
+}, "x", pu.freezes, " \xB7 2nd chance"))));
 
 /* In-game powerup row. Used inside each GameMode. */
 const GamePowerBar = ({
   pu,
   onHint,
   onSkip,
+  onFreeze,
   hintDisabled,
   skipDisabled,
+  freezeDisabled,
+  freezeActive,
   hintHint = "Eliminate a wrong option"
 }) => /*#__PURE__*/React.createElement("div", {
   className: "flex gap-2 mb-4"
@@ -4592,7 +4659,31 @@ const GamePowerBar = ({
   style: {
     color: '#7B7B9A'
   }
-}, "x", pu.skips))));
+}, "x", pu.skips))), /*#__PURE__*/React.createElement("button", {
+  onClick: onFreeze,
+  disabled: freezeDisabled || pu.freezes <= 0,
+  title: "Second chance — wrong answer won\u2019t count",
+  className: "flex-1 rounded-xl p-2.5 flex items-center gap-2 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
+  style: {
+    background: freezeActive ? '#B3D4FC' : (!freezeDisabled && pu.freezes > 0 ? '#E0EEFF' : 'rgba(255,255,255,0.5)'),
+    border: `1.5px solid ${freezeActive ? '#4140FF' : (!freezeDisabled && pu.freezes > 0 ? '#90CAF9' : '#E8E0F0')}`,
+    boxShadow: freezeActive ? '0 0 12px rgba(65,64,255,0.3)' : 'none'
+  }
+}, /*#__PURE__*/React.createElement("span", {
+  className: "text-lg"
+}, "\u2744\uFE0F"), /*#__PURE__*/React.createElement("div", {
+  className: "min-w-0 text-left"
+}, /*#__PURE__*/React.createElement("p", {
+  className: "text-[10px] font-bold tracking-wider uppercase",
+  style: {
+    color: freezeActive ? '#4140FF' : '#2D2D3F'
+  }
+}, freezeActive ? "Active!" : "Freeze"), /*#__PURE__*/React.createElement("p", {
+  className: "text-[11px]",
+  style: {
+    color: '#7B7B9A'
+  }
+}, freezeActive ? "2nd chance" : "x" + pu.freezes))));
 
 /* ==========================================================================
    AUTH SCREEN — login / register with hashed passwords
@@ -4667,14 +4758,16 @@ const AuthScreen = ({
           try {
             const me = await api.me();
             if (me && me.stats) storage.set(userStatsKey(key), {
-              gamesPlayed: me.stats.totalGames,
-              totalPts: me.stats.totalPoints,
-              bestWeek: me.stats.weekPoints,
-              xp: me.stats.xp || me.stats.totalPoints
+              gamesPlayed: me.stats.totalGames || 0,
+              totalPts: me.stats.totalPoints || 0,
+              bestWeek: me.stats.bestWeek || 0,
+              weekPts: me.stats.weekPoints || 0,
+              weekKey: getWeekKey(),
+              xp: me.stats.xp || me.stats.totalPoints || 0
             });
             if (me && me.streak) storage.set(userStreakKey(key), {
               count: me.streak.currentStreak || 0,
-              last: me.streak.lastPlayedDay || null,
+              lastDate: me.streak.lastPlayedDay || null,
               longest: me.streak.longestStreak || 0
             });
             if (me && Array.isArray(me.achievements)) storage.set(userAchvKey(key), me.achievements);
@@ -5159,7 +5252,8 @@ const AdminPanel = ({
   const grantMeMaxPowerups = () => {
     storage.set(POWERUPS_KEY(profile.name.toLowerCase(), todayStr()), {
       hints: 99,
-      skips: 99
+      skips: 99,
+      freezes: 99
     });
     alert('Maxed out your powerups for today.');
   };
@@ -6024,6 +6118,7 @@ const GuessMode = ({
   const [results, setResults] = useState([]);
   const [pu, setPu] = useState(() => currentPowerups());
   const [hintedSide, setHintedSide] = useState(null); // which side to grey out
+  const [freezeActive, setFreezeActive] = useState(false); // second-chance shield
   const current = pairs.current[round];
   if (!current) {
     return /*#__PURE__*/React.createElement("div", {
@@ -6066,6 +6161,14 @@ const GuessMode = ({
       setRound(round + 1);
     }
   };
+  const doFreeze = () => {
+    if (revealed || freezeActive) return;
+    if (!consumePowerup('freezes')) return;
+    setFreezeActive(true);
+    setPu(currentPowerups());
+    Sound.shimmer();
+    Haptics.buzz(14);
+  };
   const fmtPrice = p => {
     if (p >= 1) return p.toFixed(2) + ' ETH';
     if (p >= 0.01) return p.toFixed(3) + ' ETH';
@@ -6086,8 +6189,15 @@ const GuessMode = ({
   const choose = side => {
     if (revealed) return;
     if (hintedSide && side === hintedSide) return; // blocked by hint
-    setRevealed(true);
     const correct = side === correctSide;
+    if (!correct && freezeActive) {
+      // Freeze absorbs the wrong answer — shake + let them try again
+      setFreezeActive(false);
+      Sound.wrong();
+      Haptics.buzz([8, 40, 8, 40, 8]);
+      return; // don't reveal, don't record — they get another shot
+    }
+    setRevealed(true);
     if (correct) {
       Sound.correct();
       Haptics.buzz(14);
@@ -6098,6 +6208,7 @@ const GuessMode = ({
     setTimeout(() => {
       const newResults = [...results, correct ? 'correct' : 'wrong'];
       setResults(newResults);
+      setFreezeActive(false);
       if (round + 1 >= pairs.current.length) {
         const pts = newResults.filter(r => r === 'correct').length;
         onFinish({
@@ -6144,8 +6255,11 @@ const GuessMode = ({
     pu: pu,
     onHint: doHint,
     onSkip: doSkip,
+    onFreeze: doFreeze,
     hintDisabled: revealed || !!hintedSide,
     skipDisabled: revealed,
+    freezeDisabled: revealed,
+    freezeActive: freezeActive,
     hintHint: "Eliminates the wrong option for this round"
   }), /*#__PURE__*/React.createElement(FrostedCard, {
     className: "p-4 mb-4 text-center"
@@ -6265,6 +6379,7 @@ const PriceMode = ({
   const [icons, setIcons] = useState([]);
   const [pu, setPu] = useState(() => currentPowerups());
   const [hintedSide, setHintedSide] = useState(null);
+  const [freezeActive, setFreezeActive] = useState(false);
   const current = pairs.current[round];
   if (!current) {
     return /*#__PURE__*/React.createElement("div", {
@@ -6306,19 +6421,35 @@ const PriceMode = ({
       setRevealed(false);
     }
   };
+  const doFreeze = () => {
+    if (revealed || freezeActive) return;
+    if (!consumePowerup('freezes')) return;
+    setFreezeActive(true);
+    setPu(currentPowerups());
+    Sound.shimmer();
+    Haptics.buzz(14);
+  };
   const choose = side => {
     if (revealed) return;
     if (side === hintedSide) return;
-    setRevealed(true);
     const correct = side === correctSide;
+    if (!correct && freezeActive) {
+      // Freeze absorbs the wrong answer — streak preserved, try again
+      setFreezeActive(false);
+      Sound.wrong();
+      Haptics.buzz([8, 40, 8, 40, 8]);
+      return;
+    }
+    setRevealed(true);
     if (correct) {
-      Sound.correct();
+      if (streak >= 2) { Sound.streak(); } else { Sound.correct(); }
       Haptics.buzz(14);
     } else {
       Sound.wrong();
       Haptics.buzz([8, 40, 8]);
     }
     setTimeout(() => {
+      setFreezeActive(false);
       if (correct) {
         const newStreak = streak + 1;
         setStreak(newStreak);
@@ -6393,8 +6524,11 @@ const PriceMode = ({
     pu: pu,
     onHint: doHint,
     onSkip: doSkip,
+    onFreeze: doFreeze,
     hintDisabled: revealed || !!hintedSide,
-    skipDisabled: revealed
+    skipDisabled: revealed,
+    freezeDisabled: revealed,
+    freezeActive: freezeActive
   }), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-3 lg:gap-10 lg:max-w-5xl lg:mx-auto mb-4"
   }, ['a', 'b'].map(side => {
@@ -6553,6 +6687,7 @@ const TraitMode = ({
   const [results, setResults] = useState([]);
   const [pu, setPu] = useState(() => currentPowerups());
   const [hintRange, setHintRange] = useState(null); // {lo, hi} narrowing the slider after hint
+  const [freezeActive, setFreezeActive] = useState(false);
   const current = questions.current[round];
   if (!current) {
     return /*#__PURE__*/React.createElement("div", {
@@ -6607,9 +6742,16 @@ const TraitMode = ({
       setHintRange(null);
     }
   };
+  const doFreeze = () => {
+    if (revealed || freezeActive) return;
+    if (!consumePowerup('freezes')) return;
+    setFreezeActive(true);
+    setPu(currentPowerups());
+    Sound.shimmer();
+    Haptics.buzz(14);
+  };
   const submit = () => {
     if (revealed) return;
-    setRevealed(true);
     const diff = Math.abs(guess - actual);
     let type, pts;
     if (diff <= 1) {
@@ -6625,6 +6767,15 @@ const TraitMode = ({
       type = 'wrong';
       pts = 0;
     }
+    // Freeze: if wrong (0 pts), absorb and let them re-try
+    if (pts === 0 && freezeActive) {
+      setFreezeActive(false);
+      Sound.wrong();
+      Haptics.buzz([8, 40, 8, 40, 8]);
+      // Don't reveal — let them adjust slider
+      return;
+    }
+    setRevealed(true);
     if (pts > 0) {
       Sound.correct();
       Haptics.buzz(pts === 3 ? 20 : 12);
@@ -6633,6 +6784,7 @@ const TraitMode = ({
       Haptics.buzz([8, 40, 8]);
     }
     setTimeout(() => {
+      setFreezeActive(false);
       const newResults = [...results, {
         type,
         pts
@@ -6713,8 +6865,11 @@ const TraitMode = ({
     pu: pu,
     onHint: doHint,
     onSkip: doSkip,
+    onFreeze: doFreeze,
     hintDisabled: revealed || !!hintRange,
-    skipDisabled: revealed
+    skipDisabled: revealed,
+    freezeDisabled: revealed,
+    freezeActive: freezeActive
   }), /*#__PURE__*/React.createElement(FrostedCard, {
     className: "p-6 mb-5 text-center"
   }, /*#__PURE__*/React.createElement("p", {
@@ -8449,6 +8604,7 @@ function DoodleOrNot() {
           icons: lastResult.icons,
           profileName: profile.name,
           avatarColor: profile.color || '#C5B3E6',
+          streak: streak.count || 0,
           day: dayNumber(),
           url: 'doodleornot.xyz'
         });

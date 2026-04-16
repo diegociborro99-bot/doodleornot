@@ -13,16 +13,23 @@ router.post('/', requireAuth, async (req, res) => {
     const day = (req.body && req.body.day) || todayISO();
     if (!['higher', 'rarity', 'trait'].includes(mode)) return res.status(400).json({ error: 'bad_mode' });
 
+    // Guard: prevent duplicate submission for same user/mode/day
+    const field = mode === 'higher' ? 'higherSale' : mode === 'rarity' ? 'rarityDuel' : 'traitRoulette';
+    const existingProgress = await prisma.dailyProgress.findUnique({
+      where: { userId_day: { userId: req.userId, day } }
+    });
+    if (existingProgress && existingProgress[field]) {
+      return res.json({ ok: true, progress: existingProgress, duplicate: true });
+    }
+
     // 1) insert a Score row (for replay/history)
     await prisma.score.create({
       data: { userId: req.userId, day, mode, points, icons: Array.isArray(icons) ? icons : [] }
     });
 
     // 2) upsert DailyProgress — mark this mode completed
-    const field = mode === 'higher' ? 'higherSale' : mode === 'rarity' ? 'rarityDuel' : 'traitRoulette';
-    const existing = await prisma.dailyProgress.findUnique({
-      where: { userId_day: { userId: req.userId, day } }
-    });
+    // (field already computed above for duplicate guard)
+    const existing = existingProgress;
     const badIcons = new Set(['wrong', 'down']);
     const wrongIconsToday = (Array.isArray(icons) ? icons : []).filter(i => badIcons.has(i));
 
@@ -40,10 +47,17 @@ router.post('/', requireAuth, async (req, res) => {
 
     // 3) update Stats (totalGames/totalCorrect/totalPoints/weekPoints/xp)
     const correct = (Array.isArray(icons) ? icons : []).filter(i => i === 'check' || i === 'up').length;
-    const isCurrentWeek = (ws) => ws === weekStartISO();
-    const statsNow = await prisma.stats.findUnique({ where: { userId: req.userId } });
     const weekStart = weekStartISO();
-    const weekPoints = (statsNow && isCurrentWeek(statsNow.weekStart)) ? statsNow.weekPoints + points : points;
+
+    // Atomic update: first reset weekPoints if new week, then increment
+    const statsNow = await prisma.stats.findUnique({ where: { userId: req.userId } });
+    if (statsNow && statsNow.weekStart !== weekStart) {
+      // New week — reset weekPoints before incrementing
+      await prisma.stats.update({
+        where: { userId: req.userId },
+        data: { weekPoints: 0, weekStart }
+      });
+    }
 
     await prisma.stats.upsert({
       where: { userId: req.userId },
@@ -51,7 +65,7 @@ router.post('/', requireAuth, async (req, res) => {
         totalGames: { increment: 1 },
         totalCorrect: { increment: correct },
         totalPoints: { increment: points },
-        weekPoints,
+        weekPoints: { increment: points },
         weekStart,
         xp: { increment: points }
       },
