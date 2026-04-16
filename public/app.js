@@ -785,10 +785,10 @@ const renderShareCard = ({
   ctx.stroke();
   // Title
   ctx.fillStyle = '#2D2D3F';
-  ctx.font = '700 72px Quicksand, system-ui, sans-serif';
+  ctx.font = '700 72px Fredoka, system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Doodle or Not', W / 2, 150);
-  ctx.font = '500 36px Quicksand, system-ui, sans-serif';
+  ctx.font = '500 36px Fredoka, system-ui, sans-serif';
   ctx.fillStyle = '#7B7B9A';
   ctx.fillText(`Day #${day}`, W / 2, 195);
   // Avatar dot + username
@@ -800,14 +800,14 @@ const renderShareCard = ({
   ctx.lineWidth = 5;
   ctx.stroke();
   ctx.fillStyle = '#2D2D3F';
-  ctx.font = '700 56px Quicksand, system-ui, sans-serif';
+  ctx.font = '700 56px Fredoka, system-ui, sans-serif';
   ctx.fillText('@' + profileName, W / 2, 470);
   // Mode
-  ctx.font = '600 40px Quicksand, system-ui, sans-serif';
+  ctx.font = '600 40px Fredoka, system-ui, sans-serif';
   ctx.fillStyle = '#4140FF';
   ctx.fillText(modeName, W / 2, 540);
   // Score big
-  ctx.font = '700 200px Fraunces, Quicksand, serif';
+  ctx.font = "700 200px 'Paytone One', Fredoka, sans-serif";
   ctx.fillStyle = '#2D2D3F';
   ctx.fillText(String(points) + ' pts', W / 2, 750);
   // Icons row
@@ -820,11 +820,11 @@ const renderShareCard = ({
     up: '▲',
     down: '▼'
   };
-  ctx.font = '600 72px Quicksand, system-ui, sans-serif';
+  ctx.font = '600 72px Fredoka, system-ui, sans-serif';
   ctx.fillStyle = '#4140FF';
   ctx.fillText((icons || []).map(i => sym[i] || '·').join('  '), W / 2, 850);
   // URL footer
-  ctx.font = '500 32px Quicksand, system-ui, sans-serif';
+  ctx.font = '500 32px Fredoka, system-ui, sans-serif';
   ctx.fillStyle = '#7B7B9A';
   ctx.fillText(url || 'doodleornot.xyz', W / 2, 990);
   canvas.toBlob(b => resolve(b), 'image/png', 0.95);
@@ -2574,7 +2574,7 @@ const WaterTitle = ({
     style: {
       fontSize: fontSize || undefined,
       lineHeight: 1.05,
-      fontFamily: "'Quicksand', sans-serif",
+      fontFamily: "'Fredoka', sans-serif",
       fontWeight: 600,
       letterSpacing: '-0.015em',
       textAlign: 'center',
@@ -2667,14 +2667,30 @@ const FooterSignature = () => {
   }, /*#__PURE__*/React.createElement("div", {
     className: "degos-doodle-halo",
     "aria-hidden": "true"
-  }), /*#__PURE__*/React.createElement("img", {
-    src: "./degos-doodle.png",
-    alt: "Degos' Doodle",
+  }), /*#__PURE__*/React.createElement("div", {
     className: "degos-doodle-img",
-    onError: e => {
-      e.currentTarget.style.display = 'none';
+    style: {
+      overflow: 'hidden'
     }
-  })));
+  }, (() => {
+    const d = Array.isArray(DOODLES) && DOODLES.length ? DOODLES[Math.abs(hashCode('degos-signature')) % DOODLES.length] : null;
+    return d ? /*#__PURE__*/React.createElement(DoodleAvatar, {
+      doodle: d,
+      size: 120,
+      rounded: true
+    }) : /*#__PURE__*/React.createElement("img", {
+      src: "./degos-doodle.png",
+      alt: "Degos' Doodle",
+      style: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover'
+      },
+      onError: e => {
+        e.currentTarget.style.display = 'none';
+      }
+    });
+  })())));
 };
 
 /* ==========================================================================
@@ -4308,8 +4324,10 @@ const AuthScreen = ({
             name: serverUser.username,
             passHash: 'server',
             color: serverUser.avatarColor || existing.color || '#C5B3E6',
-            // Preserve locally-uploaded avatar (data URL). Server only stores a faceShape hint.
-            avatar: existing.avatar && typeof existing.avatar === 'string' && existing.avatar.startsWith('data:') ? existing.avatar : serverUser.faceShape || existing.avatar || null,
+            // Preserve locally-uploaded avatar (data URL). Server only stores a faceShape hint,
+            // which is NOT an image src — keep it separate so ProfileAvatar falls back cleanly.
+            avatar: existing.avatar && typeof existing.avatar === 'string' && existing.avatar.startsWith('data:') ? existing.avatar : null,
+            faceShape: serverUser.faceShape || existing.faceShape || 'round',
             joined: existing.joined || Date.now(),
             isAdmin: isAdminUser,
             serverId: serverUser.id
@@ -4371,10 +4389,11 @@ const AuthScreen = ({
         const users = getUsers();
         const adminHash = await sha256Hex(ADMIN_PASSWORD_PLAIN);
         users[ADMIN_USERNAME] = {
+          ...(users[ADMIN_USERNAME] || {}),
           name: ADMIN_USERNAME,
           passHash: adminHash,
-          color: '#4140FF',
-          avatar: null,
+          color: users[ADMIN_USERNAME]?.color || '#4140FF',
+          avatar: users[ADMIN_USERNAME]?.avatar || null,
           joined: users[ADMIN_USERNAME]?.joined || Date.now(),
           isAdmin: true
         };
@@ -7809,7 +7828,7 @@ function DoodleOrNot() {
     return /*#__PURE__*/React.createElement("div", {
       className: "min-h-app font-sans",
       style: {
-        fontFamily: "'Quicksand', sans-serif"
+        fontFamily: "'Fredoka', sans-serif"
       }
     }, /*#__PURE__*/React.createElement(FontLoader, null), /*#__PURE__*/React.createElement(SkyBackground, null), /*#__PURE__*/React.createElement(AuthScreen, {
       onAuth: handleAuth
@@ -7821,7 +7840,7 @@ function DoodleOrNot() {
     return /*#__PURE__*/React.createElement("div", {
       className: "min-h-app font-sans",
       style: {
-        fontFamily: "'Quicksand', sans-serif"
+        fontFamily: "'Fredoka', sans-serif"
       }
     }, /*#__PURE__*/React.createElement(FontLoader, null), /*#__PURE__*/React.createElement(SkyBackground, null), /*#__PURE__*/React.createElement(OnboardingFlow, {
       onDone: completeOnboarding
@@ -7884,7 +7903,7 @@ function DoodleOrNot() {
     return /*#__PURE__*/React.createElement("div", {
       className: "min-h-app font-sans",
       style: {
-        fontFamily: "'Quicksand', sans-serif"
+        fontFamily: "'Fredoka', sans-serif"
       }
     }, /*#__PURE__*/React.createElement(FontLoader, null), /*#__PURE__*/React.createElement(SkyBackground, null), /*#__PURE__*/React.createElement(AppHeader, null), /*#__PURE__*/React.createElement(AdminPanel, {
       profile: profile,
@@ -7910,7 +7929,7 @@ function DoodleOrNot() {
     return /*#__PURE__*/React.createElement("div", {
       className: "min-h-app font-sans",
       style: {
-        fontFamily: "'Quicksand', sans-serif"
+        fontFamily: "'Fredoka', sans-serif"
       }
     }, /*#__PURE__*/React.createElement(FontLoader, null), /*#__PURE__*/React.createElement(SkyBackground, null), /*#__PURE__*/React.createElement(AppHeader, {
       compact: true
@@ -7937,7 +7956,7 @@ function DoodleOrNot() {
     return /*#__PURE__*/React.createElement("div", {
       className: "min-h-app font-sans",
       style: {
-        fontFamily: "'Quicksand', sans-serif"
+        fontFamily: "'Fredoka', sans-serif"
       }
     }, /*#__PURE__*/React.createElement(FontLoader, null), /*#__PURE__*/React.createElement(SkyBackground, null), /*#__PURE__*/React.createElement(AppHeader, {
       compact: true
@@ -7999,7 +8018,7 @@ function DoodleOrNot() {
     return /*#__PURE__*/React.createElement("div", {
       className: "min-h-app font-sans",
       style: {
-        fontFamily: "'Quicksand', sans-serif"
+        fontFamily: "'Fredoka', sans-serif"
       }
     }, /*#__PURE__*/React.createElement(FontLoader, null), /*#__PURE__*/React.createElement(SkyBackground, null), /*#__PURE__*/React.createElement(SplashScreen, {
       initial: profile,
@@ -8018,7 +8037,7 @@ function DoodleOrNot() {
   return /*#__PURE__*/React.createElement("div", {
     className: "min-h-app font-sans",
     style: {
-      fontFamily: "'Quicksand', sans-serif"
+      fontFamily: "'Fredoka', sans-serif"
     }
   }, /*#__PURE__*/React.createElement(FontLoader, null), /*#__PURE__*/React.createElement(SkyBackground, null), /*#__PURE__*/React.createElement(AppHeader, null), /*#__PURE__*/React.createElement("div", {
     key: tab,
@@ -8058,9 +8077,9 @@ function DoodleOrNot() {
   }));
 }
 
-/* ---------- Load Quicksand font ---------- */
+/* ---------- Load fonts ---------- */
 const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
-    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Paytone+One&display=swap');
 
     /* ============================================================
        MOBILE-FIRST GLOBAL OPTIMIZATIONS
@@ -8083,7 +8102,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
       scroll-behavior: smooth;
     }
     body, html, #root {
-      font-family: 'Quicksand', system-ui, sans-serif !important;
+      font-family: 'Fredoka', system-ui, sans-serif !important;
       letter-spacing: 0.01em;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -8200,7 +8219,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
       button, [role="button"] { min-height: 44px; min-width: 44px; }
     }
 
-    .font-display { font-family: 'Fraunces', 'Quicksand', serif; font-variation-settings: 'opsz' 144; letter-spacing: -0.02em; }
+    .font-display { font-family: 'Paytone One', 'Fredoka', system-ui, sans-serif; letter-spacing: -0.01em; font-weight: 400; }
     input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height: 28px; }
     @keyframes waterBob {
       0%,100% { transform: translateY(0); }
@@ -8314,7 +8333,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
       animation: degosGlowSoft 3.6s ease-in-out infinite;
     }
     .degos-sig {
-      font-family: 'Quicksand', sans-serif;
+      font-family: 'Fredoka', sans-serif;
       font-weight: 700;
       font-size: 12px;
       letter-spacing: 0.22em;
@@ -8729,31 +8748,28 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     }
   `);
 
-/* ---------- Mount (with error boundary that surfaces render errors) ---------- */
+/* ---------- Mount ---------- */
+ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(DoodleOrNot, null));
+
+/* ---------- Mount with Error Boundary ---------- */
 function __showFatal(title, err, extra) {
   try {
     var box = document.createElement('div');
-    box.style.cssText = 'position:fixed;inset:12px;z-index:99999;background:#fff;border:2px solid #E57373;border-radius:14px;padding:16px;font:12px/1.5 ui-monospace,Menlo,monospace;color:#2D2D3F;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.2);white-space:pre-wrap;';
-    box.textContent = title + '\n\n' + (err && err.message ? err.message : String(err)) + '\n\n' + ((err && err.stack) || '').split('\n').slice(0,8).join('\n') + (extra ? '\n\n' + extra : '');
+    box.style.cssText = 'position:fixed;inset:12px;z-index:99999;background:#fff;border:2px solid #E57373;border-radius:14px;padding:16px;font:13px/1.5 ui-monospace,Menlo,monospace;color:#2D2D3F;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.2);';
+    var msg = (err && (err.stack || err.message)) || String(err);
+    box.innerHTML = '<div style="font-weight:700;color:#B94A4A;margin-bottom:6px;">' + title + '</div><div style="white-space:pre-wrap;">' + String(msg).replace(/</g,'&lt;') + '</div>' + (extra ? '<div style="margin-top:8px;white-space:pre-wrap;color:#7B7B9A;">'+String(extra).replace(/</g,'&lt;')+'</div>' : '');
     document.body.appendChild(box);
-  } catch(e) {}
+    var s = document.getElementById('boot-splash'); if (s) s.style.display='none';
+  } catch(e){}
 }
 class __RootErrorBoundary extends React.Component {
   constructor(p){ super(p); this.state = { err: null }; }
-  static getDerivedStateFromError(err){ return { err }; }
-  componentDidCatch(err, info){
-    __showFatal('Render error', err, 'Component stack:' + (info && info.componentStack || ''));
-  }
-  render(){
-    if (this.state.err) return null;
-    return this.props.children;
-  }
+  static getDerivedStateFromError(err){ return { err: err }; }
+  componentDidCatch(err, info){ __showFatal('Render error', err, 'Component stack:' + (info && info.componentStack || '')); }
+  render(){ if (this.state.err) return null; return this.props.children; }
 }
 try {
   ReactDOM.createRoot(document.getElementById('root')).render(
     React.createElement(__RootErrorBoundary, null, React.createElement(DoodleOrNot))
   );
-} catch (e) {
-  __showFatal('Mount error', e);
-}
-
+} catch (e) { __showFatal('Mount error', e); }
