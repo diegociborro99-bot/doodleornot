@@ -5019,7 +5019,8 @@ const AdminPanel = ({
   profile,
   onExit,
   onLogout,
-  onEnterApp
+  onEnterApp,
+  onWeeklyReset
 }) => {
   const [users, setUsersState] = useState(() => getUsers());
   const [confirmWipe, setConfirmWipe] = useState(null);
@@ -5070,9 +5071,13 @@ const AdminPanel = ({
       const s = storage.get(userStatsKey(key), null);
       if (s) {
         s.weekPts = 0;
+        s.bestWeek = 0;
         storage.set(userStatsKey(key), s);
       }
     }
+    // Trigger leaderboard re-fetch from server + reset parent state
+    if (window._refetchLeaderboard) window._refetchLeaderboard();
+    if (onWeeklyReset) onWeeklyReset();
     refresh();
     alert('Weekly leaderboard reset!');
   };
@@ -7119,7 +7124,12 @@ const LeaderboardScreen = ({
   const [tab, setTab] = useState('this');
   const [serverRows, setServerRows] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fetchKey, setFetchKey] = useState(0);
   const api = typeof window !== 'undefined' ? window.DON_API : null;
+
+  // Expose refetch so admin reset can trigger it
+  const refetchBoard = () => setFetchKey(k => k + 1);
+  useEffect(() => { window._refetchLeaderboard = refetchBoard; return () => { delete window._refetchLeaderboard; }; }, []);
 
   useEffect(() => {
     if (!api) { setLoading(false); return; }
@@ -7127,56 +7137,20 @@ const LeaderboardScreen = ({
     api.leaderboard('weekly', 50)
       .then(data => {
         if (data && Array.isArray(data.rows)) setServerRows(data.rows);
+        else setServerRows([]);
       })
-      .catch(() => {})
+      .catch(() => setServerRows([]))
       .finally(() => setLoading(false));
-  }, [tab]);
+  }, [tab, fetchKey]);
 
-  // Empty state: user is brand new AND nobody else is on the board yet
-  // (we keep the mock board so it's never literally empty in practice; only
-  // trigger the empty illustration when the user hasn't played and selected "last week")
-  if (tab === 'last' && (weekPts || 0) === 0) {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "px-4 pt-6 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-8 mx-auto scroll-momentum"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center justify-center gap-2 mb-1"
-    }, /*#__PURE__*/React.createElement(TrophyIcon, {
-      size: 28
-    }), /*#__PURE__*/React.createElement("h1", {
-      className: "font-display font-semibold text-3xl",
-      style: {
-        color: '#2D2D3F'
-      }
-    }, "Leaderboard")), /*#__PURE__*/React.createElement("p", {
-      className: "text-xs text-center mb-5",
-      style: {
-        color: '#7B7B9A'
-      }
-    }, "Weekly rankings \xB7 resets Monday 00:00 UTC"), /*#__PURE__*/React.createElement("div", {
-      className: "flex gap-2 mb-5 justify-center"
-    }, /*#__PURE__*/React.createElement(Pill, {
-      active: tab === 'this',
-      onClick: () => setTab('this')
-    }, "This week"), /*#__PURE__*/React.createElement(Pill, {
-      active: tab === 'last',
-      onClick: () => setTab('last')
-    }, "Last week")), /*#__PURE__*/React.createElement(FrostedCard, {
-      className: "p-4"
-    }, /*#__PURE__*/React.createElement(EmptyState, {
-      title: t('league_empty'),
-      subtitle: t('be_first')
-    })));
-  }
-  // Use server leaderboard if available; fall back to mock data
-  const baseBoard = (serverRows && serverRows.length > 0)
-    ? serverRows.map(r => ({
-        name: r.username,
-        color: r.avatarColor || '#C5B3E6',
-        pts: r.points,
-        me: r.username === profile.name
-      }))
-    : [...MOCK_LEADERBOARD];
-  // Ensure current user is on the board
+  // Build board from server data only (no mock data)
+  const baseBoard = (serverRows || []).map(r => ({
+    name: r.username,
+    color: r.avatarColor || '#C5B3E6',
+    pts: r.points,
+    me: r.username === profile.name
+  }));
+  // Always ensure current user is on the board
   const alreadyOnBoard = baseBoard.some(r => r.me);
   if (!alreadyOnBoard) {
     baseBoard.push({
@@ -7188,6 +7162,29 @@ const LeaderboardScreen = ({
     });
   }
   const merged = baseBoard.sort((a, b) => b.pts - a.pts);
+
+  // Empty state: nobody has points this week
+  const totalPts = merged.reduce((s, r) => s + r.pts, 0);
+  if (!loading && totalPts === 0) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "px-4 pt-6 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-8 mx-auto scroll-momentum"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-center gap-2 mb-1"
+    }, /*#__PURE__*/React.createElement(TrophyIcon, {
+      size: 28
+    }), /*#__PURE__*/React.createElement("h1", {
+      className: "font-display font-semibold text-3xl",
+      style: { color: '#2D2D3F' }
+    }, "Leaderboard")), /*#__PURE__*/React.createElement("p", {
+      className: "text-xs text-center mb-5",
+      style: { color: '#7B7B9A' }
+    }, "Weekly rankings \xB7 resets Monday 00:00 UTC"), /*#__PURE__*/React.createElement(FrostedCard, {
+      className: "p-8 text-center anim-pop-in"
+    }, /*#__PURE__*/React.createElement(EmptyState, {
+      title: "No scores yet this week",
+      subtitle: "Play a round to get on the board!"
+    })));
+  }
   const myRank = merged.findIndex(r => r.me) + 1;
   const top3 = merged.slice(0, 3);
   const rest = merged.slice(3, 20);
@@ -8358,7 +8355,8 @@ function DoodleOrNot() {
       profile: profile,
       onExit: () => setAdminMode(false),
       onLogout: handleLogout,
-      onEnterApp: () => setAdminMode(false)
+      onEnterApp: () => setAdminMode(false),
+      onWeeklyReset: () => setStats(prev => ({ ...prev, weekPts: 0 }))
     }), overlays, /*#__PURE__*/React.createElement(FooterSignature, null));
   }
 
