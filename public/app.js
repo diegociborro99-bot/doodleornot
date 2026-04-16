@@ -1456,6 +1456,7 @@ const ProfileAvatar = ({
   size = 80,
   animated = true
 }) => {
+  const [imgError, setImgError] = useState(false);
   const borderW = Math.max(2, Math.round(size / 26));
   const style = {
     width: size,
@@ -1464,7 +1465,7 @@ const ProfileAvatar = ({
     border: `${borderW}px solid ${STROKE}`,
     boxShadow: animated ? `0 8px 22px ${profile.color}66` : 'none'
   };
-  const hasValidAvatar = profile.avatar && typeof profile.avatar === 'string'
+  const hasValidAvatar = !imgError && profile.avatar && typeof profile.avatar === 'string'
     && (profile.avatar.startsWith('data:') || profile.avatar.startsWith('http'));
   if (hasValidAvatar) {
     return /*#__PURE__*/React.createElement("div", {
@@ -1474,7 +1475,7 @@ const ProfileAvatar = ({
       src: profile.avatar,
       alt: "avatar",
       draggable: false,
-      onError: function(e) { e.currentTarget.style.display = 'none'; },
+      onError: function() { setImgError(true); },
       style: {
         width: '100%',
         height: '100%',
@@ -7770,7 +7771,15 @@ function DoodleOrNot() {
   const [profile, setProfile] = useState(() => {
     if (!username) return null;
     const users = getUsers();
-    return users[username] || null;
+    const p = users[username] || null;
+    // Sanitize: avatar must be a valid data URL or http URL, otherwise null
+    if (p && p.avatar && typeof p.avatar === 'string'
+        && !p.avatar.startsWith('data:') && !p.avatar.startsWith('http')) {
+      p.avatar = null;
+      users[username] = p;
+      saveUsers(users);
+    }
+    return p;
   });
   const [adminMode, setAdminMode] = useState(() => !!(profile && profile.isAdmin));
   const [tab, setTab] = useState('home');
@@ -7860,20 +7869,23 @@ function DoodleOrNot() {
     (async () => {
       try {
         const data = await api.me();
-        if (cancelled || !data || !data.user) return;
-        const u = data.user;
+        if (cancelled || !data || !data.username) return;
+        const u = data;
         const uname = u.username;
         // Mirror profile locally so the rest of the app sees it.
         const users = getUsers();
         const existing = users[uname] || {};
+        const existingAvatar = existing.avatar && typeof existing.avatar === 'string'
+          && existing.avatar.startsWith('data:') ? existing.avatar : null;
         const hydrated = {
           ...existing,
-          username: uname,
-          avatarColor: u.avatarColor || existing.avatarColor || '#C5B3E6',
-          avatar: u.avatarData || existing.avatar || null,
+          name: uname,
+          color: u.avatarColor || existing.color || '#C5B3E6',
+          avatar: u.avatarData || existingAvatar,
           faceShape: u.faceShape || existing.faceShape || 'round',
-          createdAt: existing.createdAt || Date.now(),
-          isAdmin: !!existing.isAdmin
+          joined: existing.joined || Date.now(),
+          isAdmin: !!existing.isAdmin,
+          serverId: u.id
         };
         users[uname] = hydrated;
         storage.set('don:users', users);
