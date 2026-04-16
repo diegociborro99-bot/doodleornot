@@ -138,6 +138,26 @@ const ACHIEVEMENTS = [{
   name: 'Top 10',
   desc: 'Crack the weekly top 10.',
   tint: '#90CAF9'
+}, {
+  id: 'comeback_kid',
+  name: 'Comeback Kid',
+  desc: 'Use Freeze and answer correctly after.',
+  tint: '#B3D4FC'
+}, {
+  id: 'points_500',
+  name: 'Half Grand',
+  desc: 'Earn 500 total points.',
+  tint: '#FFE082'
+}, {
+  id: 'games_50',
+  name: 'Doodle Addict',
+  desc: 'Play 50 game modes total.',
+  tint: '#FFAB91'
+}, {
+  id: 'flawless',
+  name: 'Flawless Victory',
+  desc: 'Get all perfect scores in a single mode.',
+  tint: '#A8E6CF'
 }];
 
 // Progress for a given achievement as a 0..1 ratio given current stats/streak/progress/dexCount
@@ -167,6 +187,13 @@ const achievementProgress = (id, {
       return (stats.gamesPlayed || 0) > 0 ? 0.33 : 0;
     case 'top_10':
       return ratio(stats.bestWeek, 30);
+    case 'comeback_kid':
+    case 'flawless':
+      return (stats.gamesPlayed || 0) > 0 ? 0.33 : 0;
+    case 'points_500':
+      return ratio(stats.totalPts, 500);
+    case 'games_50':
+      return ratio(stats.gamesPlayed, 50);
     default:
       return 0;
   }
@@ -177,6 +204,8 @@ const checkAchievements = ({
   prev,
   mode,
   points,
+  icons,
+  clutch,
   newStats,
   newProgress,
   newStreak
@@ -195,6 +224,10 @@ const checkAchievements = ({
   if (mode === 'trait' && points >= 15) add('rarity_hunter');
   if (mode === 'guess' && points >= 15) add('whale_spotter');
   if (mode === 'price' && points >= 15) add('eye_for_rare');
+  if (newStats.totalPts >= 500) add('points_500');
+  if (newStats.gamesPlayed >= 50) add('games_50');
+  if (clutch) add('comeback_kid');
+  if (Array.isArray(icons) && icons.length > 0 && icons.every(i => i === 'perfect')) add('flawless');
   const newly = [...unlocked].filter(id => !prev.includes(id));
   return {
     all: [...unlocked],
@@ -4651,6 +4684,22 @@ const PowerupsBar = ({
   }
 }, "x", pu.freezes, " \xB7 2nd chance"))));
 
+/* Floating score popup: shows "+X" that rises and fades after each answer */
+const ScorePopup = ({ points, type, visible }) => {
+  if (!visible) return null;
+  const color = type === 'perfect' ? '#FFE082' : type === 'correct' || type === 'up' ? '#7DD8A0' : type === 'near' ? '#90CAF9' : '#FF8A8A';
+  const label = points > 0 ? `+${points}` : type === 'skip' ? 'Skip' : 'Miss';
+  return /*#__PURE__*/React.createElement("div", {
+    className: "score-popup",
+    style: {
+      position: 'absolute', top: '40%', left: '50%', transform: 'translateX(-50%)',
+      zIndex: 50, fontSize: '2rem', fontWeight: 800,
+      color: color, textShadow: `0 2px 8px ${color}66`,
+      fontFamily: "'Paytone One', system-ui, sans-serif"
+    }
+  }, label);
+};
+
 /* In-game powerup row. Used inside each GameMode. */
 const GamePowerBar = ({
   pu,
@@ -5854,6 +5903,47 @@ const ResultIcon = ({
    HOME SCREEN
    ========================================================================== */
 
+/* Daily Reward Strip — shows 7-day streak calendar with bonus points */
+const DailyRewardStrip = ({ streak = 0, claimedToday = false }) => {
+  const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const todayIdx = (new Date().getUTCDay() + 6) % 7; // Mon=0
+  const bonusForDay = i => i < 5 ? 1 : 2; // weekends give 2x
+  return /*#__PURE__*/React.createElement(FrostedCard, {
+    className: "p-3 mb-4 anim-float-in"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[11px] font-bold tracking-wider uppercase",
+    style: { color: '#7B7B9A' }
+  }, "\uD83D\uDD25 Daily Streak Bonus"), /*#__PURE__*/React.createElement("span", {
+    className: "text-[11px] font-semibold",
+    style: { color: streak >= 7 ? '#4140FF' : '#7B7B9A' }
+  }, streak, "-day streak")), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-1.5 justify-between"
+  }, DAYS.map((d, i) => {
+    const isPast = i < todayIdx;
+    const isToday = i === todayIdx;
+    const active = isPast && streak > (todayIdx - i) ? true : (isToday && claimedToday);
+    const bonus = bonusForDay(i);
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      className: "flex-1 flex flex-col items-center gap-0.5"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all",
+      style: {
+        background: active ? '#7DD8A0' : isToday ? '#FFE082' : 'rgba(255,255,255,0.6)',
+        border: isToday ? '2px solid #4140FF' : '1.5px solid #E8E0F0',
+        color: active ? '#FFF' : isToday ? '#2D2D3F' : '#7B7B9A',
+        transform: isToday ? 'scale(1.1)' : 'none',
+        boxShadow: isToday ? '0 2px 8px rgba(65,64,255,0.2)' : 'none'
+      }
+    }, active ? '✓' : d), /*#__PURE__*/React.createElement("span", {
+      className: "text-[9px] font-semibold",
+      style: { color: active ? '#7DD8A0' : '#7B7B9A' }
+    }, "+", bonus));
+  })));
+};
+
 const HomeScreen = ({
   profile,
   progress,
@@ -5998,6 +6088,9 @@ const HomeScreen = ({
     }
   }, "Play any mode to keep your streak alive.")))), /*#__PURE__*/React.createElement(PowerupsBar, {
     pu: powerups
+  }), /*#__PURE__*/React.createElement(DailyRewardStrip, {
+    streak: streak,
+    claimedToday: Object.values(progress).some(Boolean)
   }), /*#__PURE__*/React.createElement("div", {
     className: "lg:grid lg:grid-cols-2 lg:gap-4"
   }, /*#__PURE__*/React.createElement(MoodCard, null), /*#__PURE__*/React.createElement("div", {
@@ -6153,8 +6246,8 @@ const GuessMode = ({
       if (a.s.p === b.s.p) continue;
       const hi = Math.max(a.s.p, b.s.p);
       const lo = Math.min(a.s.p, b.s.p);
-      // require a meaningful gap: the higher price must be >= 1.35x the lower
-      if (hi / lo < 1.35) continue;
+      // require a minimum gap so pairs aren't impossibly close
+      if (hi / lo < 1.15) continue;
       used.add(a.id);
       used.add(b.id);
       pairs.current.push({
@@ -6162,6 +6255,12 @@ const GuessMode = ({
         b
       });
     }
+    // Progressive difficulty: sort easiest (highest price ratio) first
+    pairs.current.sort((p1, p2) => {
+      const r1 = Math.max(p1.a.s.p, p1.b.s.p) / Math.min(p1.a.s.p, p1.b.s.p);
+      const r2 = Math.max(p2.a.s.p, p2.b.s.p) / Math.min(p2.a.s.p, p2.b.s.p);
+      return r2 - r1;
+    });
     // Prefetch all doodle images for this session upfront
     prefetchDoodleImages(pairs.current.flatMap(p => [p.a, p.b]));
   }
@@ -6171,6 +6270,8 @@ const GuessMode = ({
   const [pu, setPu] = useState(() => currentPowerups());
   const [hintedSide, setHintedSide] = useState(null); // which side to grey out
   const [freezeActive, setFreezeActive] = useState(false); // second-chance shield
+  const [popup, setPopup] = useState(null);
+  const [animSide, setAnimSide] = useState(null);
   const current = pairs.current[round];
   if (!current) {
     return /*#__PURE__*/React.createElement("div", {
@@ -6250,6 +6351,8 @@ const GuessMode = ({
       return; // don't reveal, don't record — they get another shot
     }
     setRevealed(true);
+    setPopup({ points: correct ? 1 : 0, type: correct ? 'correct' : 'wrong' });
+    setAnimSide(side);
     if (correct) {
       Sound.correct();
       Haptics.buzz(14);
@@ -6261,6 +6364,8 @@ const GuessMode = ({
       const newResults = [...results, correct ? 'correct' : 'wrong'];
       setResults(newResults);
       setFreezeActive(false);
+      setPopup(null);
+      setAnimSide(null);
       if (round + 1 >= pairs.current.length) {
         const pts = newResults.filter(r => r === 'correct').length;
         onFinish({
@@ -6286,7 +6391,8 @@ const GuessMode = ({
     return () => window.removeEventListener('keydown', h);
   }, [revealed, round, hintedSide]);
   return /*#__PURE__*/React.createElement("div", {
-    className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
+    className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto",
+    style: { position: 'relative' }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -6335,7 +6441,7 @@ const GuessMode = ({
     return /*#__PURE__*/React.createElement(FrostedCard, {
       key: side,
       onClick: () => choose(side),
-      className: `p-3 lg:p-6 transition-all ${isHintedOut ? 'cursor-not-allowed' : 'cursor-pointer'} ${revealed ? '' : 'active:scale-95 lg:hover:-translate-y-1'}`,
+      className: `p-3 lg:p-6 transition-all ${isHintedOut ? 'cursor-not-allowed' : 'cursor-pointer'} ${revealed ? '' : 'active:scale-95 lg:hover:-translate-y-1'} ${animSide === side && side === correctSide ? 'anim-correct-pulse' : ''} ${animSide === side && side !== correctSide ? 'anim-shake' : ''}`,
       style: {
         outline: isCorrect ? '3px solid #7DD8A0' : isWrong ? '3px solid #FF8A8A' : 'none',
         outlineOffset: '2px',
@@ -6389,7 +6495,7 @@ const GuessMode = ({
     style: {
       background: '#C5B3E6'
     }
-  })))));
+  })))), /*#__PURE__*/React.createElement(ScorePopup, { points: popup?.points || 0, type: popup?.type || '', visible: !!popup }));
 };
 
 /* ==========================================================================
@@ -6411,10 +6517,10 @@ const PriceMode = ({
       const b = DOODLES[Math.floor(rng.current() * DOODLES.length)];
       if (a.id === b.id || used.has(a.id) || used.has(b.id)) continue;
       if (a.r === b.r) continue;
-      // Skew: try to keep rarity difference meaningful (at least 15% apart)
+      // Allow pairs with rank diff >= 100 (progressive difficulty will sort them)
       const ra = a.rank || 1;
       const rb = b.rank || 1;
-      if (Math.abs(ra - rb) < 150) continue;
+      if (Math.abs(ra - rb) < 100) continue;
       used.add(a.id);
       used.add(b.id);
       pairs.current.push({
@@ -6422,6 +6528,12 @@ const PriceMode = ({
         b
       });
     }
+    // Progressive difficulty: sort easiest (largest rank difference) first
+    pairs.current.sort((p1, p2) => {
+      const d1 = Math.abs((p1.a.rank || 1) - (p1.b.rank || 1));
+      const d2 = Math.abs((p2.a.rank || 1) - (p2.b.rank || 1));
+      return d2 - d1;
+    });
     prefetchDoodleImages(pairs.current.flatMap(p => [p.a, p.b]));
   }
   const [round, setRound] = useState(0);
@@ -6432,6 +6544,8 @@ const PriceMode = ({
   const [pu, setPu] = useState(() => currentPowerups());
   const [hintedSide, setHintedSide] = useState(null);
   const [freezeActive, setFreezeActive] = useState(false);
+  const [popup, setPopup] = useState(null);
+  const [animSide, setAnimSide] = useState(null);
   const current = pairs.current[round];
   if (!current) {
     return /*#__PURE__*/React.createElement("div", {
@@ -6493,15 +6607,20 @@ const PriceMode = ({
       return;
     }
     setRevealed(true);
+    setAnimSide(side);
     if (correct) {
+      setPopup({ points: 2 * mult, type: 'up' });
       if (streak >= 2) { Sound.streak(); } else { Sound.correct(); }
       Haptics.buzz(14);
     } else {
+      setPopup({ points: 0, type: 'down' });
       Sound.wrong();
       Haptics.buzz([8, 40, 8]);
     }
     setTimeout(() => {
       setFreezeActive(false);
+      setPopup(null);
+      setAnimSide(null);
       if (correct) {
         const newStreak = streak + 1;
         setStreak(newStreak);
@@ -6542,7 +6661,8 @@ const PriceMode = ({
     });
   };
   return /*#__PURE__*/React.createElement("div", {
-    className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
+    className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto",
+    style: { position: 'relative' }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -6591,7 +6711,7 @@ const PriceMode = ({
     return /*#__PURE__*/React.createElement(FrostedCard, {
       key: side,
       onClick: () => choose(side),
-      className: `p-3 lg:p-6 transition-all ${revealed || isHintedOut ? '' : 'cursor-pointer active:scale-95 lg:hover:-translate-y-1'}`,
+      className: `p-3 lg:p-6 transition-all ${revealed || isHintedOut ? '' : 'cursor-pointer active:scale-95 lg:hover:-translate-y-1'} ${animSide === side && side === correctSide ? 'anim-correct-pulse' : ''} ${animSide === side && side !== correctSide ? 'anim-shake' : ''}`,
       style: {
         outline: isCorrect ? '3px solid #7DD8A0' : isWrong ? '3px solid #FF8A8A' : 'none',
         outlineOffset: '2px',
@@ -6655,7 +6775,7 @@ const PriceMode = ({
     style: {
       color: '#2D2D3F'
     }
-  }, "Game over \xB7 streak ", streak)));
+  }, "Game over \xB7 streak ", streak)), /*#__PURE__*/React.createElement(ScorePopup, { points: popup?.points || 0, type: popup?.type || '', visible: !!popup }));
 };
 
 /* ==========================================================================
@@ -6723,8 +6843,8 @@ const TraitMode = ({
       const next = remaining.pop();
       if (!wanted.some(w => w.type === next.type && w.value === next.value)) wanted.push(next);
     }
-    // Shuffle the final question order so player can't predict bucket position
-    shuf(wanted);
+    // Progressive difficulty: sort easiest first (traits furthest from 25% are easier to guess)
+    wanted.sort((a, b) => Math.abs(b.pct - 25) - Math.abs(a.pct - 25));
     const picked = wanted;
     // For each picked trait, collect up to 3 example Doodles that have it (deterministic)
     for (const q of picked) {
@@ -6751,6 +6871,7 @@ const TraitMode = ({
   const [pu, setPu] = useState(() => currentPowerups());
   const [hintRange, setHintRange] = useState(null); // {lo, hi} narrowing the slider after hint
   const [freezeActive, setFreezeActive] = useState(false);
+  const [popup, setPopup] = useState(null);
   const current = questions.current[round];
   if (!current) {
     return /*#__PURE__*/React.createElement("div", {
@@ -6845,6 +6966,7 @@ const TraitMode = ({
       return;
     }
     setRevealed(true);
+    setPopup({ points: pts, type: type });
     if (pts > 0) {
       Sound.correct();
       Haptics.buzz(pts === 3 ? 20 : 12);
@@ -6854,6 +6976,7 @@ const TraitMode = ({
     }
     setTimeout(() => {
       setFreezeActive(false);
+      setPopup(null);
       const newResults = [...results, {
         type,
         pts
@@ -6916,7 +7039,8 @@ const TraitMode = ({
     return () => window.removeEventListener('keydown', h);
   }, [revealed, guess, round, submit]);
   return /*#__PURE__*/React.createElement("div", {
-    className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto"
+    className: "px-4 pt-4 pb-nav max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto",
+    style: { position: 'relative' }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -7058,7 +7182,7 @@ const TraitMode = ({
   }, /*#__PURE__*/React.createElement(ResultIcon, {
     type: r.type,
     size: 18
-  })))));
+  })))), /*#__PURE__*/React.createElement(ScorePopup, { points: popup?.points || 0, type: popup?.type || '', visible: !!popup }));
 };
 
 /* ==========================================================================
@@ -8463,6 +8587,8 @@ function DoodleOrNot() {
       prev: achievements,
       mode: result.mode,
       points: result.points,
+      icons: result.icons,
+      clutch: result.clutch,
       newStats,
       newProgress,
       newStreak
@@ -8978,6 +9104,40 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     .anim-float-in   { animation: floatIn 0.55s cubic-bezier(.2,.9,.2,1) both; }
     .anim-pop-in     { animation: popIn   0.55s cubic-bezier(.2,.9,.3,1.2) both; }
     .anim-page-in    { animation: pageIn  0.4s  cubic-bezier(.2,.8,.2,1) both; }
+
+    /* ===== Score popup float-up ===== */
+    @keyframes scorePop {
+      0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+      20%  { opacity: 1; transform: translateY(-10px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-50px) scale(1); }
+    }
+    .score-popup { animation: scorePop 1.1s cubic-bezier(.2,.8,.2,1) forwards; pointer-events: none; }
+
+    /* ===== Wrong shake ===== */
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-6px) rotate(-1deg); }
+      30% { transform: translateX(5px) rotate(0.5deg); }
+      45% { transform: translateX(-4px); }
+      60% { transform: translateX(3px); }
+      75% { transform: translateX(-2px); }
+    }
+    .anim-shake { animation: wrongShake 0.5s ease-out; }
+
+    /* ===== Correct pulse glow ===== */
+    @keyframes correctPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(125,216,160,0.5); }
+      50%  { box-shadow: 0 0 0 12px rgba(125,216,160,0); }
+      100% { box-shadow: 0 0 0 0 rgba(125,216,160,0); }
+    }
+    .anim-correct-pulse { animation: correctPulse 0.6s ease-out; }
+
+    /* ===== Round slide transition ===== */
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .anim-slide-in { animation: slideInRight 0.35s cubic-bezier(.2,.8,.2,1) both; }
 
     /* ===== Hover lift ===== */
     .hover-lift { transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease; }
