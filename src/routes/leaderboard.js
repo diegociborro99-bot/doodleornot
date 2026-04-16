@@ -20,13 +20,14 @@ router.get('/', optionalAuth, async (req, res) => {
         select: {
           userId: true,
           weekPoints: true,
-          user: { select: { username: true, avatarColor: true } }
+          user: { select: { username: true, avatarColor: true, avatarData: true } }
         }
       });
       return res.json({ scope, weekStart, weekNumber: getWeekNumber(), rows: rows.map((r, i) => ({
         rank: i + 1,
         username: r.user.username,
         avatarColor: r.user.avatarColor,
+        avatarData: r.user.avatarData || null,
         points: r.weekPoints
       })) });
     }
@@ -37,13 +38,14 @@ router.get('/', optionalAuth, async (req, res) => {
       select: {
         userId: true,
         totalPoints: true,
-        user: { select: { username: true, avatarColor: true } }
+        user: { select: { username: true, avatarColor: true, avatarData: true } }
       }
     });
     res.json({ scope, rows: rows.map((r, i) => ({
       rank: i + 1,
       username: r.user.username,
       avatarColor: r.user.avatarColor,
+      avatarData: r.user.avatarData || null,
       points: r.totalPoints
     })) });
   } catch (err) {

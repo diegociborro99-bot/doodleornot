@@ -734,9 +734,7 @@ const consumePowerup = kind => {
   pu[kind] = Math.max(0, (pu[kind] || 0) - 1);
   savePowerups(u, pu);
   if (kind !== 'freezes' && window.DON_API && window.DON_API.usePowerup) {
-    try {
-      window.DON_API.usePowerup(kind);
-    } catch (_) {}
+    window.DON_API.usePowerup(kind).catch(() => {});
   }
   return true;
 };
@@ -6775,8 +6773,8 @@ const TraitMode = ({
     if (revealed || hintRange) return;
     if (!consumePowerup('hints')) return;
     setPu(currentPowerups());
-    // reveal a scaled window around the actual value (±5 base, wider for common traits)
-    const hintW = Math.max(5, Math.round(5 * Math.max(1, actual / 5)));
+    // reveal a proportional window around the actual value (±50% of actual, min ±3)
+    const hintW = Math.max(3, Math.round(actual * 0.5));
     const lo = Math.max(0, Math.round(actual) - hintW);
     const hi = Math.min(50, Math.round(actual) + hintW);
     setHintRange({
@@ -6819,13 +6817,11 @@ const TraitMode = ({
   const submit = () => {
     if (revealed) return;
     const diff = Math.abs(guess - actual);
-    // Scaled thresholds: harder for low-rarity traits, more forgiving for common ones
-    // Base: perfect <=1, correct <=3, near <=8 (for a ~5% trait)
-    // Scale factor: max(1, actual/5) so a 10% trait gets 2x tolerance, 1% stays at 1x
-    const scale = Math.max(1, actual / 5);
-    const tPerfect = Math.max(1, Math.round(1 * scale));
-    const tCorrect = Math.max(2, Math.round(3 * scale));
-    const tNear = Math.max(4, Math.round(8 * scale));
+    // Tight proportional thresholds: ±10% of actual for perfect, ±25% for correct, ±50% for near
+    // Minimum floors ensure very small traits (0.5%) still have reachable but tight windows
+    const tPerfect = Math.max(0.5, actual * 0.10);
+    const tCorrect = Math.max(1.5, actual * 0.25);
+    const tNear    = Math.max(3,   actual * 0.50);
     let type, pts;
     if (diff <= tPerfect) {
       type = 'perfect';
@@ -6878,10 +6874,9 @@ const TraitMode = ({
   };
   const lastResult = revealed ? (() => {
     const diff = Math.abs(guess - actual);
-    const sc = Math.max(1, actual / 5);
-    const tP = Math.max(1, Math.round(1 * sc));
-    const tC = Math.max(2, Math.round(3 * sc));
-    const tN = Math.max(4, Math.round(8 * sc));
+    const tP = Math.max(0.5, actual * 0.10);
+    const tC = Math.max(1.5, actual * 0.25);
+    const tN = Math.max(3,   actual * 0.50);
     if (diff <= tP) return {
       type: 'perfect',
       label: 'Bullseye!'
@@ -7393,6 +7388,7 @@ const LeaderboardScreen = ({
   const baseBoard = (serverRows || []).map(r => ({
     name: r.username,
     color: r.avatarColor || '#C5B3E6',
+    avatar: r.avatarData || null,
     pts: r.points,
     me: r.username === profile.name
   }));
@@ -9001,10 +8997,11 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     .avatar-glow { animation: avatarPulse 3.2s ease-in-out infinite; }
 
     /* ===== Doodle card image — scales up on desktop to fill 2-col layout ===== */
-    .doodle-card-img { width: 100%; display: flex; justify-content: center; }
-    .doodle-card-img > img, .doodle-card-img > div { width: 100% !important; height: auto !important; aspect-ratio: 1 / 1; max-width: 170px; }
+    .doodle-card-img { width: 100%; display: flex; justify-content: center; align-items: center; }
+    .doodle-card-img > div { width: 100% !important; height: auto !important; aspect-ratio: 1 / 1; max-width: 260px; margin: 0 auto; }
+    .doodle-card-img > div > img { width: 100% !important; height: 100% !important; object-fit: cover; }
     @media (min-width: 1024px) {
-      .doodle-card-img > img, .doodle-card-img > div { max-width: 380px; }
+      .doodle-card-img > div { max-width: 380px; }
     }
 
     /* ===== Rainbow slow spin ===== */
