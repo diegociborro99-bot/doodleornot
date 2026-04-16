@@ -1493,35 +1493,106 @@ const ProfileAvatar = ({
    DOODLE AVATAR — procedural SVG of a Doodle-style character
    ========================================================================== */
 
+/* Global image cache: prevents re-requesting URLs we already loaded successfully */
+const _imgCache = new Set();
+const _imgFailed = new Set();
+
+/* Prefetch a list of doodle objects so images are warm in browser cache */
+const prefetchDoodleImages = doodles => {
+  if (!Array.isArray(doodles)) return;
+  doodles.forEach(d => {
+    if (!d) return;
+    const url = doodleImage(d);
+    if (_imgCache.has(url) || _imgFailed.has(url)) return;
+    const img = new Image();
+    img.onload = () => _imgCache.add(url);
+    img.src = url;
+  });
+};
 const DoodleAvatar = ({
   doodle,
   size = 120,
   rounded = true,
   onFail
 }) => {
-  const [failed, setFailed] = useState(false);
+  const [status, setStatus] = useState('loading'); // loading | loaded | retrying | failed
   const [attempt, setAttempt] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const wrapRef = useRef(null);
+
+  // Reset on doodle change
   useEffect(() => {
-    setFailed(false);
-    setAttempt(0);
+    const url = doodle ? doodleImage(doodle) : '';
+    if (_imgCache.has(url)) {
+      setStatus('loaded');
+      setAttempt(0);
+    } else {
+      setStatus('loading');
+      setAttempt(0);
+    }
   }, [doodle && doodle.id]);
-  // Multiple CDN strategies; retry transparently before giving up.
+
+  // IntersectionObserver — only load when near viewport
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        setVisible(true);
+        io.disconnect();
+      }
+    }, {
+      rootMargin: '200px'
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // CDN strategies with cache-bust on last attempt
   const sources = doodle ? [doodleImage(doodle),
-  // 0 — default seadn
+  // primary CDN
   doodleImage(doodle) + '?w=500&auto=format',
-  // 1 — seadn resized
-  `https://api.opensea.io/api/v1/asset/0x8a90cab2b38dba80c64b7734e58ee1db38b8992e/${doodle.i}/image`,
-  // 2 — fallback
-  doodleImage(doodle) + '?retry=' + Date.now() // 3 — cache-bust last try
+  // resized variant
+  `https://img.seadn.io/files/${doodle.i}?w=500&auto=format`,
+  // alternate seadn host
+  doodleImage(doodle) + '?cb=' + Date.now() // cache-bust retry
   ] : [];
   const currentSrc = sources[attempt] || sources[0];
-  if (!doodle || failed) {
-    // Nice colorful placeholder instead of a broken-image icon
-    const palette = ['#FFB7C5', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6', '#FFAB91'];
-    const seed = doodle ? doodle.id : 0;
-    const c1 = palette[seed % palette.length];
-    const c2 = palette[(seed + 2) % palette.length];
+
+  // Fallback placeholder
+  const palette = ['#FFB7C5', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6', '#FFAB91'];
+  const seed = doodle ? doodle.id : 0;
+  const c1 = palette[seed % palette.length];
+  const c2 = palette[(seed + 2) % palette.length];
+  const radius = rounded ? '0.75rem' : '0';
+
+  // Shimmer skeleton while loading
+  const shimmer = /*#__PURE__*/React.createElement("div", {
+    ref: wrapRef,
+    className: "doodle-shimmer",
+    style: {
+      width: size,
+      height: size,
+      borderRadius: radius,
+      background: `linear-gradient(135deg, ${c1}44, ${c2}44)`,
+      position: 'relative',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute',
+      inset: 0,
+      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)',
+      backgroundSize: '200% 100%',
+      animation: 'shimmer 1.5s ease-in-out infinite'
+    }
+  }));
+  if (!doodle || status === 'failed') {
     return /*#__PURE__*/React.createElement("div", {
+      ref: wrapRef,
       className: rounded ? 'rounded-2xl' : '',
       style: {
         width: size,
@@ -1533,39 +1604,81 @@ const DoodleAvatar = ({
         color: '#2D2D3F',
         fontWeight: 700,
         fontSize: Math.max(10, size * 0.14),
-        userSelect: 'none'
+        userSelect: 'none',
+        position: 'relative',
+        overflow: 'hidden'
       }
     }, /*#__PURE__*/React.createElement(FaceIcon, {
       size: Math.round(size * 0.55),
       fill: c1
-    }));
+    }), doodle && /*#__PURE__*/React.createElement("span", {
+      style: {
+        position: 'absolute',
+        bottom: 4,
+        fontSize: 9,
+        fontWeight: 600,
+        color: 'rgba(45,45,63,0.5)',
+        letterSpacing: '0.04em'
+      }
+    }, "#", doodle.id));
   }
-  return /*#__PURE__*/React.createElement("img", {
+  if (!visible) return shimmer;
+  return /*#__PURE__*/React.createElement("div", {
+    ref: wrapRef,
+    style: {
+      width: size,
+      height: size,
+      position: 'relative',
+      borderRadius: radius,
+      overflow: 'hidden'
+    }
+  }, status !== 'loaded' && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute',
+      inset: 0,
+      background: `linear-gradient(135deg, ${c1}44, ${c2}44)`,
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute',
+      inset: 0,
+      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)',
+      backgroundSize: '200% 100%',
+      animation: 'shimmer 1.5s ease-in-out infinite'
+    }
+  })), /*#__PURE__*/React.createElement("img", {
     src: currentSrc,
-    alt: "",
+    alt: doodle ? `Doodle #${doodle.id}` : '',
     width: size,
     height: size,
     loading: "lazy",
     draggable: false,
+    onLoad: () => {
+      _imgCache.add(doodleImage(doodle));
+      setStatus('loaded');
+    },
     onError: () => {
-      // transparently try the next CDN/URL strategy before giving up
       if (attempt < sources.length - 1) {
         setAttempt(a => a + 1);
+        setStatus('retrying');
       } else {
-        setFailed(true);
+        _imgFailed.add(doodleImage(doodle));
+        setStatus('failed');
         if (onFail) onFail(doodle);
       }
     },
-    className: rounded ? 'rounded-2xl' : '',
     style: {
       display: 'block',
       width: size,
       height: size,
       objectFit: 'cover',
-      background: '#EEE',
-      userSelect: 'none'
+      userSelect: 'none',
+      position: 'relative',
+      opacity: status === 'loaded' ? 1 : 0,
+      transition: 'opacity 0.3s ease'
     }
-  });
+  }));
 };
 
 /* ==========================================================================
@@ -1807,7 +1920,11 @@ const SkyBackground = () => {
   const luminaryY = 14 + Math.sin(dayProgress * Math.PI) * -8; // pulls up at midday
   const isSun = h >= 5.5 && h < 20.5;
   return /*#__PURE__*/React.createElement("div", {
-    className: "fixed inset-0 overflow-hidden pointer-events-none -z-10"
+    className: "fixed inset-0 overflow-hidden pointer-events-none -z-10",
+    style: {
+      contain: 'layout style paint',
+      willChange: 'auto'
+    }
   }, /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-0",
     style: {
@@ -1853,9 +1970,182 @@ const SkyBackground = () => {
   }, /*#__PURE__*/React.createElement(CloudIcon, {
     size: d.size * 1.8,
     fill: "#FFFFFF"
-  }))), /*#__PURE__*/React.createElement(DreamLandscape, {
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "absolute inset-0 overflow-hidden",
+    style: {
+      opacity: isNight ? 0.5 : 0.3
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sky-aurora sky-aurora-a"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "sky-aurora sky-aurora-b"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "sky-aurora sky-aurora-c"
+  })), isNight && /*#__PURE__*/React.createElement("div", {
+    className: "absolute inset-0 overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "shooting-star",
+    style: {
+      top: '12%',
+      left: '5%',
+      animationDelay: '0s'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "shooting-star",
+    style: {
+      top: '25%',
+      left: '45%',
+      animationDelay: '4.5s'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "shooting-star",
+    style: {
+      top: '8%',
+      left: '72%',
+      animationDelay: '9s'
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "absolute inset-0 overflow-hidden pointer-events-none",
+    style: {
+      opacity: isNight ? 0.3 : 0.5
+    }
+  }, [{
+    emoji: '🌸',
+    x: 8,
+    y: 15,
+    dur: 32,
+    del: 0,
+    sz: 18
+  }, {
+    emoji: '✿',
+    x: 25,
+    y: 35,
+    dur: 40,
+    del: -6,
+    sz: 14
+  }, {
+    emoji: '🦋',
+    x: 55,
+    y: 12,
+    dur: 36,
+    del: -12,
+    sz: 16
+  }, {
+    emoji: '☁️',
+    x: 72,
+    y: 28,
+    dur: 44,
+    del: -18,
+    sz: 20
+  }, {
+    emoji: '🌈',
+    x: 88,
+    y: 45,
+    dur: 38,
+    del: -24,
+    sz: 15
+  }, {
+    emoji: '⭐',
+    x: 40,
+    y: 50,
+    dur: 42,
+    del: -9,
+    sz: 12
+  }].map((f, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    className: "floating-doodle-face",
+    style: {
+      left: `${f.x}%`,
+      top: `${f.y}%`,
+      fontSize: f.sz,
+      animationDuration: `${f.dur}s`,
+      animationDelay: `${f.del}s`
+    }
+  }, f.emoji))), /*#__PURE__*/React.createElement(DreamLandscape, {
     isNight: isNight
   }), /*#__PURE__*/React.createElement("style", null, `
+        /* Floating mini doodle faces */
+        .floating-doodle-face {
+          position: absolute;
+          animation: doodleFaceDrift ease-in-out infinite;
+          will-change: transform;
+          filter: blur(0.3px);
+          opacity: 0.6;
+        }
+        @keyframes doodleFaceDrift {
+          0%,100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          25%     { transform: translate(12px, -20px) rotate(8deg) scale(1.05); }
+          50%     { transform: translate(-8px, -35px) rotate(-5deg) scale(0.95); }
+          75%     { transform: translate(18px, -15px) rotate(12deg) scale(1.02); }
+        }
+
+        /* Aurora blobs */
+        .sky-aurora {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(60px);
+          will-change: transform;
+          mix-blend-mode: screen;
+        }
+        .sky-aurora-a {
+          width: 40vw; height: 40vw;
+          top: -5%; left: -10%;
+          background: radial-gradient(circle, rgba(255,183,197,0.4), transparent 70%);
+          animation: auroraA 18s ease-in-out infinite;
+        }
+        .sky-aurora-b {
+          width: 35vw; height: 35vw;
+          top: 10%; right: -8%;
+          background: radial-gradient(circle, rgba(168,230,207,0.35), transparent 70%);
+          animation: auroraB 22s ease-in-out infinite;
+        }
+        .sky-aurora-c {
+          width: 30vw; height: 30vw;
+          top: 30%; left: 30%;
+          background: radial-gradient(circle, rgba(197,179,230,0.35), transparent 70%);
+          animation: auroraC 25s ease-in-out infinite;
+        }
+        @keyframes auroraA {
+          0%,100% { transform: translate(0, 0) scale(1); }
+          33%     { transform: translate(8vw, 3vh) scale(1.15); }
+          66%     { transform: translate(-4vw, 6vh) scale(0.9); }
+        }
+        @keyframes auroraB {
+          0%,100% { transform: translate(0, 0) scale(1); }
+          40%     { transform: translate(-6vw, 5vh) scale(1.1); }
+          70%     { transform: translate(3vw, -3vh) scale(0.95); }
+        }
+        @keyframes auroraC {
+          0%,100% { transform: translate(0, 0) scale(1); }
+          50%     { transform: translate(5vw, -4vh) scale(1.2); }
+        }
+
+        /* Shooting stars */
+        .shooting-star {
+          position: absolute;
+          width: 3px; height: 3px;
+          background: #FFF8E2;
+          border-radius: 50%;
+          box-shadow: 0 0 6px 2px rgba(255,248,226,0.8);
+          opacity: 0;
+          animation: shootingStar 12s ease-in infinite;
+        }
+        .shooting-star::after {
+          content: '';
+          position: absolute;
+          top: 0; right: 0;
+          width: 60px; height: 1.5px;
+          background: linear-gradient(90deg, rgba(255,248,226,0.8), transparent);
+          transform: rotate(35deg);
+          transform-origin: 0% 50%;
+        }
+        @keyframes shootingStar {
+          0%        { opacity: 0; transform: translate(0,0); }
+          2%        { opacity: 1; }
+          8%        { opacity: 0; transform: translate(25vw, 15vh); }
+          100%      { opacity: 0; transform: translate(25vw, 15vh); }
+        }
+
         @keyframes cloudDrift {
           0%   { transform: translateX(-30px) translateY(0); }
           50%  { transform: translateX(30px) translateY(-6px); }
@@ -1907,7 +2197,8 @@ const DreamLandscape = ({
     style: {
       height: '62vh',
       minHeight: 420,
-      opacity: dim
+      opacity: dim,
+      contain: 'layout style paint'
     }
   }, /*#__PURE__*/React.createElement("svg", {
     viewBox: "0 0 1000 620",
@@ -2558,10 +2849,8 @@ const WaterTitle = ({
   size = 'text-5xl'
 }) => {
   const words = text.split(' ');
-  // Map tailwind size class → responsive clamp() so it looks great on mobile
   const clampMap = {
     'text-6xl': 'clamp(2.25rem, 11vw, 3.75rem)',
-    // hero (auth, mood full)
     'text-5xl': 'clamp(2rem, 9vw, 3rem)',
     'text-4xl': 'clamp(1.75rem, 7.5vw, 2.25rem)',
     'text-3xl': 'clamp(1.5rem, 6vw, 1.875rem)',
@@ -2569,18 +2858,21 @@ const WaterTitle = ({
   };
   const fontSize = clampMap[size];
   let idx = 0;
+  // Rainbow gradient colors for each letter (cycling)
+  const palette = ['#FFB7C5', '#FFAB91', '#FFE082', '#A8E6CF', '#90CAF9', '#C5B3E6'];
   return /*#__PURE__*/React.createElement("h1", {
-    className: "select-none",
+    className: "select-none water-title-glow",
     style: {
       fontSize: fontSize || undefined,
       lineHeight: 1.05,
-      fontFamily: "'Fredoka', sans-serif",
-      fontWeight: 600,
-      letterSpacing: '-0.015em',
+      fontFamily: "'Paytone One', 'Fredoka', sans-serif",
+      fontWeight: 400,
+      letterSpacing: '-0.01em',
       textAlign: 'center',
       wordBreak: 'keep-all',
       hyphens: 'none',
-      maxWidth: '100%'
+      maxWidth: '100%',
+      filter: 'drop-shadow(0 3px 12px rgba(65,64,255,0.18))'
     }
   }, words.map((word, wi) => /*#__PURE__*/React.createElement("span", {
     key: wi,
@@ -2590,17 +2882,49 @@ const WaterTitle = ({
       marginRight: wi < words.length - 1 ? '0.28em' : 0
     }
   }, [...word].map(ch => {
-    const delay = `${idx++ * 0.15 % 2.4}s`;
+    const i = idx++;
+    const delay = `${i * 0.15 % 2.4}s`;
+    const color = palette[i % palette.length];
     return /*#__PURE__*/React.createElement("span", {
-      key: idx,
+      key: i,
       className: "doodle-letter",
       style: {
         animationDelay: delay,
-        display: 'inline-block'
+        display: 'inline-block',
+        color: color,
+        textShadow: `0 2px 0 rgba(0,0,0,0.12), 0 -1px 0 rgba(255,255,255,0.6), 0 4px 16px ${color}55`,
+        WebkitTextStroke: '1.2px rgba(45,45,63,0.2)'
       }
     }, ch);
   }))));
 };
+
+/* Fancy section header with animated rainbow underline + optional icon */
+const SectionHeader = ({
+  icon,
+  text,
+  subtitle,
+  className = ''
+}) => /*#__PURE__*/React.createElement("div", {
+  className: `section-header anim-fade-in ${className}`
+}, /*#__PURE__*/React.createElement("div", {
+  className: "flex items-center gap-2"
+}, icon && /*#__PURE__*/React.createElement("span", {
+  className: "section-header-icon"
+}, icon), /*#__PURE__*/React.createElement("h2", {
+  className: "font-display font-semibold text-xl",
+  style: {
+    color: '#2D2D3F'
+  }
+}, text)), subtitle && /*#__PURE__*/React.createElement("p", {
+  className: "text-xs mt-0.5",
+  style: {
+    color: '#7B7B9A'
+  }
+}, subtitle), /*#__PURE__*/React.createElement("div", {
+  className: "section-header-bar",
+  "aria-hidden": "true"
+}));
 
 /* ==========================================================================
    COUNT-UP number (animates from 0 to target value)
@@ -2642,55 +2966,59 @@ const CountUp = ({
    FOOTER SIGNATURE — "vibe coded by Degos" with neon animated letters
    ========================================================================== */
 
+/* DegosDoodle — renders a deterministic doodle directly (no lazy-load / IntersectionObserver)
+   so it always appears in the footer regardless of scroll position */
+const DegosDoodle = () => {
+  const d = (Array.isArray(DOODLES) && DOODLES.length)
+    ? DOODLES[Math.abs(hashCode('degos-signature')) % DOODLES.length] : null;
+  const [attempt, setAttempt] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const fallbacks = d ? [
+    doodleImage(d),
+    doodleImage(d) + '?w=500&auto=format',
+    doodleImage(d) + '?cb=' + Date.now()
+  ] : [];
+  if (!d || failed) {
+    const palette = ['#FFB7C5','#FFE082','#A8E6CF','#90CAF9','#C5B3E6'];
+    const c = palette[(d ? d.id : 0) % palette.length];
+    return /*#__PURE__*/React.createElement("div", { className: "degos-doodle-wrap" },
+      /*#__PURE__*/React.createElement("div", { className: "degos-doodle-halo", "aria-hidden": "true" }),
+      /*#__PURE__*/React.createElement("div", { className: "degos-doodle-img", style: {
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'linear-gradient(135deg, ' + c + ', #C5B3E6)'
+      }}, /*#__PURE__*/React.createElement(FaceIcon, { size: 60, fill: c }))
+    );
+  }
+  return /*#__PURE__*/React.createElement("div", { className: "degos-doodle-wrap" },
+    /*#__PURE__*/React.createElement("div", { className: "degos-doodle-halo", "aria-hidden": "true" }),
+    /*#__PURE__*/React.createElement("img", {
+      src: fallbacks[attempt] || fallbacks[0],
+      alt: 'Doodle #' + d.id,
+      className: "degos-doodle-img",
+      loading: "eager",
+      onError: () => {
+        if (attempt < fallbacks.length - 1) setAttempt(a => a + 1);
+        else setFailed(true);
+      }
+    })
+  );
+};
+
 const FooterSignature = () => {
   const full = 'vibe coded by Degos';
   return /*#__PURE__*/React.createElement("div", {
     className: "w-full flex flex-col items-center justify-center pt-8 select-none gap-4",
-    style: {
-      paddingBottom: 'calc(120px + env(safe-area-inset-bottom))'
-    }
+    style: { paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }
   }, /*#__PURE__*/React.createElement("div", {
     className: "degos-wrap"
   }, /*#__PURE__*/React.createElement("span", {
     className: "degos-sig"
   }, [...full].map((ch, i) => /*#__PURE__*/React.createElement("span", {
-    key: i,
-    className: "degos-letter",
-    style: {
-      animationDelay: `${i * 0.08 % 1.6}s`
-    }
+    key: i, className: "degos-letter",
+    style: { animationDelay: (i * 0.08 % 1.6) + 's' }
   }, ch === ' ' ? '\u00A0' : ch))), /*#__PURE__*/React.createElement("span", {
-    className: "degos-underline",
-    "aria-hidden": "true"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "degos-doodle-wrap"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "degos-doodle-halo",
-    "aria-hidden": "true"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "degos-doodle-img",
-    style: {
-      overflow: 'hidden'
-    }
-  }, (() => {
-    const d = Array.isArray(DOODLES) && DOODLES.length ? DOODLES[Math.abs(hashCode('degos-signature')) % DOODLES.length] : null;
-    return d ? /*#__PURE__*/React.createElement(DoodleAvatar, {
-      doodle: d,
-      size: 120,
-      rounded: true
-    }) : /*#__PURE__*/React.createElement("img", {
-      src: "./degos-doodle.png",
-      alt: "Degos' Doodle",
-      style: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover'
-      },
-      onError: e => {
-        e.currentTarget.style.display = 'none';
-      }
-    });
-  })())));
+    className: "degos-underline", "aria-hidden": "true"
+  })), /*#__PURE__*/React.createElement(DegosDoodle, null));
 };
 
 /* ==========================================================================
@@ -5467,7 +5795,35 @@ const HomeScreen = ({
     }
   }, "pts")))), challengeSeed && /*#__PURE__*/React.createElement(ChallengeBanner, {
     onDismiss: onDismissChallenge
-  }), /*#__PURE__*/React.createElement(PowerupsBar, {
+  }), streak >= 2 && doneCount === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "mb-3 anim-fade-in",
+    style: {
+      animationDelay: '0.1s'
+    }
+  }, /*#__PURE__*/React.createElement(FrostedCard, {
+    className: "px-4 py-3 flex items-center gap-3",
+    style: {
+      background: 'rgba(255,183,197,0.35)',
+      border: '1px solid rgba(255,183,197,0.6)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xl",
+    style: {
+      animation: 'bsDot 1.2s ease-in-out infinite'
+    }
+  }, "\uD83D\uDD25"), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-sm font-bold",
+    style: {
+      color: '#2D2D3F'
+    }
+  }, streak, "-day streak at risk!"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs",
+    style: {
+      color: '#7B7B9A'
+    }
+  }, "Play any mode to keep your streak alive.")))), /*#__PURE__*/React.createElement(PowerupsBar, {
     pu: powerups
   }), /*#__PURE__*/React.createElement("div", {
     className: "lg:grid lg:grid-cols-2 lg:gap-4"
@@ -5633,6 +5989,8 @@ const GuessMode = ({
         b
       });
     }
+    // Prefetch all doodle images for this session upfront
+    prefetchDoodleImages(pairs.current.flatMap(p => [p.a, p.b]));
   }
   const [round, setRound] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -5870,6 +6228,7 @@ const PriceMode = ({
         b
       });
     }
+    prefetchDoodleImages(pairs.current.flatMap(p => [p.a, p.b]));
   }
   const [round, setRound] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -6154,6 +6513,8 @@ const TraitMode = ({
       q.exampleCandidates = matches.slice(0, 8);
     }
     questions.current = picked;
+    // Prefetch example Doodle images
+    prefetchDoodleImages(picked.flatMap(q => q.exampleCandidates || []));
   }
   const [round, setRound] = useState(0);
   const [guess, setGuess] = useState(20);
@@ -6507,16 +6868,29 @@ const ResultsScreen = ({
   const perfectCount = icons.filter(i => i === 'perfect').length;
   const anyCorrect = icons.some(i => ['perfect', 'correct', 'up', 'near'].includes(i));
   const tier = points >= 15 ? 'legendary' : points >= 10 ? 'great' : points >= 5 ? 'solid' : anyCorrect ? 'getting-there' : 'tough-day';
-  const headline = {
+  const headline = allPerfect ? 'Flawless! 🌈' : {
     'legendary': 'Legendary!',
     'great': 'Nicely done.',
     'solid': 'Solid round.',
     'getting-there': 'Getting there.',
     'tough-day': 'Tough day. Tomorrow awaits.'
   }[tier];
-  const showConfetti = points >= 10 || perfectCount >= 2 || clutch;
-  const confettiCount = tier === 'legendary' ? 120 : tier === 'great' ? 72 : tier === 'solid' ? 44 : 20;
-  const confettiPalette = tier === 'legendary' ? ['#FFE082', '#FFB7C5', '#C5B3E6', '#A8E6CF', '#90CAF9', '#FFAB91', '#4140FF'] : tier === 'great' ? ['#FFE082', '#FFB7C5', '#A8E6CF', '#C5B3E6'] : tier === 'solid' ? ['#FFE082', '#A8E6CF', '#90CAF9'] : ['#FFB7C5', '#FFE082'];
+  const allPerfect = icons.length > 0 && icons.every(i => i === 'perfect');
+  const showConfetti = points >= 10 || perfectCount >= 2 || clutch || allPerfect;
+  const confettiCount = allPerfect ? 160 : tier === 'legendary' ? 120 : tier === 'great' ? 72 : tier === 'solid' ? 44 : 20;
+  const confettiPalette = allPerfect ? ['#FFE082', '#FFB7C5', '#C5B3E6', '#A8E6CF', '#90CAF9', '#FFAB91', '#4140FF', '#FFF'] : tier === 'legendary' ? ['#FFE082', '#FFB7C5', '#C5B3E6', '#A8E6CF', '#90CAF9', '#FFAB91', '#4140FF'] : tier === 'great' ? ['#FFE082', '#FFB7C5', '#A8E6CF', '#C5B3E6'] : tier === 'solid' ? ['#FFE082', '#A8E6CF', '#90CAF9'] : ['#FFB7C5', '#FFE082'];
+
+  // Play celebration sound for top tiers
+  useEffect(() => {
+    if (tier === 'legendary' || allPerfect) {
+      Sound.shimmer();
+      Haptics.buzz([14, 60, 14, 60, 14]);
+    } else if (tier === 'great') {
+      Sound.levelUp();
+    } else if (tier === 'solid') {
+      Sound.jingle();
+    }
+  }, []);
   return /*#__PURE__*/React.createElement("div", {
     className: "px-4 pt-6 pb-10 max-w-[480px] lg:max-w-[1400px] lg:px-12 mx-auto relative"
   }, showConfetti && /*#__PURE__*/React.createElement(Confetti, {
@@ -8222,8 +8596,41 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     .font-display { font-family: 'Paytone One', 'Fredoka', system-ui, sans-serif; letter-spacing: -0.01em; font-weight: 400; }
     input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height: 28px; }
     @keyframes waterBob {
-      0%,100% { transform: translateY(0); }
-      50%     { transform: translateY(-3px); }
+      0%,100% { transform: translateY(0) rotate(-1deg); }
+      25%     { transform: translateY(-4px) rotate(0.5deg); }
+      50%     { transform: translateY(-2px) rotate(1deg); }
+      75%     { transform: translateY(-5px) rotate(-0.5deg); }
+    }
+    /* ===== Section headers with rainbow underline ===== */
+    .section-header { position: relative; margin-bottom: 12px; }
+    .section-header-icon {
+      display: inline-flex;
+      animation: sectionIconPulse 3s ease-in-out infinite;
+    }
+    @keyframes sectionIconPulse {
+      0%,100% { transform: scale(1) rotate(0deg); }
+      50%     { transform: scale(1.1) rotate(4deg); }
+    }
+    .section-header-bar {
+      margin-top: 6px;
+      height: 3px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #FFB7C5, #FFE082, #A8E6CF, #90CAF9, #C5B3E6, #FFB7C5);
+      background-size: 200% 100%;
+      animation: sectionBarSlide 4s linear infinite;
+      opacity: 0.7;
+    }
+    @keyframes sectionBarSlide {
+      0%   { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .water-title-glow {
+      animation: titleGlow 4s ease-in-out infinite;
+    }
+    @keyframes titleGlow {
+      0%,100% { filter: drop-shadow(0 3px 12px rgba(65,64,255,0.18)); }
+      50%     { filter: drop-shadow(0 5px 20px rgba(65,64,255,0.32)) drop-shadow(0 0 30px rgba(197,179,230,0.2)); }
     }
     @keyframes waterSheen {
       0%,100% { background-position: 0% 50%; }
@@ -8259,6 +8666,12 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     /* ===== Hover lift ===== */
     .hover-lift { transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease; }
     .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(65,64,255,0.14); }
+
+    /* ===== Shimmer skeleton for loading images ===== */
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
 
     /* ===== Profile avatar glow ===== */
     @keyframes avatarPulse {
