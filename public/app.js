@@ -4835,16 +4835,14 @@ const AuthScreen = ({
       maxWidth: '420px'
     }
   }, mode === 'login' ? 'Welcome back, Doodle' : 'Create your account to start playing'), /*#__PURE__*/React.createElement("div", {
-    className: "hidden lg:flex flex-col gap-4 mt-8",
+    className: "flex flex-col gap-3 mt-6 lg:mt-8",
     style: {
       maxWidth: '460px',
-      background: 'rgba(255,255,255,0.88)',
-      backdropFilter: 'blur(20px) saturate(1.3)',
-      WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
-      borderRadius: '20px',
-      padding: '20px 24px',
-      border: '1.5px solid rgba(255,255,255,0.92)',
-      boxShadow: '0 4px 20px rgba(15,13,46,0.10)'
+      background: '#FFFFFF',
+      borderRadius: '18px',
+      padding: '18px 22px',
+      border: '2px solid #E8E4F0',
+      boxShadow: '0 4px 16px rgba(15,13,46,0.10), 0 1px 3px rgba(15,13,46,0.06)'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 text-sm font-semibold",
@@ -4856,7 +4854,7 @@ const AuthScreen = ({
       width: 28,
       height: 28,
       borderRadius: 14,
-      background: 'rgba(168,230,207,0.55)',
+      background: '#D4F5E6',
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -4872,7 +4870,7 @@ const AuthScreen = ({
       width: 28,
       height: 28,
       borderRadius: 14,
-      background: 'rgba(255,183,197,0.55)',
+      background: '#FFD6E0',
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -4888,7 +4886,7 @@ const AuthScreen = ({
       width: 28,
       height: 28,
       borderRadius: 14,
-      background: 'rgba(197,179,230,0.55)',
+      background: '#E0D6F0',
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
