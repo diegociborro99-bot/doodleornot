@@ -733,7 +733,7 @@ const consumePowerup = kind => {
   if ((pu[kind] || 0) <= 0) return false;
   pu[kind] = Math.max(0, (pu[kind] || 0) - 1);
   savePowerups(u, pu);
-  if (window.DON_API && window.DON_API.usePowerup) {
+  if (kind !== 'freezes' && window.DON_API && window.DON_API.usePowerup) {
     try {
       window.DON_API.usePowerup(kind);
     } catch (_) {}
@@ -1016,7 +1016,7 @@ const DOODLES = DATA.doodles;
 const RARITY = DATA.rarity;
 const IMG_PREFIX = DATA.imgPrefix;
 const TRAIT_TYPES = ['face', 'head', 'background', 'body', 'hair', 'piercing'];
-const doodleImage = d => IMG_PREFIX + d.i;
+const doodleImage = d => d.i.startsWith('http') ? d.i : IMG_PREFIX + d.i;
 const openseaUrl = d => `https://opensea.io/assets/ethereum/0x8a90cab2b38dba80c64b7734e58ee1db38b8992e/${d.id}`;
 
 /* Rarity % for a (type, value). Returns 100 when unknown (very common fallback). */
@@ -1606,7 +1606,7 @@ const prefetchDoodleImages = doodles => {
       const alt = new Image();
       alt.onload = () => _imgCache.add(url);
       alt.onerror = () => _imgFailed.add(url);
-      alt.src = url + '?w=500&auto=format';
+      alt.src = url + (url.includes('?') ? '&' : '?') + 'w=500&auto=format';
     };
     img.src = url;
   });
@@ -1656,13 +1656,12 @@ const DoodleAvatar = ({
   }, []);
 
   // CDN strategies with cache-bust on last attempt
-  const sources = doodle ? [doodleImage(doodle),
+  const primaryUrl = doodleImage(doodle);
+  const sources = doodle ? [primaryUrl,
   // primary CDN
-  doodleImage(doodle) + '?w=500&auto=format',
+  primaryUrl + (primaryUrl.includes('?') ? '&' : '?') + 'w=500&auto=format',
   // resized variant
-  `https://img.seadn.io/files/${doodle.i}?w=500&auto=format`,
-  // alternate seadn host
-  doodleImage(doodle) + '?cb=' + Date.now() // cache-bust retry
+  primaryUrl + (primaryUrl.includes('?') ? '&' : '?') + 'cb=' + Date.now() // cache-bust retry
   ] : [];
   const currentSrc = sources[attempt] || sources[0];
 
@@ -7109,6 +7108,7 @@ const ResultsScreen = ({
   // Score tier — drives confetti + headline
   const perfectCount = icons.filter(i => i === 'perfect').length;
   const anyCorrect = icons.some(i => ['perfect', 'correct', 'up', 'near'].includes(i));
+  const allPerfect = icons.length > 0 && icons.every(i => i === 'perfect');
   const tier = points >= 15 ? 'legendary' : points >= 10 ? 'great' : points >= 5 ? 'solid' : anyCorrect ? 'getting-there' : 'tough-day';
   const headline = allPerfect ? 'Flawless! 🌈' : {
     'legendary': 'Legendary!',
@@ -7117,7 +7117,6 @@ const ResultsScreen = ({
     'getting-there': 'Getting there.',
     'tough-day': 'Tough day. Tomorrow awaits.'
   }[tier];
-  const allPerfect = icons.length > 0 && icons.every(i => i === 'perfect');
   const showConfetti = points >= 10 || perfectCount >= 2 || clutch || allPerfect;
   const confettiCount = allPerfect ? 160 : tier === 'legendary' ? 120 : tier === 'great' ? 72 : tier === 'solid' ? 44 : 20;
   const confettiPalette = allPerfect ? ['#FFE082', '#FFB7C5', '#C5B3E6', '#A8E6CF', '#90CAF9', '#FFAB91', '#4140FF', '#FFF'] : tier === 'legendary' ? ['#FFE082', '#FFB7C5', '#C5B3E6', '#A8E6CF', '#90CAF9', '#FFAB91', '#4140FF'] : tier === 'great' ? ['#FFE082', '#FFB7C5', '#A8E6CF', '#C5B3E6'] : tier === 'solid' ? ['#FFE082', '#A8E6CF', '#90CAF9'] : ['#FFB7C5', '#FFE082'];
