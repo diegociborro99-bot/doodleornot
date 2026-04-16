@@ -1534,7 +1534,7 @@ const DoodleAvatar = ({
       setStatus('loading');
       setAttempt(0);
     }
-  }, [doodle && doodle.id]);
+  }, [doodle ? doodle.id : null]);
 
   // IntersectionObserver — only load when near viewport
   useEffect(() => {
@@ -7884,6 +7884,16 @@ function DoodleOrNot() {
     Sound.setEnabled && Sound.setEnabled(prefs.sound);
     Haptics.setEnabled && Haptics.setEnabled(prefs.haptics);
     setPrefs(prefs);
+    // Sync preferences to server DB
+    const api = typeof window !== 'undefined' ? window.DON_API : null;
+    if (api && username) {
+      api.updatePreferences({
+        darkMode: prefs.darkMode || 'auto',
+        sound: !!prefs.sound,
+        haptics: !!prefs.haptics,
+        lang: prefs.lang || 'en'
+      }).catch(() => {});
+    }
     if (typeof document !== 'undefined') {
       document.documentElement.style.fontSize = `${16 * (prefs.fontScale || 1)}px`;
       document.documentElement.dataset.reducedMotion = prefs.reducedMotion ? '1' : '0';
