@@ -4798,12 +4798,18 @@ const AuthScreen = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1",
     style: {
-      maxWidth: '100%'
+      maxWidth: '100%',
+      background: 'rgba(255,255,255,0.72)',
+      backdropFilter: 'blur(18px) saturate(1.3)',
+      WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
+      borderRadius: '28px',
+      padding: '28px 32px',
+      border: '1.5px solid rgba(255,255,255,0.85)',
+      boxShadow: '0 8px 32px rgba(15,13,46,0.12), 0 2px 8px rgba(15,13,46,0.08)'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "relative lg:self-start",
     style: {
-      textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
       filter: 'drop-shadow(0 6px 24px rgba(197,179,230,0.35))'
     }
   }, /*#__PURE__*/React.createElement(FloatingSparkles, {
@@ -5504,12 +5510,18 @@ const SplashScreen = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1",
     style: {
-      maxWidth: '100%'
+      maxWidth: '100%',
+      background: 'rgba(255,255,255,0.72)',
+      backdropFilter: 'blur(18px) saturate(1.3)',
+      WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
+      borderRadius: '28px',
+      padding: '28px 32px',
+      border: '1.5px solid rgba(255,255,255,0.85)',
+      boxShadow: '0 8px 32px rgba(15,13,46,0.12), 0 2px 8px rgba(15,13,46,0.08)'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "relative lg:self-start",
     style: {
-      textShadow: '0 2px 20px rgba(255,255,255,0.45), 0 1px 2px rgba(255,255,255,0.6)',
       filter: 'drop-shadow(0 6px 24px rgba(197,179,230,0.35))'
     }
   }, /*#__PURE__*/React.createElement(FloatingSparkles, {
