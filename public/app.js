@@ -744,11 +744,13 @@ const POWERUPS_KEY = (u, d) => `don:pu:${u}:${d}`;
 const HINTS_PER_DAY = 1;
 const SKIPS_PER_DAY = 1;
 const FREEZES_PER_DAY = 1;
-const getPowerups = u => storage.get(POWERUPS_KEY(u, todayStr()), {
-  hints: HINTS_PER_DAY,
-  skips: SKIPS_PER_DAY,
-  freezes: FREEZES_PER_DAY
-});
+const getPowerups = u => {
+  const defaults = { hints: HINTS_PER_DAY, skips: SKIPS_PER_DAY, freezes: FREEZES_PER_DAY };
+  const raw = storage.get(POWERUPS_KEY(u, todayStr()), defaults);
+  // Ensure freezes field exists for users with old cached data
+  if (typeof raw.freezes !== 'number') raw.freezes = FREEZES_PER_DAY;
+  return raw;
+};
 const savePowerups = (u, pu) => storage.set(POWERUPS_KEY(u, todayStr()), pu);
 /* Helpers for consuming powerups from inside game modes. Server-side sync is
    attempted best-effort; local state is the source of truth for the UI. */
@@ -767,7 +769,9 @@ const consumePowerup = kind => {
   pu[kind] = Math.max(0, (pu[kind] || 0) - 1);
   savePowerups(u, pu);
   if (kind !== 'freezes' && window.DON_API && window.DON_API.usePowerup) {
-    window.DON_API.usePowerup(kind).catch(() => {});
+    // Server expects singular ('hint'/'skip'), client uses plural ('hints'/'skips')
+    const serverKind = kind === 'hints' ? 'hint' : kind === 'skips' ? 'skip' : kind;
+    window.DON_API.usePowerup(serverKind).catch(() => {});
   }
   return true;
 };
@@ -1006,9 +1010,10 @@ const mulberry32 = seed => () => {
   return ((t ^ t >>> 14) >>> 0) / 4294967296;
 };
 const todayStr = () => new Date().toISOString().slice(0, 10);
+const DAY1_EPOCH = Date.UTC(2026, 3, 16); // April 16, 2026 = Day #1
 const dayNumber = () => {
-  const start = new Date('2025-01-01').getTime();
-  return Math.floor((Date.now() - start) / 86400000) + 1;
+  const now = Date.now();
+  return Math.max(1, Math.floor((now - DAY1_EPOCH) / 86400000) + 1);
 };
 // Monday-based week key matching server's weekStartISO (all UTC)
 const getWeekKey = () => {
@@ -1475,6 +1480,21 @@ const TrophyIcon = ({
   stroke: STROKE,
   strokeWidth: "2.5"
 }));
+/* Powerup icons — custom SVG, Doodles style */
+const HintIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement(BaseSVG, { size },
+  /*#__PURE__*/React.createElement("circle", { cx: "12", cy: "10", r: "6", fill: "#FFE082", stroke: STROKE, strokeWidth: "2" }),
+  /*#__PURE__*/React.createElement("path", { d: "M10 16h4v2a2 2 0 0 1-4 0v-2z", fill: "#FFE082", stroke: STROKE, strokeWidth: "2" }),
+  /*#__PURE__*/React.createElement("path", { d: "M12 4v1M12 13v1M15.5 6.5l-.7.7M8.5 6.5l.7.7", stroke: STROKE, strokeWidth: "1.5" }),
+  /*#__PURE__*/React.createElement("line", { x1: "10", y1: "19", x2: "14", y2: "19", stroke: STROKE, strokeWidth: "1.5" }));
+const SkipIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement(BaseSVG, { size },
+  /*#__PURE__*/React.createElement("circle", { cx: "12", cy: "12", r: "9", fill: "#A8E6CF", stroke: STROKE, strokeWidth: "2" }),
+  /*#__PURE__*/React.createElement("path", { d: "M10 8l5 4-5 4V8z", fill: STROKE }),
+  /*#__PURE__*/React.createElement("line", { x1: "16", y1: "8", x2: "16", y2: "16", stroke: STROKE, strokeWidth: "2" }));
+const FreezeIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement(BaseSVG, { size },
+  /*#__PURE__*/React.createElement("circle", { cx: "12", cy: "12", r: "9", fill: "#B3D4FC", stroke: STROKE, strokeWidth: "2" }),
+  /*#__PURE__*/React.createElement("path", { d: "M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4", stroke: "#FFF", strokeWidth: "1.5", opacity: "0.7" }),
+  /*#__PURE__*/React.createElement("circle", { cx: "12", cy: "12", r: "3", fill: "#FFF", stroke: STROKE, strokeWidth: "1.5" }));
+
 const FaceIcon = ({
   size = 24,
   fill = '#FFAB91'
@@ -4626,9 +4646,7 @@ const PowerupsBar = ({
     border: `1px solid ${pu.hints > 0 ? '#FFE082' : '#E8E0F0'}`,
     opacity: pu.hints > 0 ? 1 : 0.55
   }
-}, /*#__PURE__*/React.createElement("span", {
-  className: "text-lg"
-}, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("div", {
+}, /*#__PURE__*/React.createElement(HintIcon, { size: 22 }), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0"
 }, /*#__PURE__*/React.createElement("p", {
   className: "text-[11px] font-bold tracking-wider uppercase",
@@ -4647,9 +4665,7 @@ const PowerupsBar = ({
     border: `1px solid ${pu.skips > 0 ? '#A8E6CF' : '#E8E0F0'}`,
     opacity: pu.skips > 0 ? 1 : 0.55
   }
-}, /*#__PURE__*/React.createElement("span", {
-  className: "text-lg"
-}, "\u23ED\uFE0F"), /*#__PURE__*/React.createElement("div", {
+}, /*#__PURE__*/React.createElement(SkipIcon, { size: 22 }), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0"
 }, /*#__PURE__*/React.createElement("p", {
   className: "text-[11px] font-bold tracking-wider uppercase",
@@ -4668,9 +4684,7 @@ const PowerupsBar = ({
     border: `1px solid ${pu.freezes > 0 ? '#90CAF9' : '#E8E0F0'}`,
     opacity: pu.freezes > 0 ? 1 : 0.55
   }
-}, /*#__PURE__*/React.createElement("span", {
-  className: "text-lg"
-}, "\u2744\uFE0F"), /*#__PURE__*/React.createElement("div", {
+}, /*#__PURE__*/React.createElement(FreezeIcon, { size: 22 }), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0"
 }, /*#__PURE__*/React.createElement("p", {
   className: "text-[11px] font-bold tracking-wider uppercase",
@@ -4722,9 +4736,7 @@ const GamePowerBar = ({
     background: !hintDisabled && pu.hints > 0 ? '#FFF4E0' : 'rgba(255,255,255,0.5)',
     border: `1.5px solid ${!hintDisabled && pu.hints > 0 ? '#FFE082' : '#E8E0F0'}`
   }
-}, /*#__PURE__*/React.createElement("span", {
-  className: "text-lg"
-}, "\uD83D\uDCA1"), /*#__PURE__*/React.createElement("div", {
+}, /*#__PURE__*/React.createElement(HintIcon, { size: 22 }), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0 text-left"
 }, /*#__PURE__*/React.createElement("p", {
   className: "text-[11px] font-bold tracking-wider uppercase",
@@ -4745,9 +4757,7 @@ const GamePowerBar = ({
     background: !skipDisabled && pu.skips > 0 ? '#E0F5EC' : 'rgba(255,255,255,0.5)',
     border: `1.5px solid ${!skipDisabled && pu.skips > 0 ? '#A8E6CF' : '#E8E0F0'}`
   }
-}, /*#__PURE__*/React.createElement("span", {
-  className: "text-lg"
-}, "\u23ED\uFE0F"), /*#__PURE__*/React.createElement("div", {
+}, /*#__PURE__*/React.createElement(SkipIcon, { size: 22 }), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0 text-left"
 }, /*#__PURE__*/React.createElement("p", {
   className: "text-[11px] font-bold tracking-wider uppercase",
@@ -4769,9 +4779,7 @@ const GamePowerBar = ({
     border: `1.5px solid ${freezeActive ? '#4140FF' : (!freezeDisabled && pu.freezes > 0 ? '#90CAF9' : '#E8E0F0')}`,
     boxShadow: freezeActive ? '0 0 12px rgba(65,64,255,0.3)' : 'none'
   }
-}, /*#__PURE__*/React.createElement("span", {
-  className: "text-lg"
-}, "\u2744\uFE0F"), /*#__PURE__*/React.createElement("div", {
+}, /*#__PURE__*/React.createElement(FreezeIcon, { size: 22 }), /*#__PURE__*/React.createElement("div", {
   className: "min-w-0 text-left"
 }, /*#__PURE__*/React.createElement("p", {
   className: "text-[11px] font-bold tracking-wider uppercase",
