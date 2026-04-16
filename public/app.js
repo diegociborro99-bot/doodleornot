@@ -247,12 +247,27 @@ const setPrefs = p => storage.set(PREFS_KEY, p);
 /* ---------- Sound engine: tiny Tone.js wrapper, lazy-inits on first gesture ---------- */
 const Sound = {
   enabled: true,
-  _synth: null,
+  _melodySynth: null,
+  _bassSynth: null,
+  _bellSynth: null,
   _fx: null,
   _initted: false,
+  _resumed: false,
   _bootPrefs() {
     try {
       this.enabled = !!getPrefs().sound;
+    } catch {}
+  },
+  _ensureResumed() {
+    if (this._resumed) return;
+    const T = window.Tone;
+    if (!T) return;
+    try {
+      if (T.context && T.context.state !== 'running') {
+        T.start();
+        T.context.resume();
+      }
+      this._resumed = true;
     } catch {}
   },
   init() {
@@ -262,24 +277,29 @@ const Sound = {
     if (!T) return;
     this._initted = true;
     try {
-      if (T.context && T.context.state !== 'running') T.start();
-      const reverb = new T.Reverb({
-        decay: 1.6,
-        wet: 0.22
-      }).toDestination();
-      this._fx = reverb;
-      this._synth = new T.PolySynth(T.Synth, {
-        oscillator: {
-          type: 'triangle'
-        },
-        envelope: {
-          attack: 0.005,
-          decay: 0.15,
-          sustain: 0.05,
-          release: 0.35
-        }
-      }).connect(reverb);
-      this._synth.volume.value = -14;
+      this._ensureResumed();
+      // FX chain: light reverb + compression for polish
+      const reverb = new T.Reverb({ decay: 1.4, wet: 0.18 }).toDestination();
+      const comp = new T.Compressor({ threshold: -18, ratio: 3 }).connect(reverb);
+      this._fx = comp;
+      // Melody synth: warm sine+triangle for correct/jingle/levelUp
+      this._melodySynth = new T.PolySynth(T.Synth, {
+        oscillator: { type: 'fatsine', spread: 20, count: 3 },
+        envelope: { attack: 0.01, decay: 0.2, sustain: 0.08, release: 0.5 }
+      }).connect(comp);
+      this._melodySynth.volume.value = -12;
+      // Bass synth: deep for wrong/error
+      this._bassSynth = new T.PolySynth(T.Synth, {
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.01, decay: 0.3, sustain: 0.0, release: 0.4 }
+      }).connect(comp);
+      this._bassSynth.volume.value = -10;
+      // Bell synth: bright sparkle for shimmer/streak/freeze
+      this._bellSynth = new T.PolySynth(T.Synth, {
+        oscillator: { type: 'sine', partialCount: 4 },
+        envelope: { attack: 0.002, decay: 0.15, sustain: 0.02, release: 0.6 }
+      }).connect(comp);
+      this._bellSynth.volume.value = -14;
     } catch {
       this._initted = false;
     }
@@ -289,84 +309,102 @@ const Sound = {
   },
   _play(fn) {
     if (!this.enabled) return;
+    this._ensureResumed();
     this.init();
-    if (!this._synth || !window.Tone) return;
+    if (!this._melodySynth || !window.Tone) return;
     try {
-      fn(this._synth, window.Tone);
+      fn({ melody: this._melodySynth, bass: this._bassSynth, bell: this._bellSynth }, window.Tone);
     } catch {}
   },
   jingle() {
     this._play((s, T) => {
       const n = T.now();
-      s.triggerAttackRelease('G4', '8n', n);
-      s.triggerAttackRelease('B4', '8n', n + 0.13);
-      s.triggerAttackRelease('E5', '4n', n + 0.27);
+      s.melody.triggerAttackRelease('G4', '8n', n);
+      s.melody.triggerAttackRelease('B4', '8n', n + 0.12);
+      s.melody.triggerAttackRelease('D5', '8n', n + 0.24);
+      s.bell.triggerAttackRelease('G5', '4n', n + 0.36);
     });
   },
   correct() {
     this._play((s, T) => {
       const n = T.now();
-      s.triggerAttackRelease('C5', '16n', n);
-      s.triggerAttackRelease('E5', '16n', n + 0.07);
-      s.triggerAttackRelease('G5', '8n', n + 0.14);
+      s.melody.triggerAttackRelease('C5', '16n', n);
+      s.melody.triggerAttackRelease('E5', '16n', n + 0.06);
+      s.melody.triggerAttackRelease('G5', '8n', n + 0.12);
+      s.bell.triggerAttackRelease('C6', '16n', n + 0.18);
     });
   },
   wrong() {
     this._play((s, T) => {
       const n = T.now();
-      s.triggerAttackRelease('Eb3', '16n', n);
-      s.triggerAttackRelease('Bb2', '8n', n + 0.1);
+      s.bass.triggerAttackRelease('D3', '8n', n);
+      s.bass.triggerAttackRelease('Ab2', '4n', n + 0.12);
     });
   },
   shimmer() {
     this._play((s, T) => {
       const n = T.now();
-      s.triggerAttackRelease('E5', '32n', n);
-      s.triggerAttackRelease('G5', '32n', n + 0.05);
-      s.triggerAttackRelease('B5', '32n', n + 0.1);
-      s.triggerAttackRelease('E6', '16n', n + 0.15);
-      s.triggerAttackRelease('G6', '16n', n + 0.22);
+      s.bell.triggerAttackRelease('E5', '32n', n);
+      s.bell.triggerAttackRelease('G#5', '32n', n + 0.045);
+      s.bell.triggerAttackRelease('B5', '32n', n + 0.09);
+      s.bell.triggerAttackRelease('E6', '16n', n + 0.14);
+      s.bell.triggerAttackRelease('G#6', '8n', n + 0.2);
     });
   },
   levelUp() {
     this._play((s, T) => {
       const n = T.now();
-      s.triggerAttackRelease('C5', '16n', n);
-      s.triggerAttackRelease('E5', '16n', n + 0.1);
-      s.triggerAttackRelease('G5', '16n', n + 0.2);
-      s.triggerAttackRelease('C6', '8n', n + 0.3);
-      s.triggerAttackRelease('E6', '4n', n + 0.42);
+      s.melody.triggerAttackRelease('C5', '16n', n);
+      s.melody.triggerAttackRelease('E5', '16n', n + 0.09);
+      s.melody.triggerAttackRelease('G5', '16n', n + 0.18);
+      s.melody.triggerAttackRelease('C6', '8n', n + 0.28);
+      s.bell.triggerAttackRelease('E6', '4n', n + 0.38);
+      s.bell.triggerAttackRelease('G6', '4n', n + 0.48);
     });
   },
   streak() {
     this._play((s, T) => {
       const n = T.now();
-      s.triggerAttackRelease('G5', '32n', n);
-      s.triggerAttackRelease('A5', '32n', n + 0.04);
-      s.triggerAttackRelease('B5', '32n', n + 0.08);
-      s.triggerAttackRelease('D6', '16n', n + 0.12);
+      s.bell.triggerAttackRelease('A5', '32n', n);
+      s.bell.triggerAttackRelease('C#6', '32n', n + 0.04);
+      s.bell.triggerAttackRelease('E6', '16n', n + 0.08);
+      s.melody.triggerAttackRelease('A6', '8n', n + 0.13);
     });
   },
   freeze() {
     this._play((s, T) => {
       const n = T.now();
-      s.triggerAttackRelease('B5', '32n', n);
-      s.triggerAttackRelease('E6', '16n', n + 0.06);
-      s.triggerAttackRelease('B5', '32n', n + 0.14);
+      s.bell.triggerAttackRelease('E6', '32n', n);
+      s.bell.triggerAttackRelease('B5', '16n', n + 0.05);
+      s.bell.triggerAttackRelease('E6', '16n', n + 0.12);
+      s.bell.triggerAttackRelease('G#6', '8n', n + 0.18);
     });
   },
   tap() {
-    this._play((s, T) => s.triggerAttackRelease('A4', '32n', T.now()));
+    this._play((s, T) => s.bell.triggerAttackRelease('A5', '32n', T.now()));
   },
   reveal() {
     this._play((s, T) => {
       const n = T.now();
-      s.triggerAttackRelease('G4', '16n', n);
-      s.triggerAttackRelease('D5', '16n', n + 0.08);
+      s.melody.triggerAttackRelease('G4', '16n', n);
+      s.melody.triggerAttackRelease('D5', '16n', n + 0.07);
+      s.bell.triggerAttackRelease('B5', '16n', n + 0.14);
     });
   }
 };
 Sound._bootPrefs();
+// Resume AudioContext on first user interaction (browser autoplay policy)
+if (typeof document !== 'undefined') {
+  const _resumeAudio = () => {
+    Sound._ensureResumed();
+    document.removeEventListener('click', _resumeAudio);
+    document.removeEventListener('touchstart', _resumeAudio);
+    document.removeEventListener('keydown', _resumeAudio);
+  };
+  document.addEventListener('click', _resumeAudio, { once: false, passive: true });
+  document.addEventListener('touchstart', _resumeAudio, { once: false, passive: true });
+  document.addEventListener('keydown', _resumeAudio, { once: false, passive: true });
+}
 const Haptics = {
   enabled: true,
   _bootPrefs() {
