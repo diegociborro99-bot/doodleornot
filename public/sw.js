@@ -29,17 +29,23 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
-      .then(() => {
+    caches.keys().then((keys) => {
+      const old = keys.filter((k) => k !== VERSION);
+      return Promise.all(old.map((k) => caches.delete(k))).then(() => old.length);
+    })
+    .then((deletedCount) => self.clients.claim().then(() => deletedCount))
+    .then((deletedCount) => {
+      // Only force-reload when UPGRADING from an old SW version.
+      // On first install (no old caches), skip — the page already loaded fine.
+      if (deletedCount > 0) {
         // Force-reload all open tabs so they pick up fresh index.html + app.js.
         // This is critical: if the old app.js had a syntax error, the page has
         // no controllerchange listener and will stay stuck without this.
         self.clients.matchAll({ type: 'window' }).then(tabs => {
           tabs.forEach(tab => tab.navigate(tab.url));
         });
-      })
+      }
+    })
   );
 });
 
