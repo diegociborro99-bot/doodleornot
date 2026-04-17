@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && npx tailwindcss -i tw-input.css -o public/tailwind.css --minify",
     "db:migrate": "prisma migrate deploy",
     "db:dev": "prisma migrate dev",
     "db:studio": "prisma studio"
@@ -23,5 +23,8 @@
     "express-rate-limit": "^7.4.0",
     "jsonwebtoken": "^9.0.2",
     "prisma": "^5.22.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
   }
 }
