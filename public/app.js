@@ -972,24 +972,7 @@ const promptInstall = async () => {
   _deferredInstall = null;
   return outcome === 'accepted';
 };
-const registerSW = () => {
-  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
-
-  // When a NEW service worker takes over, auto-reload so the user gets fresh code.
-  // This is the key to preventing stale-cache lock-outs after deploys.
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return;
-    refreshing = true;
-    window.location.reload();
-  });
-
-  navigator.serviceWorker.register('./sw.js').then(reg => {
-    // Check for updates every 30 minutes (don't rely on browser's 24h cycle)
-    setInterval(() => { try { reg.update(); } catch(e){} }, 30 * 60 * 1000);
-  }).catch(() => {});
-};
-if (typeof window !== 'undefined') window.addEventListener('load', registerSW);
+// SW registration moved to index.html (must survive app.js syntax errors)
 
 /* ---------- Notifications ---------- */
 const requestNotifPermission = async () => {

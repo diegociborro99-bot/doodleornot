@@ -18,6 +18,25 @@
 <link rel="preconnect" href="https://i2c.seadn.io" crossorigin />
 <link rel="dns-prefetch" href="https://i2c.seadn.io" />
 <script>window.process = { env: { NODE_ENV: 'production' } };</script>
+<script>
+// SW auto-update: MUST be in index.html, not app.js — if app.js has a syntax error,
+// the controllerchange listener would never register and users stay stuck forever.
+(function(){
+  if (!('serviceWorker' in navigator)) return;
+  var refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').then(function(reg){
+      // Check for SW updates every 30 min (don't rely on browser's 24h cycle)
+      setInterval(function(){ try { reg.update(); } catch(e){} }, 30 * 60 * 1000);
+    }).catch(function(){});
+  });
+})();
+</script>
 <link rel="stylesheet" href="./tailwind.css" />
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>

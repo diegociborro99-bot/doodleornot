@@ -32,6 +32,14 @@ self.addEventListener('activate', (e) => {
     caches.keys()
       .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
+      .then(() => {
+        // Force-reload all open tabs so they pick up fresh index.html + app.js.
+        // This is critical: if the old app.js had a syntax error, the page has
+        // no controllerchange listener and will stay stuck without this.
+        self.clients.matchAll({ type: 'window' }).then(tabs => {
+          tabs.forEach(tab => tab.navigate(tab.url));
+        });
+      })
   );
 });
 
