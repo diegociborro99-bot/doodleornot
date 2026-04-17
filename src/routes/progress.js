@@ -28,110 +28,106 @@ router.post('/', requireAuth, async (req, res) => {
     // Server-computed clutch: all icons are bad until the last one (0 wrong when freeze absorbs)
     const clutch = false; // clutch is cosmetic only, disable client-controlled value
 
-    // Guard: prevent duplicate submission for same user/mode/day
     const field = mode === 'higher' ? 'higherSale' : mode === 'rarity' ? 'rarityDuel' : 'traitRoulette';
-    const existingProgress = await prisma.dailyProgress.findUnique({
-      where: { userId_day: { userId: req.userId, day } }
-    });
-    if (existingProgress && existingProgress[field]) {
-      return res.json({ ok: true, progress: existingProgress, duplicate: true });
-    }
-
-    // 1) insert a Score row (for replay/history) — catch duplicate constraint
-    try {
-      await prisma.score.create({
-        data: { userId: req.userId, day, mode, points, icons: Array.isArray(icons) ? icons : [] }
-      });
-    } catch (e) {
-      // P2002 = unique constraint violation — duplicate score, skip
-      if (e.code === 'P2002') {
-        return res.json({ ok: true, duplicate: true });
-      }
-      throw e;
-    }
-
-    // 2) upsert DailyProgress — mark this mode completed
-    const existing = existingProgress;
+    const correct = Math.min(15, icons.filter(i => i === 'check' || i === 'up' || i === 'perfect' || i === 'correct').length);
+    const weekStart = weekStartISO();
     const badIcons = new Set(['wrong', 'down']);
     const wrongIconsToday = (Array.isArray(icons) ? icons : []).filter(i => badIcons.has(i));
 
-    const baseData = {
-      [field]: true,
-      totalPoints: (existing?.totalPoints || 0) + points,
-      clutch: clutch || existing?.clutch || false,
-      wrongIcons: [...(existing?.wrongIcons || []), ...wrongIconsToday]
-    };
-    const progress = await prisma.dailyProgress.upsert({
-      where: { userId_day: { userId: req.userId, day } },
-      update: baseData,
-      create: { userId: req.userId, day, ...baseData }
-    });
+    // Entire read-check-write wrapped in serializable transaction to prevent
+    // concurrent requests from duplicating points or bypassing the mode guard.
+    const result = await prisma.$transaction(async (tx) => {
+      // Guard: prevent duplicate submission for same user/mode/day
+      const existingProgress = await tx.dailyProgress.findUnique({
+        where: { userId_day: { userId: req.userId, day } }
+      });
+      if (existingProgress && existingProgress[field]) {
+        return { ok: true, progress: existingProgress, duplicate: true };
+      }
 
-    // 3) update Stats (totalGames/totalCorrect/totalPoints/weekPoints/xp)
-    const correct = Math.min(15, icons.filter(i => i === 'check' || i === 'up' || i === 'perfect' || i === 'correct').length);
-    const weekStart = weekStartISO();
+      // 1) insert Score row — unique constraint is the last-resort guard
+      await tx.score.create({
+        data: { userId: req.userId, day, mode, points, icons: Array.isArray(icons) ? icons : [] }
+      });
 
-    // Snapshot last week's data before resetting for the new week
-    const statsNow = await prisma.stats.findUnique({ where: { userId: req.userId } });
-    if (statsNow && statsNow.weekStart !== weekStart && statsNow.weekStart !== '') {
-      // New week — snapshot current week as "last week", then reset
-      await prisma.stats.update({
+      // 2) upsert DailyProgress — mark this mode completed
+      const existing = existingProgress;
+      const baseData = {
+        [field]: true,
+        totalPoints: (existing?.totalPoints || 0) + points,
+        clutch: clutch || existing?.clutch || false,
+        wrongIcons: [...(existing?.wrongIcons || []), ...wrongIconsToday]
+      };
+      const progress = await tx.dailyProgress.upsert({
+        where: { userId_day: { userId: req.userId, day } },
+        update: baseData,
+        create: { userId: req.userId, day, ...baseData }
+      });
+
+      // 3) update Stats — snapshot last week if needed, then increment
+      const statsNow = await tx.stats.findUnique({ where: { userId: req.userId } });
+      if (statsNow && statsNow.weekStart !== weekStart && statsNow.weekStart !== '') {
+        await tx.stats.update({
+          where: { userId: req.userId },
+          data: {
+            lastWeekPoints: statsNow.weekPoints,
+            lastWeekStart: statsNow.weekStart,
+            weekPoints: 0,
+            weekStart
+          }
+        });
+      }
+
+      await tx.stats.upsert({
         where: { userId: req.userId },
-        data: {
-          lastWeekPoints: statsNow.weekPoints,
-          lastWeekStart: statsNow.weekStart,
-          weekPoints: 0,
-          weekStart
+        update: {
+          totalGames: { increment: 1 },
+          totalCorrect: { increment: correct },
+          totalPoints: { increment: points },
+          weekPoints: { increment: points },
+          weekStart,
+          xp: { increment: points }
+        },
+        create: {
+          userId: req.userId,
+          totalGames: 1,
+          totalCorrect: correct,
+          totalPoints: points,
+          weekPoints: points,
+          weekStart,
+          xp: points
         }
       });
-    }
 
-    await prisma.stats.upsert({
-      where: { userId: req.userId },
-      update: {
-        totalGames: { increment: 1 },
-        totalCorrect: { increment: correct },
-        totalPoints: { increment: points },
-        weekPoints: { increment: points },
-        weekStart,
-        xp: { increment: points }
-      },
-      create: {
-        userId: req.userId,
-        totalGames: 1,
-        totalCorrect: correct,
-        totalPoints: points,
-        weekPoints: points,
-        weekStart,
-        xp: points
-      }
-    });
-
-    // 4) update Streak when all three modes done today
-    if (progress.higherSale && progress.rarityDuel && progress.traitRoulette) {
-      const streak = await prisma.streak.findUnique({ where: { userId: req.userId } });
-      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-      let current = 1, longest = 1;
-      if (streak) {
-        if (streak.lastPlayedDay === day) {
-          current = streak.currentStreak;
-          longest = streak.longestStreak;
-        } else if (streak.lastPlayedDay === yesterday) {
-          current = (streak.currentStreak || 0) + 1;
-          longest = Math.max(streak.longestStreak || 0, current);
-        } else {
-          current = 1;
-          longest = Math.max(streak.longestStreak || 0, 1);
+      // 4) update Streak when all three modes done today
+      if (progress.higherSale && progress.rarityDuel && progress.traitRoulette) {
+        const streak = await tx.streak.findUnique({ where: { userId: req.userId } });
+        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        let current = 1, longest = 1;
+        if (streak) {
+          if (streak.lastPlayedDay === day) {
+            current = streak.currentStreak;
+            longest = streak.longestStreak;
+          } else if (streak.lastPlayedDay === yesterday) {
+            current = (streak.currentStreak || 0) + 1;
+            longest = Math.max(streak.longestStreak || 0, current);
+          } else {
+            current = 1;
+            longest = Math.max(streak.longestStreak || 0, 1);
+          }
         }
+        await tx.streak.upsert({
+          where: { userId: req.userId },
+          update: { currentStreak: current, longestStreak: longest, lastPlayedDay: day },
+          create: { userId: req.userId, currentStreak: 1, longestStreak: 1, lastPlayedDay: day }
+        });
       }
-      await prisma.streak.upsert({
-        where: { userId: req.userId },
-        update: { currentStreak: current, longestStreak: longest, lastPlayedDay: day },
-        create: { userId: req.userId, currentStreak: 1, longestStreak: 1, lastPlayedDay: day }
-      });
-    }
 
-    res.json({ ok: true, progress });
+      return { ok: true, progress };
+    }, { isolationLevel: 'Serializable' });
+
+    if (result.duplicate) return res.json(result);
+    res.json(result);
   } catch (err) {
     console.error('POST / error:', err);
     res.status(500).json({ error: 'server_error' });

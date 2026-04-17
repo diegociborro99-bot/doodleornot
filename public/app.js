@@ -232,8 +232,8 @@ const checkAchievements = ({
   if (newStreak.count >= 30) add('streak_30');
   if (newStats.totalPts >= 100) add('century');
   if (mode === 'trait' && points >= 15) add('rarity_hunter');
-  if (mode === 'guess' && points >= 15) add('whale_spotter');
-  if (mode === 'price' && points >= 15) add('eye_for_rare');
+  if (mode === 'price' && points >= 15) add('whale_spotter');
+  if (mode === 'guess' && points >= 15) add('eye_for_rare');
   if (newStats.totalPts >= 500) add('points_500');
   if (newStats.gamesPlayed >= 50) add('games_50');
   if (clutch) add('comeback_kid');
@@ -1769,17 +1769,29 @@ const DoodleAvatar = ({
       animation: 'shimmer 1.5s ease-in-out infinite'
     }
   }));
+  // Auto-retry failed images (max 3 attempts) — hooks must be before early returns
+  const retryCountRef = useRef(0);
+  useEffect(() => {
+    if (!doodle || status !== 'failed') return;
+    if (retryCountRef.current >= 3) return; // give up after 3 retries
+    const timer = setTimeout(() => {
+      retryCountRef.current++;
+      _imgFailed.delete(doodleImage(doodle));
+      setAttempt(0);
+      setStatus('loading');
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [status, doodle]);
   if (!doodle) {
     return shimmer;
   }
   if (status === 'failed') {
-    // Auto-retry after 2s instead of showing a static fallback
     const retryFn = () => {
+      retryCountRef.current = 0;
       _imgFailed.delete(doodleImage(doodle));
       setAttempt(0);
       setStatus('loading');
     };
-    setTimeout(retryFn, 2500);
     return /*#__PURE__*/React.createElement("div", {
       ref: wrapRef,
       className: rounded ? 'rounded-2xl' : '',
@@ -6617,6 +6629,7 @@ const PriceMode = ({
   const [popup, setPopup] = useState(null);
   const [animIdx, setAnimIdx] = useState(null);
   const choosingRef = useRef(false);
+  const accPtsRef = useRef(0); // accumulated points per-round (not retroactive)
   const current = triplets.current[round];
   if (!current) {
     return /*#__PURE__*/React.createElement("div", {
@@ -6702,7 +6715,9 @@ const PriceMode = ({
     setRevealed(true);
     setAnimIdx(idx);
     if (correct) {
-      setPopup({ points: 2 * mult, type: 'up' });
+      const roundPts = 2 * mult;
+      accPtsRef.current += roundPts;
+      setPopup({ points: roundPts, type: 'up' });
       if (streak >= 2) { Sound.streak(); } else { Sound.correct(); }
       Haptics.buzz(14);
     } else {
@@ -6749,10 +6764,8 @@ const PriceMode = ({
     return () => window.removeEventListener('keydown', h);
   }, [revealed, round, streak, icons, freezeActive, hintedIdx]);
   const finish = (finalStreak, finalIcons) => {
-    const hits = finalIcons.filter(i => i === 'up').length;
-    const finalMult = finalStreak >= 10 ? 3 : finalStreak >= 5 ? 2 : 1;
     onFinish({
-      points: hits * 2 * finalMult,
+      points: accPtsRef.current, // use accumulated per-round points, not retroactive
       icons: finalIcons,
       mode: 'price',
       streak: finalStreak
@@ -8416,7 +8429,7 @@ function DoodleOrNot() {
         const data = await api.me();
         if (cancelled || !data || !data.username) return;
         const u = data;
-        const uname = u.username;
+        const uname = u.username.toLowerCase();
         // Mirror profile locally so the rest of the app sees it.
         const users = getUsers();
         const existing = users[uname] || {};
@@ -8634,6 +8647,10 @@ function DoodleOrNot() {
     setLastResult(null);
   };
   const handleLogout = () => {
+    // Clear server httpOnly cookie first
+    if (window.DON_API && window.DON_API.logout) {
+      window.DON_API.logout().catch(() => {});
+    }
     setSession(null);
     setSessionState(null);
     setProfile(null);
@@ -9840,7 +9857,7 @@ function __showFatal(title, err, extra) {
     var box = document.createElement('div');
     box.style.cssText = 'position:fixed;inset:12px;z-index:99999;background:#fff;border:2px solid #E57373;border-radius:14px;padding:16px;font:13px/1.5 ui-monospace,Menlo,monospace;color:#2D2D3F;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.2);';
     var msg = (err && (err.stack || err.message)) || String(err);
-    box.innerHTML = '<div style="font-weight:700;color:#B94A4A;margin-bottom:6px;">' + title + '</div><div style="white-space:pre-wrap;">' + String(msg).replace(/</g,'&lt;') + '</div>' + (extra ? '<div style="margin-top:8px;white-space:pre-wrap;color:#7B7B9A;">'+String(extra).replace(/</g,'&lt;')+'</div>' : '');
+    box.innerHTML = '<div style="font-weight:700;color:#B94A4A;margin-bottom:6px;">' + String(title).replace(/</g,'&lt;') + '</div><div style="white-space:pre-wrap;">' + String(msg).replace(/</g,'&lt;') + '</div>' + (extra ? '<div style="margin-top:8px;white-space:pre-wrap;color:#7B7B9A;">'+String(extra).replace(/</g,'&lt;')+'</div>' : '');
     document.body.appendChild(box);
     var s = document.getElementById('boot-splash'); if (s) s.style.display='none';
   } catch(e){}
@@ -9849,7 +9866,20 @@ class __RootErrorBoundary extends React.Component {
   constructor(p){ super(p); this.state = { err: null }; }
   static getDerivedStateFromError(err){ return { err: err }; }
   componentDidCatch(err, info){ __showFatal('Render error', err, 'Component stack:' + (info && info.componentStack || '')); }
-  render(){ if (this.state.err) return null; return this.props.children; }
+  render(){
+    if (this.state.err) return React.createElement('div', {
+      style: { padding: '2rem', textAlign: 'center', fontFamily: 'Fredoka, system-ui, sans-serif', color: '#2D2D3F' }
+    },
+      React.createElement('div', { style: { fontSize: '3rem', marginBottom: '1rem' } }, '\uD83D\uDEE0'),
+      React.createElement('h2', { style: { marginBottom: '.5rem' } }, 'Something went wrong'),
+      React.createElement('p', { style: { color: '#7B7B9A', marginBottom: '1.5rem', fontSize: '14px' } }, String(this.state.err.message || this.state.err).slice(0, 200)),
+      React.createElement('button', {
+        onClick: function(){ location.reload(); },
+        style: { background: '#4140FF', color: '#fff', border: 'none', borderRadius: '12px', padding: '12px 32px', fontSize: '16px', fontWeight: 600, cursor: 'pointer' }
+      }, 'Reload')
+    );
+    return this.props.children;
+  }
 }
 try {
   ReactDOM.createRoot(document.getElementById('root')).render(
