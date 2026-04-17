@@ -4,6 +4,7 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const { updateDataset } = require('./src/update-sales');
 
 const authRoutes = require('./src/routes/auth');
 const progressRoutes = require('./src/routes/progress');
@@ -58,7 +59,7 @@ app.use('/api', (err, _req, res, _next) => {
 app.use(
   '/doodles-dataset.js',
   express.static(path.join(PUBLIC_DIR, 'doodles-dataset.js'), {
-    maxAge: '30d', immutable: true,
+    maxAge: '1d',
     setHeaders(res) { res.setHeader('Content-Type', 'application/javascript; charset=utf-8'); }
   })
 );
@@ -74,6 +75,43 @@ app.use(express.static(PUBLIC_DIR, {
 app.get(/^(?!\/api\/).*$/, (_req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
+
+// ----- Monthly sales updater (1st of month, 03:00 UTC) -----
+const { requireAuth } = require('./src/auth');
+
+// Manual trigger: POST /api/admin/update-sales (admin only)
+app.post('/api/admin/update-sales', requireAuth, async (req, res) => {
+  try {
+    const prisma = require('./src/db');
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
+    if (!user || user.username !== 'degos') return res.status(403).json({ error: 'admin_only' });
+    const apiKey = process.env.OPENSEA_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: 'missing_opensea_key' });
+    res.json({ status: 'started', message: 'Sales update running in background...' });
+    updateDataset(apiKey).then(r => console.log('Manual sales update result:', r)).catch(e => console.error('Manual sales update failed:', e));
+  } catch (err) {
+    console.error('update-sales error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// Auto-cron: check every hour if it's the 1st of the month at 03:00 UTC
+let lastUpdateMonth = -1;
+setInterval(() => {
+  const now = new Date();
+  const day = now.getUTCDate();
+  const hour = now.getUTCHours();
+  const month = now.getUTCMonth();
+  if (day === 1 && hour === 3 && month !== lastUpdateMonth) {
+    lastUpdateMonth = month;
+    const apiKey = process.env.OPENSEA_API_KEY;
+    if (!apiKey) { console.warn('Skipping sales update: no OPENSEA_API_KEY'); return; }
+    console.log('Monthly sales update triggered (1st of month, 03:00 UTC)');
+    updateDataset(apiKey)
+      .then(r => console.log('Monthly sales update result:', r))
+      .catch(e => console.error('Monthly sales update FAILED:', e));
+  }
+}, 60 * 60 * 1000); // check every hour
 
 app.listen(PORT, () => {
   console.log(`Doodle or Not listening on :${PORT} (node ${process.version})`);
