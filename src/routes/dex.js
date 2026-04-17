@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/', requireAuth, async (req, res) => {
   try {
     const ids = (req.body && Array.isArray(req.body.ids)) ? req.body.ids : [];
-    const clean = ids.map(n => parseInt(n, 10)).filter(n => Number.isFinite(n) && n >= 0 && n < 10000);
+    const clean = ids.slice(0, 50).map(n => parseInt(n, 10)).filter(n => Number.isFinite(n) && n >= 0 && n < 10000);
     if (!clean.length) return res.json({ added: 0 });
     // use createMany with skipDuplicates
     const result = await prisma.dexEntry.createMany({

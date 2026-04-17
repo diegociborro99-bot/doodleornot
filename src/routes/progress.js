@@ -12,7 +12,7 @@ const MAX_POINTS_PER_MODE = 25;
 // mode: 'higher' | 'rarity' | 'trait'
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { mode, icons = [], clutch = false } = req.body || {};
+    const { mode } = req.body || {};
     // Always use server-computed day — never trust client
     const day = todayISO();
     // Clamp points to prevent manipulation
@@ -20,6 +20,13 @@ router.post('/', requireAuth, async (req, res) => {
     const points = Math.max(0, Math.min(rawPoints, MAX_POINTS_PER_MODE));
 
     if (!['higher', 'rarity', 'trait'].includes(mode)) return res.status(400).json({ error: 'bad_mode' });
+
+    // Validate and cap icons array (max 15 rounds per mode)
+    const VALID_ICONS = new Set(['check', 'up', 'down', 'wrong', 'perfect', 'correct', 'near', 'skip']);
+    const rawIcons = Array.isArray(req.body.icons) ? req.body.icons : [];
+    const icons = rawIcons.filter(i => typeof i === 'string' && VALID_ICONS.has(i)).slice(0, 15);
+    // Server-computed clutch: all icons are bad until the last one (0 wrong when freeze absorbs)
+    const clutch = false; // clutch is cosmetic only, disable client-controlled value
 
     // Guard: prevent duplicate submission for same user/mode/day
     const field = mode === 'higher' ? 'higherSale' : mode === 'rarity' ? 'rarityDuel' : 'traitRoulette';
@@ -61,16 +68,21 @@ router.post('/', requireAuth, async (req, res) => {
     });
 
     // 3) update Stats (totalGames/totalCorrect/totalPoints/weekPoints/xp)
-    const correct = (Array.isArray(icons) ? icons : []).filter(i => i === 'check' || i === 'up').length;
+    const correct = Math.min(15, icons.filter(i => i === 'check' || i === 'up' || i === 'perfect' || i === 'correct').length);
     const weekStart = weekStartISO();
 
-    // Atomic update: first reset weekPoints if new week, then increment
+    // Snapshot last week's data before resetting for the new week
     const statsNow = await prisma.stats.findUnique({ where: { userId: req.userId } });
-    if (statsNow && statsNow.weekStart !== weekStart) {
-      // New week — reset weekPoints before incrementing
+    if (statsNow && statsNow.weekStart !== weekStart && statsNow.weekStart !== '') {
+      // New week — snapshot current week as "last week", then reset
       await prisma.stats.update({
         where: { userId: req.userId },
-        data: { weekPoints: 0, weekStart }
+        data: {
+          lastWeekPoints: statsNow.weekPoints,
+          lastWeekStart: statsNow.weekStart,
+          weekPoints: 0,
+          weekStart
+        }
       });
     }
 

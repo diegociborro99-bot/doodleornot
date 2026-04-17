@@ -12,10 +12,10 @@ router.get('/', optionalAuth, async (req, res) => {
     const scope = validScopes.includes(req.query.scope) ? req.query.scope : 'weekly';
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || '50', 10)));
 
-    if (scope === 'weekly' || scope === 'lastweekly') {
-      const weekStart = scope === 'lastweekly' ? lastWeekStartISO() : weekStartISO();
+    if (scope === 'weekly') {
+      const ws = weekStartISO();
       const rows = await prisma.stats.findMany({
-        where: { weekStart },
+        where: { weekStart: ws },
         orderBy: [{ weekPoints: 'desc' }],
         take: limit,
         select: {
@@ -24,12 +24,33 @@ router.get('/', optionalAuth, async (req, res) => {
           user: { select: { username: true, avatarColor: true, avatarData: true } }
         }
       });
-      return res.json({ scope, weekStart, weekNumber: getWeekNumber(), rows: rows.map((r, i) => ({
+      return res.json({ scope, weekStart: ws, weekNumber: getWeekNumber(), rows: rows.map((r, i) => ({
         rank: i + 1,
         username: r.user.username,
         avatarColor: r.user.avatarColor,
         avatarData: r.user.avatarData || null,
         points: r.weekPoints
+      })) });
+    }
+
+    if (scope === 'lastweekly') {
+      const lws = lastWeekStartISO();
+      const rows = await prisma.stats.findMany({
+        where: { lastWeekStart: lws, lastWeekPoints: { gt: 0 } },
+        orderBy: [{ lastWeekPoints: 'desc' }],
+        take: limit,
+        select: {
+          userId: true,
+          lastWeekPoints: true,
+          user: { select: { username: true, avatarColor: true, avatarData: true } }
+        }
+      });
+      return res.json({ scope, weekStart: lws, weekNumber: getWeekNumber() - 1, rows: rows.map((r, i) => ({
+        rank: i + 1,
+        username: r.user.username,
+        avatarColor: r.user.avatarColor,
+        avatarData: r.user.avatarData || null,
+        points: r.lastWeekPoints
       })) });
     }
 
@@ -62,6 +83,14 @@ router.post('/reset-weekly', requireAuth, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
     if (!user || user.username !== 'degos') {
       return res.status(403).json({ error: 'admin_only' });
+    }
+    // Snapshot current week into lastWeek before resetting
+    const allStats = await prisma.stats.findMany({ where: { weekPoints: { gt: 0 } }, select: { userId: true, weekPoints: true, weekStart: true } });
+    for (const s of allStats) {
+      await prisma.stats.update({
+        where: { userId: s.userId },
+        data: { lastWeekPoints: s.weekPoints, lastWeekStart: s.weekStart }
+      });
     }
     await prisma.stats.updateMany({
       data: { weekPoints: 0, weekStart: '' }

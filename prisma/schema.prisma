@@ -77,6 +77,8 @@ model Stats {
   highestStreak   Int     @default(0)
   weekPoints      Int     @default(0)
   weekStart       String  @default("") // ISO week-start date, rolls weekly
+  lastWeekPoints  Int     @default(0)
+  lastWeekStart   String  @default("") // snapshot of previous week
   xp              Int     @default(0)
   updatedAt       DateTime @updatedAt
 }

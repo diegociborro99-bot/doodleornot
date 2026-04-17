@@ -1,7 +1,9 @@
 const {
   useState,
   useEffect,
-  useRef
+  useRef,
+  useMemo,
+  useCallback
 } = React;
 
 /* ==========================================================================
@@ -1112,7 +1114,7 @@ const GUESS_POOL = (() => {
    ICON SYSTEM — all custom inline SVG, thick black outlines, pastel fills
    ========================================================================== */
 
-const STROKE = '#2D2D3F';
+const STROKE = 'var(--c-text)';
 const BaseSVG = ({
   size = 24,
   children,
@@ -2516,31 +2518,31 @@ const DreamLandscape = ({
   }), /*#__PURE__*/React.createElement("path", {
     d: "M 78 232 Q 90 220 102 232 Q 95 248 78 248 Z",
     fill: "#FFFFFF",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8",
     strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
     d: "M 225 195 Q 240 180 255 195 Q 248 218 225 218 Z",
     fill: "#FFFFFF",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8",
     strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
     d: "M 405 222 Q 420 210 435 222 Q 428 242 405 242 Z",
     fill: "#FFFFFF",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8",
     strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
     d: "M 605 212 Q 620 200 635 212 Q 628 232 605 232 Z",
     fill: "#FFFFFF",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8",
     strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
     d: "M 805 242 Q 820 230 835 242 Q 828 258 805 258 Z",
     fill: "#FFFFFF",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8",
     strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("g", {
@@ -2566,19 +2568,19 @@ const DreamLandscape = ({
   }))), /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
     d: "M -20 400 Q 80 340 180 365 Q 280 395 380 375 Q 480 350 580 370 Q 700 395 820 365 Q 920 345 1020 380 L 1020 500 L -20 500 Z",
     fill: "#A8C8E8",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.4",
     strokeLinejoin: "round"
   })), /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
     d: "M -20 430 Q 140 360 300 400 Q 420 428 560 395 Q 700 360 860 410 Q 960 440 1020 420 L 1020 560 L -20 560 Z",
     fill: "url(#hillG1)",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.6",
     strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
     d: "M -20 470 Q 160 410 320 450 Q 480 490 640 440 Q 800 395 1020 470 L 1020 580 L -20 580 Z",
     fill: "url(#hillG2)",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.6",
     strokeLinejoin: "round"
   })), /*#__PURE__*/React.createElement("g", {
@@ -2614,21 +2616,21 @@ const DreamLandscape = ({
   })), /*#__PURE__*/React.createElement("path", {
     d: "M -30 560 Q 220 470 360 500 Q 540 540 620 470 Q 720 410 860 450 Q 960 475 1030 460",
     fill: "none",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2",
     strokeLinecap: "round",
     opacity: "0.25"
   }), /*#__PURE__*/React.createElement("path", {
     d: "M -30 602 Q 220 512 360 542 Q 540 582 620 512 Q 720 452 860 492 Q 960 517 1030 502",
     fill: "none",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2",
     strokeLinecap: "round",
     opacity: "0.25"
   })), /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
     d: "M 720 500 Q 760 540 820 555 Q 900 575 1020 570 L 1020 620 L 700 620 Z",
     fill: "url(#river)",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.4",
     strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
@@ -2656,13 +2658,13 @@ const DreamLandscape = ({
   })), /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
     d: "M -40 540 Q 60 470 180 530 Q 260 570 320 545 Q 400 515 470 560 Q 520 590 580 580 L 580 640 L -40 640 Z",
     fill: "url(#hillV)",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.8",
     strokeLinejoin: "round"
   }), /*#__PURE__*/React.createElement("path", {
     d: "M 680 595 Q 760 560 840 590 Q 920 618 1040 600 L 1040 640 L 680 640 Z",
     fill: "url(#hillP)",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.6",
     strokeLinejoin: "round"
   })), /*#__PURE__*/React.createElement("g", {
@@ -2672,7 +2674,7 @@ const DreamLandscape = ({
     }
   }, /*#__PURE__*/React.createElement("path", {
     d: "M 0 40 Q -5 10 5 -20 Q 15 -10 10 20",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "3.5",
     fill: "#7A5AB6",
     strokeLinecap: "round"
@@ -2681,28 +2683,28 @@ const DreamLandscape = ({
     cy: "-22",
     r: "14",
     fill: "#FBD3E0",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.5"
   }), /*#__PURE__*/React.createElement("circle", {
     cx: "8",
     cy: "-30",
     r: "16",
     fill: "#F9BBD0",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.5"
   }), /*#__PURE__*/React.createElement("circle", {
     cx: "20",
     cy: "-12",
     r: "13",
     fill: "#FBD3E0",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.5"
   }), /*#__PURE__*/React.createElement("circle", {
     cx: "-4",
     cy: "-6",
     r: "11",
     fill: "#F9BBD0",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.5"
   })), /*#__PURE__*/React.createElement("g", {
     transform: "translate(40 560)",
@@ -2722,12 +2724,12 @@ const DreamLandscape = ({
     ry: "7",
     transform: `rotate(${a})`,
     fill: "#FFFFFF",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2"
   })), /*#__PURE__*/React.createElement("circle", {
     r: "6",
     fill: "#F9BBD0",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2"
   }))), /*#__PURE__*/React.createElement("g", {
     transform: "translate(95 605)",
@@ -2745,12 +2747,12 @@ const DreamLandscape = ({
     ry: "6",
     transform: `rotate(${a})`,
     fill: "#FFFFFF",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8"
   })), /*#__PURE__*/React.createElement("circle", {
     r: "4.5",
     fill: "#F9A8C1",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.6"
   }))), /*#__PURE__*/React.createElement("g", {
     fill: "#FFFFFF",
@@ -2788,7 +2790,7 @@ const DreamLandscape = ({
     rx: "7",
     ry: "10",
     fill: "#FFE082",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2"
   }), /*#__PURE__*/React.createElement("ellipse", {
     cx: "6",
@@ -2796,7 +2798,7 @@ const DreamLandscape = ({
     rx: "7",
     ry: "10",
     fill: "#FFE082",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2"
   }), /*#__PURE__*/React.createElement("ellipse", {
     cx: "-4",
@@ -2804,7 +2806,7 @@ const DreamLandscape = ({
     rx: "5",
     ry: "7",
     fill: "#FFCE66",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2"
   }), /*#__PURE__*/React.createElement("ellipse", {
     cx: "4",
@@ -2812,14 +2814,14 @@ const DreamLandscape = ({
     rx: "5",
     ry: "7",
     fill: "#FFCE66",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2"
   }), /*#__PURE__*/React.createElement("line", {
     x1: "0",
     y1: "-6",
     x2: "0",
     y2: "8",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2",
     strokeLinecap: "round"
   }))), /*#__PURE__*/React.createElement("g", {
@@ -2833,7 +2835,7 @@ const DreamLandscape = ({
     rx: "6",
     ry: "9",
     fill: "#C5B3E6",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8"
   }), /*#__PURE__*/React.createElement("ellipse", {
     cx: "5",
@@ -2841,7 +2843,7 @@ const DreamLandscape = ({
     rx: "6",
     ry: "9",
     fill: "#C5B3E6",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8"
   }), /*#__PURE__*/React.createElement("ellipse", {
     cx: "-3",
@@ -2849,7 +2851,7 @@ const DreamLandscape = ({
     rx: "4",
     ry: "6",
     fill: "#A89ED4",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8"
   }), /*#__PURE__*/React.createElement("ellipse", {
     cx: "3",
@@ -2857,18 +2859,18 @@ const DreamLandscape = ({
     rx: "4",
     ry: "6",
     fill: "#A89ED4",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8"
   }), /*#__PURE__*/React.createElement("line", {
     x1: "0",
     y1: "-5",
     x2: "0",
     y2: "7",
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "1.8",
     strokeLinecap: "round"
   }))), /*#__PURE__*/React.createElement("g", {
-    stroke: "#2D2D3F",
+    stroke: "var(--c-text)",
     strokeWidth: "2.2",
     strokeLinecap: "round",
     fill: "none",
@@ -2909,7 +2911,7 @@ const PrimaryButton = ({
   disabled: disabled,
   className: `rounded-xl px-5 py-3 font-bold text-white transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${className}`,
   style: {
-    background: '#4140FF',
+    background: 'var(--c-accent)',
     letterSpacing: '0.01em',
     boxShadow: '0 4px 14px rgba(65, 64, 255, 0.35)'
   }
@@ -2924,7 +2926,7 @@ const SoftButton = ({
   style: {
     background: 'var(--c-soft-btn)',
     color: 'var(--c-text)',
-    border: '1px solid #E8E0F0',
+    border: '1px solid var(--c-border)',
     letterSpacing: '0.01em'
   }
 }, children);
@@ -2932,13 +2934,13 @@ const Pill = ({
   children,
   active,
   onClick,
-  color = '#4140FF'
+  color = 'var(--c-accent)'
 }) => /*#__PURE__*/React.createElement("button", {
   onClick: onClick,
   className: "rounded-full px-4 py-1.5 text-sm font-semibold transition-all active:scale-95",
   style: {
-    background: active ? color : 'rgba(255,255,255,0.6)',
-    color: active ? '#FFFFFF' : '#2D2D3F',
+    background: active ? color : 'var(--c-pill-inactive)',
+    color: active ? '#FFFFFF' : 'var(--c-text)',
     border: `1px solid ${active ? color : 'var(--c-border)'}`
   }
 }, children);
@@ -3327,8 +3329,8 @@ const TopActions = ({
   "aria-label": sound ? 'Mute sound' : 'Unmute sound',
   className: "w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-transform",
   style: {
-    background: 'rgba(255,255,255,0.72)',
-    border: '1px solid #E8E0F0',
+    background: 'var(--c-card)',
+    border: '1px solid var(--c-border)',
     backdropFilter: 'blur(8px)',
     WebkitBackdropFilter: 'blur(8px)',
     boxShadow: '0 4px 14px rgba(100,80,160,0.15)'
@@ -3338,7 +3340,7 @@ const TopActions = ({
   width: "18",
   height: "18",
   fill: "none",
-  stroke: "#2D2D3F",
+  stroke: "var(--c-text)",
   strokeWidth: "2",
   strokeLinecap: "round",
   strokeLinejoin: "round"
@@ -3363,8 +3365,8 @@ const TopActions = ({
   "aria-label": "Settings",
   className: "w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-transform",
   style: {
-    background: 'rgba(255,255,255,0.72)',
-    border: '1px solid #E8E0F0',
+    background: 'var(--c-card)',
+    border: '1px solid var(--c-border)',
     backdropFilter: 'blur(8px)',
     WebkitBackdropFilter: 'blur(8px)',
     boxShadow: '0 4px 14px rgba(100,80,160,0.15)'
@@ -3374,7 +3376,7 @@ const TopActions = ({
   width: "18",
   height: "18",
   fill: "none",
-  stroke: "#2D2D3F",
+  stroke: "var(--c-text)",
   strokeWidth: "2",
   strokeLinecap: "round",
   strokeLinejoin: "round"
@@ -3446,15 +3448,15 @@ const SettingsModal = ({
   }) => /*#__PURE__*/React.createElement("div", {
     className: "flex rounded-lg overflow-hidden",
     style: {
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, options.map(o => /*#__PURE__*/React.createElement("button", {
     key: o.value,
     onClick: () => on(o.value),
     className: "px-2.5 py-1 text-[11px] font-bold transition-colors",
     style: {
-      background: value === o.value ? '#4140FF' : 'rgba(255,255,255,0.7)',
-      color: value === o.value ? '#fff' : '#2D2D3F'
+      background: value === o.value ? 'var(--c-accent)' : 'var(--c-result-bg)',
+      color: value === o.value ? '#fff' : 'var(--c-text)'
     }
   }, o.label)));
   return /*#__PURE__*/React.createElement("div", {
@@ -3581,7 +3583,7 @@ const SettingsModal = ({
     onClick: onInstall,
     className: "rounded-lg px-3 py-1.5 text-[11px] font-bold",
     style: {
-      background: '#4140FF',
+      background: 'var(--c-accent)',
       color: '#fff'
     }
   }, "Install")), /*#__PURE__*/React.createElement(Row, {
@@ -3647,7 +3649,7 @@ const OnboardingFlow = ({
     className: "h-1.5 rounded-full transition-all",
     style: {
       width: i === step ? 24 : 8,
-      background: i <= step ? '#4140FF' : 'var(--c-border)'
+      background: i <= step ? 'var(--c-accent)' : 'var(--c-border)'
     }
   }))), step < steps.length - 1 ? /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2"
@@ -3713,7 +3715,7 @@ const MoodCard = () => {
   }, "\"", MOOD_LINES[idx], "\""), d && /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] mt-0.5",
     style: {
-      color: '#4140FF'
+      color: 'var(--c-accent)'
     }
   }, "tap doodle \u2192 OpenSea \u2197")));
 };
@@ -3767,7 +3769,7 @@ const DexModal = ({
   }, /*#__PURE__*/React.createElement("p", {
     className: "font-display font-semibold text-xl tabular-nums",
     style: {
-      color: '#4140FF'
+      color: 'var(--c-accent)'
     }
   }, seen, " / ", total), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px]",
@@ -3911,7 +3913,7 @@ const WeeklyReading = ({
     className: "rounded-xl p-2",
     style: {
       background: 'var(--c-stat-bg)',
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] font-bold tracking-wider uppercase",
@@ -3927,7 +3929,7 @@ const WeeklyReading = ({
     className: "rounded-xl p-2",
     style: {
       background: 'var(--c-stat-bg)',
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] font-bold tracking-wider uppercase",
@@ -3943,7 +3945,7 @@ const WeeklyReading = ({
     className: "rounded-xl p-2",
     style: {
       background: 'var(--c-stat-bg)',
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] font-bold tracking-wider uppercase",
@@ -4024,7 +4026,7 @@ const ShortcutsOverlay = ({
   return /*#__PURE__*/React.createElement("div", {
     className: "fixed inset-0 z-[65] flex items-center justify-center p-4",
     style: {
-      background: 'rgba(45,45,63,0.55)',
+      background: 'var(--c-overlay)',
       backdropFilter: 'blur(5px)'
     },
     onClick: onClose
@@ -4032,7 +4034,7 @@ const ShortcutsOverlay = ({
     className: "w-full max-w-md rounded-2xl p-5 anim-pop-in",
     onClick: e => e.stopPropagation(),
     style: {
-      background: 'rgba(255,255,255,0.97)',
+      background: 'var(--c-card-solid)',
       border: '1px solid var(--c-border)',
       boxShadow: '0 20px 50px rgba(45,45,63,0.35)'
     }
@@ -4067,9 +4069,9 @@ const ShortcutsOverlay = ({
   }, desc), /*#__PURE__*/React.createElement("kbd", {
     className: "px-2 py-0.5 rounded-md text-xs font-bold tabular-nums",
     style: {
-      background: '#F1EDF7',
-      color: '#4140FF',
-      border: '1px solid #E8E0F0'
+      background: 'var(--c-input-bg)',
+      color: 'var(--c-accent)',
+      border: '1px solid var(--c-border)'
     }
   }, k)))), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] mt-3 text-center",
@@ -4136,7 +4138,7 @@ const DoodleDetailModal = ({
   }, "#", doodle.id), typeof doodle.lastSale === 'number' && /*#__PURE__*/React.createElement("p", {
     className: "text-xs mt-1",
     style: {
-      color: '#4140FF'
+      color: 'var(--c-accent)'
     }
   }, "Last sale: ", /*#__PURE__*/React.createElement("span", {
     className: "font-bold"
@@ -4156,8 +4158,8 @@ const DoodleDetailModal = ({
     key: tr.type,
     className: "rounded-xl p-2",
     style: {
-      background: 'rgba(255,255,255,0.65)',
-      border: '1px solid #E8E0F0'
+      background: 'var(--c-pill-inactive)',
+      border: '1px solid var(--c-border)'
     }
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] font-bold tracking-wider uppercase truncate",
@@ -4216,7 +4218,7 @@ const ShareCardModal = ({
   return /*#__PURE__*/React.createElement("div", {
     className: "fixed inset-0 z-[65] flex items-center justify-center p-4",
     style: {
-      background: 'rgba(45,45,63,0.55)',
+      background: 'var(--c-overlay)',
       backdropFilter: 'blur(5px)'
     },
     onClick: onClose
@@ -4224,7 +4226,7 @@ const ShareCardModal = ({
     className: "w-full max-w-md rounded-2xl p-4 anim-pop-in overflow-y-auto",
     onClick: e => e.stopPropagation(),
     style: {
-      background: 'rgba(255,255,255,0.97)',
+      background: 'var(--c-card-solid)',
       border: '1px solid var(--c-border)',
       boxShadow: '0 20px 50px rgba(45,45,63,0.35)',
       maxHeight: '90vh'
@@ -4247,7 +4249,7 @@ const ShareCardModal = ({
   }, "\xD7")), /*#__PURE__*/React.createElement("div", {
     className: "rounded-xl overflow-hidden mb-3",
     style: {
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, url ? /*#__PURE__*/React.createElement("img", {
     src: url,
@@ -4264,7 +4266,7 @@ const ShareCardModal = ({
     onClick: download,
     className: "rounded-xl py-2.5 font-bold text-sm",
     style: {
-      background: '#4140FF',
+      background: 'var(--c-accent)',
       color: '#fff'
     }
   }, t('download_png')), /*#__PURE__*/React.createElement("button", {
@@ -4360,7 +4362,7 @@ const LeaguesModal = ({
     onClick: create,
     className: "rounded-xl py-2.5 font-bold text-sm",
     style: {
-      background: '#4140FF',
+      background: 'var(--c-accent)',
       color: '#fff'
     }
   }, t('create_league')), /*#__PURE__*/React.createElement("div", {
@@ -4371,7 +4373,7 @@ const LeaguesModal = ({
     placeholder: t('league_code'),
     className: "flex-1 rounded-xl px-3 text-sm font-semibold",
     style: {
-      background: '#fff',
+      background: 'var(--c-card-solid)',
       border: '1px solid var(--c-border)',
       color: 'var(--c-text)'
     }
@@ -4403,7 +4405,7 @@ const LeaguesModal = ({
     onClick: () => copy(createdCode),
     className: "mt-2 rounded-lg px-3 py-1 text-[11px] font-bold",
     style: {
-      background: '#fff',
+      background: 'var(--c-card-solid)',
       border: '1px solid #A8E6CF',
       color: 'var(--c-text)'
     }
@@ -4433,7 +4435,7 @@ const LeaguesModal = ({
       className: "rounded-xl p-3",
       style: {
         background: 'var(--c-result-bg)',
-        border: '1px solid #E8E0F0'
+        border: '1px solid var(--c-border)'
       }
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex items-center justify-between mb-2"
@@ -4453,9 +4455,9 @@ const LeaguesModal = ({
       onClick: () => copy(code),
       className: "rounded-lg px-2 py-1 text-[11px] font-bold",
       style: {
-        background: '#F1EDF7',
-        color: '#4140FF',
-        border: '1px solid #E8E0F0'
+        background: 'var(--c-input-bg)',
+        color: 'var(--c-accent)',
+        border: '1px solid var(--c-border)'
       }
     }, "Copy"), /*#__PURE__*/React.createElement("button", {
       onClick: () => leave(code),
@@ -4478,7 +4480,7 @@ const LeaguesModal = ({
     }, /*#__PURE__*/React.createElement("b", null, i + 1, "."), " @", r.u, r.u === username && ' (you)'), /*#__PURE__*/React.createElement("span", {
       className: "font-bold tabular-nums",
       style: {
-        color: '#4140FF'
+        color: 'var(--c-accent)'
       }
     }, r.pts)))));
   }))));
@@ -4526,7 +4528,7 @@ const DailyRecapModal = ({
     className: "rounded-xl p-3 text-center",
     style: {
       background: '#FFECE0',
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] font-bold tracking-wider uppercase",
@@ -4542,7 +4544,7 @@ const DailyRecapModal = ({
     className: "rounded-xl p-3 text-center",
     style: {
       background: '#E0F5EC',
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] font-bold tracking-wider uppercase",
@@ -4563,7 +4565,7 @@ const DailyRecapModal = ({
     onClick: onClose,
     className: "w-full rounded-xl py-2.5 font-bold text-sm",
     style: {
-      background: '#4140FF',
+      background: 'var(--c-accent)',
       color: '#fff'
     }
   }, "Let's play")));
@@ -4638,7 +4640,7 @@ const EmptyState = ({
   height: "100",
   rx: "18",
   fill: "url(#esSky)",
-  stroke: "#2D2D3F",
+  stroke: "var(--c-text)",
   strokeWidth: "2.5"
 }), /*#__PURE__*/React.createElement("ellipse", {
   cx: "54",
@@ -4646,7 +4648,7 @@ const EmptyState = ({
   rx: "20",
   ry: "14",
   fill: "#fff",
-  stroke: "#2D2D3F",
+  stroke: "var(--c-text)",
   strokeWidth: "2"
 }), /*#__PURE__*/React.createElement("ellipse", {
   cx: "86",
@@ -4654,7 +4656,7 @@ const EmptyState = ({
   rx: "28",
   ry: "18",
   fill: "#fff",
-  stroke: "#2D2D3F",
+  stroke: "var(--c-text)",
   strokeWidth: "2"
 }), /*#__PURE__*/React.createElement("ellipse", {
   cx: "112",
@@ -4662,18 +4664,18 @@ const EmptyState = ({
   rx: "14",
   ry: "10",
   fill: "#fff",
-  stroke: "#2D2D3F",
+  stroke: "var(--c-text)",
   strokeWidth: "2"
 }), /*#__PURE__*/React.createElement("circle", {
   cx: "125",
   cy: "30",
   r: "8",
   fill: "#FFE082",
-  stroke: "#2D2D3F",
+  stroke: "var(--c-text)",
   strokeWidth: "2"
 }), /*#__PURE__*/React.createElement("path", {
   d: "M40,96 Q80,86 120,96",
-  stroke: "#2D2D3F",
+  stroke: "var(--c-text)",
   strokeWidth: "2",
   fill: "none",
   strokeLinecap: "round"
@@ -4700,7 +4702,7 @@ const PowerupsBar = ({
 }, /*#__PURE__*/React.createElement("div", {
   className: "flex-1 rounded-xl p-2 flex items-center gap-2",
   style: {
-    background: pu.hints > 0 ? '#FFF4E0' : 'rgba(255,255,255,0.5)',
+    background: pu.hints > 0 ? '#FFF4E0' : 'var(--c-stat-bg)',
     border: `1px solid ${pu.hints > 0 ? '#FFE082' : 'var(--c-border)'}`,
     opacity: pu.hints > 0 ? 1 : 0.55
   }
@@ -4719,7 +4721,7 @@ const PowerupsBar = ({
 }, "x", pu.hints, " \xB7 use in-game"))), /*#__PURE__*/React.createElement("div", {
   className: "flex-1 rounded-xl p-2 flex items-center gap-2",
   style: {
-    background: pu.skips > 0 ? '#E0F5EC' : 'rgba(255,255,255,0.5)',
+    background: pu.skips > 0 ? '#E0F5EC' : 'var(--c-stat-bg)',
     border: `1px solid ${pu.skips > 0 ? '#A8E6CF' : 'var(--c-border)'}`,
     opacity: pu.skips > 0 ? 1 : 0.55
   }
@@ -4738,7 +4740,7 @@ const PowerupsBar = ({
 }, "x", pu.skips, " \xB7 use in-game"))), /*#__PURE__*/React.createElement("div", {
   className: "flex-1 rounded-xl p-2 flex items-center gap-2",
   style: {
-    background: pu.freezes > 0 ? '#E0EEFF' : 'rgba(255,255,255,0.5)',
+    background: pu.freezes > 0 ? '#E0EEFF' : 'var(--c-stat-bg)',
     border: `1px solid ${pu.freezes > 0 ? '#90CAF9' : 'var(--c-border)'}`,
     opacity: pu.freezes > 0 ? 1 : 0.55
   }
@@ -4791,7 +4793,7 @@ const GamePowerBar = ({
   title: hintHint,
   className: "flex-1 rounded-xl p-2 flex items-center gap-1.5 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
   style: {
-    background: !hintDisabled && pu.hints > 0 ? '#FFF4E0' : 'rgba(255,255,255,0.5)',
+    background: !hintDisabled && pu.hints > 0 ? '#FFF4E0' : 'var(--c-stat-bg)',
     border: `1.5px solid ${!hintDisabled && pu.hints > 0 ? '#FFE082' : 'var(--c-border)'}`
   }
 }, /*#__PURE__*/React.createElement(HintIcon, { size: 22 }), /*#__PURE__*/React.createElement("div", {
@@ -4812,7 +4814,7 @@ const GamePowerBar = ({
   title: "Skip this question (no points)",
   className: "flex-1 rounded-xl p-2 flex items-center gap-1.5 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
   style: {
-    background: !skipDisabled && pu.skips > 0 ? '#E0F5EC' : 'rgba(255,255,255,0.5)',
+    background: !skipDisabled && pu.skips > 0 ? '#E0F5EC' : 'var(--c-stat-bg)',
     border: `1.5px solid ${!skipDisabled && pu.skips > 0 ? '#A8E6CF' : 'var(--c-border)'}`
   }
 }, /*#__PURE__*/React.createElement(SkipIcon, { size: 22 }), /*#__PURE__*/React.createElement("div", {
@@ -4833,8 +4835,8 @@ const GamePowerBar = ({
   title: "Second chance — wrong answer won\u2019t count",
   className: "flex-1 rounded-xl p-2 flex items-center gap-1.5 transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5",
   style: {
-    background: freezeActive ? '#B3D4FC' : (!freezeDisabled && pu.freezes > 0 ? '#E0EEFF' : 'rgba(255,255,255,0.5)'),
-    border: `1.5px solid ${freezeActive ? '#4140FF' : (!freezeDisabled && pu.freezes > 0 ? '#90CAF9' : 'var(--c-border)')}`,
+    background: freezeActive ? '#B3D4FC' : (!freezeDisabled && pu.freezes > 0 ? '#E0EEFF' : 'var(--c-stat-bg)'),
+    border: `1.5px solid ${freezeActive ? 'var(--c-accent)' : (!freezeDisabled && pu.freezes > 0 ? '#90CAF9' : 'var(--c-border)')}`,
     boxShadow: freezeActive ? '0 0 12px rgba(65,64,255,0.3)' : 'none'
   }
 }, /*#__PURE__*/React.createElement(FreezeIcon, { size: 22 }), /*#__PURE__*/React.createElement("div", {
@@ -4842,7 +4844,7 @@ const GamePowerBar = ({
 }, /*#__PURE__*/React.createElement("p", {
   className: "text-[11px] font-bold tracking-wider uppercase",
   style: {
-    color: freezeActive ? '#4140FF' : '#2D2D3F'
+    color: freezeActive ? 'var(--c-accent)' : 'var(--c-text)'
   }
 }, freezeActive ? "Active!" : "Freeze"), /*#__PURE__*/React.createElement("p", {
   className: "text-[11px]",
@@ -4976,7 +4978,7 @@ const AuthScreen = ({
           ...(users[ADMIN_USERNAME] || {}),
           name: ADMIN_USERNAME,
           passHash: adminHash,
-          color: users[ADMIN_USERNAME]?.color || '#4140FF',
+          color: users[ADMIN_USERNAME]?.color || 'var(--c-accent)',
           avatar: users[ADMIN_USERNAME]?.avatar || null,
           joined: users[ADMIN_USERNAME]?.joined || Date.now(),
           isAdmin: true
@@ -5051,12 +5053,12 @@ const AuthScreen = ({
     className: "flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1",
     style: {
       maxWidth: '100%',
-      background: 'rgba(255,255,255,0.82)',
+      background: 'var(--c-card)',
       backdropFilter: 'blur(24px) saturate(1.4)',
       WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
       borderRadius: '28px',
       padding: '32px 36px',
-      border: '1.5px solid rgba(255,255,255,0.9)',
+      border: '1.5px solid var(--c-border)',
       boxShadow: '0 8px 32px rgba(15,13,46,0.10), 0 2px 8px rgba(15,13,46,0.06)'
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -5079,10 +5081,10 @@ const AuthScreen = ({
     style: {
       color: 'var(--c-text)',
       fontWeight: 600,
-      background: 'rgba(255,255,255,0.92)',
+      background: 'var(--c-card-solid)',
       backdropFilter: 'blur(10px) saturate(1.2)',
       WebkitBackdropFilter: 'blur(10px) saturate(1.2)',
-      border: '1px solid rgba(255,255,255,0.95)',
+      border: '1px solid var(--c-border)',
       boxShadow: '0 4px 20px rgba(15,13,46,0.25), 0 2px 6px rgba(15,13,46,0.15)',
       maxWidth: '420px'
     }
@@ -5177,7 +5179,7 @@ const AuthScreen = ({
     className: "w-full rounded-xl px-4 py-3 outline-none mb-1 font-medium transition-all focus:scale-[1.01]",
     style: {
       background: 'var(--c-result-bg)',
-      border: '2px solid #E8E0F0',
+      border: '2px solid var(--c-border)',
       color: 'var(--c-text)'
     }
   }), /*#__PURE__*/React.createElement("p", {
@@ -5202,7 +5204,7 @@ const AuthScreen = ({
     className: "w-full rounded-xl px-4 py-3 pr-12 outline-none font-medium transition-all focus:scale-[1.01]",
     style: {
       background: 'var(--c-result-bg)',
-      border: '2px solid #E8E0F0',
+      border: '2px solid var(--c-border)',
       color: 'var(--c-text)'
     }
   }), /*#__PURE__*/React.createElement("button", {
@@ -5233,7 +5235,7 @@ const AuthScreen = ({
     className: "w-full rounded-xl px-4 py-3 outline-none mb-1 font-medium transition-all focus:scale-[1.01]",
     style: {
       background: 'var(--c-result-bg)',
-      border: '2px solid #E8E0F0',
+      border: '2px solid var(--c-border)',
       color: 'var(--c-text)'
     }
   }), confirm && confirm !== password && /*#__PURE__*/React.createElement("p", {
@@ -5253,7 +5255,7 @@ const AuthScreen = ({
     checked: remember,
     onChange: e => setRemember(e.target.checked),
     style: {
-      accentColor: '#4140FF'
+      accentColor: 'var(--c-accent)'
     }
   }), "Remember me on this device"), err && /*#__PURE__*/React.createElement("div", {
     className: "rounded-xl px-3 py-2 mb-3 text-[12px] font-semibold",
@@ -5580,7 +5582,7 @@ const AdminPanel = ({
     className: "rounded-xl px-3 py-2 flex items-center justify-between gap-3",
     style: {
       background: 'var(--c-pill-inactive)',
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 min-w-0"
@@ -5601,7 +5603,7 @@ const AdminPanel = ({
   }, "@", r.name, " ", r.isAdmin && /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] font-bold px-1.5 py-0.5 rounded ml-1",
     style: {
-      background: '#4140FF',
+      background: 'var(--c-accent)',
       color: '#fff'
     }
   }, "ADMIN")), /*#__PURE__*/React.createElement("div", {
@@ -5652,7 +5654,7 @@ const AdminPanel = ({
     style: {
       background: 'var(--c-soft-btn)',
       color: 'var(--c-text)',
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, "Cancel")) : /*#__PURE__*/React.createElement("button", {
     onClick: () => setConfirmWipe(r.key),
@@ -5783,12 +5785,12 @@ const SplashScreen = ({
     className: "flex flex-col items-center mb-6 anim-float-in relative z-10 lg:mb-0 lg:items-start lg:text-left lg:order-1",
     style: {
       maxWidth: '100%',
-      background: 'rgba(255,255,255,0.82)',
+      background: 'var(--c-card)',
       backdropFilter: 'blur(24px) saturate(1.4)',
       WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
       borderRadius: '28px',
       padding: '32px 36px',
-      border: '1.5px solid rgba(255,255,255,0.9)',
+      border: '1.5px solid var(--c-border)',
       boxShadow: '0 8px 32px rgba(15,13,46,0.10), 0 2px 8px rgba(15,13,46,0.06)'
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -5811,10 +5813,10 @@ const SplashScreen = ({
     style: {
       color: 'var(--c-text)',
       fontWeight: 600,
-      background: 'rgba(255,255,255,0.92)',
+      background: 'var(--c-card-solid)',
       backdropFilter: 'blur(10px) saturate(1.2)',
       WebkitBackdropFilter: 'blur(10px) saturate(1.2)',
-      border: '1px solid rgba(255,255,255,0.95)',
+      border: '1px solid var(--c-border)',
       boxShadow: '0 4px 20px rgba(15,13,46,0.25), 0 2px 6px rgba(15,13,46,0.15)',
       maxWidth: '420px'
     }
@@ -5843,7 +5845,7 @@ const SplashScreen = ({
     className: "absolute -top-1 -right-1 w-8 h-8 rounded-full text-sm font-bold transition-transform hover:scale-110 active:scale-90",
     title: "Remove photo",
     style: {
-      background: '#FFF',
+      background: 'var(--c-card-solid)',
       border: `2px solid ${STROKE}`,
       color: 'var(--c-text)'
     }
@@ -5885,7 +5887,7 @@ const SplashScreen = ({
     className: "w-full rounded-xl px-4 py-3 outline-none mb-2 font-medium transition-all focus:scale-[1.01] disabled:opacity-70 disabled:cursor-not-allowed",
     style: {
       background: 'var(--c-result-bg)',
-      border: '2px solid #E8E0F0',
+      border: '2px solid var(--c-border)',
       color: 'var(--c-text)'
     }
   }), /*#__PURE__*/React.createElement("p", {
@@ -5983,7 +5985,7 @@ const DailyRewardStrip = ({ streak = 0, claimedToday = false }) => {
     style: { color: 'var(--c-text-sub)' }
   }, "\uD83D\uDD25 Daily Streak Bonus"), /*#__PURE__*/React.createElement("span", {
     className: "text-[11px] font-semibold",
-    style: { color: streak >= 7 ? '#4140FF' : '#7B7B9A' }
+    style: { color: streak >= 7 ? 'var(--c-accent)' : 'var(--c-text-sub)' }
   }, streak, "-day streak")), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-1.5 justify-between"
   }, DAYS.map((d, i) => {
@@ -5997,15 +5999,15 @@ const DailyRewardStrip = ({ streak = 0, claimedToday = false }) => {
     }, /*#__PURE__*/React.createElement("div", {
       className: "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all",
       style: {
-        background: active ? '#7DD8A0' : isToday ? '#FFE082' : 'rgba(255,255,255,0.6)',
-        border: isToday ? '2px solid #4140FF' : '1.5px solid var(--c-border)',
-        color: active ? '#FFF' : isToday ? '#2D2D3F' : '#7B7B9A',
+        background: active ? '#7DD8A0' : isToday ? '#FFE082' : 'var(--c-pill-inactive)',
+        border: isToday ? '2px solid var(--c-accent)' : '1.5px solid var(--c-border)',
+        color: active ? '#FFF' : isToday ? 'var(--c-text)' : 'var(--c-text-sub)',
         transform: isToday ? 'scale(1.1)' : 'none',
         boxShadow: isToday ? '0 2px 8px rgba(65,64,255,0.2)' : 'none'
       }
     }, active ? '✓' : d), /*#__PURE__*/React.createElement("span", {
       className: "text-[9px] font-semibold",
-      style: { color: active ? '#7DD8A0' : '#7B7B9A' }
+      style: { color: active ? '#7DD8A0' : 'var(--c-text-sub)' }
     }, "+", bonus));
   })));
 };
@@ -6165,7 +6167,7 @@ const HomeScreen = ({
     onClick: onOpenLeagues,
     className: "w-full h-full rounded-xl py-2.5 lg:py-4 text-sm font-bold flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 active:scale-[0.98]",
     style: {
-      background: 'rgba(255,255,255,0.75)',
+      background: 'var(--c-result-bg)',
       border: '1px solid var(--c-border)',
       color: 'var(--c-text)'
     }
@@ -6198,7 +6200,7 @@ const HomeScreen = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-10 h-10 rounded-full flex items-center justify-center transition-all",
     style: {
-      background: progress[m.id] ? m.accent : 'rgba(255,255,255,0.7)',
+      background: progress[m.id] ? m.accent : 'var(--c-result-bg)',
       border: `2px solid ${STROKE}`,
       transform: progress[m.id] ? 'scale(1.05)' : 'scale(1)'
     }
@@ -6238,7 +6240,7 @@ const HomeScreen = ({
     }, /*#__PURE__*/React.createElement("div", {
       className: "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
       style: {
-        background: 'rgba(255,255,255,0.85)',
+        background: 'var(--c-card-solid)',
         border: `1.5px solid ${m.accent}aa`,
         boxShadow: `0 8px 16px ${m.accent}44`
       }
@@ -6270,7 +6272,7 @@ const HomeScreen = ({
     }, "Done")) : /*#__PURE__*/React.createElement("button", {
       className: "rounded-full px-4 py-2 font-bold text-sm text-white shrink-0 transition-all hover:scale-105",
       style: {
-        background: '#4140FF',
+        background: 'var(--c-accent)',
         boxShadow: '0 6px 16px rgba(65,64,255,0.4)'
       }
     }, "Play")), /*#__PURE__*/React.createElement("div", {
@@ -6430,6 +6432,7 @@ const GuessMode = ({
     const correct = side === correctSide;
     if (!correct && freezeActive) {
       // Freeze absorbs the wrong answer — shake + let them try again
+      choosingRef.current = false;
       setFreezeActive(false);
       Sound.wrong();
       Haptics.buzz([8, 40, 8, 40, 8]);
@@ -6518,7 +6521,7 @@ const GuessMode = ({
   }, "Which one sold for"), /*#__PURE__*/React.createElement("h3", {
     className: "font-bold text-xl",
     style: {
-      color: '#4140FF'
+      color: 'var(--c-accent)'
     }
   }, "MORE ETH most recently?")), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-3 lg:gap-10 lg:max-w-5xl lg:mx-auto mb-4"
@@ -6553,7 +6556,7 @@ const GuessMode = ({
     }, "#", d.id), revealed ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
       className: "font-bold text-lg",
       style: {
-        color: isCorrect ? '#7DD8A0' : '#2D2D3F'
+        color: isCorrect ? '#7DD8A0' : 'var(--c-text)'
       }
     }, fmtPrice(d.s.p)), /*#__PURE__*/React.createElement("div", {
       className: "text-[10px]",
@@ -6574,7 +6577,7 @@ const GuessMode = ({
     key: i,
     className: "w-7 h-7 flex items-center justify-center rounded-full",
     style: {
-      background: results[i] ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.3)'
+      background: results[i] ? 'var(--c-result-bg)' : 'var(--c-pill-inactive)'
     }
   }, results[i] ? /*#__PURE__*/React.createElement(ResultIcon, {
     type: results[i],
@@ -6715,6 +6718,7 @@ const PriceMode = ({
     const correct = idx === correctIdx;
     if (!correct && freezeActive) {
       // Freeze absorbs the wrong answer — streak preserved, try again
+      choosingRef.current = false;
       setFreezeActive(false);
       Sound.wrong();
       Haptics.buzz([8, 40, 8, 40, 8]);
@@ -6800,7 +6804,7 @@ const PriceMode = ({
   }), /*#__PURE__*/React.createElement("span", {
     className: "font-bold text-sm",
     style: {
-      color: '#4140FF'
+      color: 'var(--c-accent)'
     }
   }, streak, " streak ", mult > 1 && `· x${mult}`))), /*#__PURE__*/React.createElement("p", {
     className: "text-center text-sm mb-4",
@@ -6809,7 +6813,7 @@ const PriceMode = ({
     }
   }, "Which Doodle is ", /*#__PURE__*/React.createElement("strong", {
     style: {
-      color: '#4140FF'
+      color: 'var(--c-accent)'
     }
   }, "RARER"), "?"), /*#__PURE__*/React.createElement(GamePowerBar, {
     pu: pu,
@@ -6854,7 +6858,7 @@ const PriceMode = ({
     }, "#", d.id), revealed ? /*#__PURE__*/React.createElement("div", {
       className: "font-bold text-sm lg:text-xl",
       style: {
-        color: isCorrect ? '#7DD8A0' : '#2D2D3F'
+        color: isCorrect ? '#7DD8A0' : 'var(--c-text)'
       }
     }, "Rank #", d.rank) : /*#__PURE__*/React.createElement("div", {
       className: "font-bold text-sm lg:text-xl",
@@ -7097,6 +7101,7 @@ const TraitMode = ({
     }
     // Freeze: if wrong (0 pts), absorb and let them re-try
     if (pts === 0 && freezeActive) {
+      choosingRef.current = false;
       setFreezeActive(false);
       Sound.wrong();
       Haptics.buzz([8, 40, 8, 40, 8]);
@@ -7221,7 +7226,7 @@ const TraitMode = ({
   }, "What % of Doodles have"), /*#__PURE__*/React.createElement("h3", {
     className: "font-bold text-2xl",
     style: {
-      color: '#4140FF'
+      color: 'var(--c-accent)'
     }
   }, titleCase(current.value)), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] mt-1 mb-4",
@@ -7467,7 +7472,7 @@ const ResultsScreen = ({
     className: "font-display font-semibold leading-none tabular-nums anim-score-pop",
     style: {
       fontSize: 96,
-      color: '#4140FF',
+      color: 'var(--c-accent)',
       letterSpacing: '-0.04em'
     }
   }, /*#__PURE__*/React.createElement(CountUp, {
@@ -7485,7 +7490,7 @@ const ResultsScreen = ({
     key: i,
     className: "w-10 h-10 flex items-center justify-center rounded-full anim-pop-in",
     style: {
-      background: 'rgba(255,255,255,0.85)',
+      background: 'var(--c-card-solid)',
       border: '1.5px solid var(--c-border)',
       animationDelay: `${0.2 + i * 0.08}s`
     }
@@ -7674,7 +7679,7 @@ const LeaderboardScreen = ({
   }
   const merged = baseBoard.sort((a, b) => b.pts - a.pts);
 
-  // Empty state: nobody has points this week
+  // Empty state: nobody has points this period
   const totalPts = merged.reduce((s, r) => s + r.pts, 0);
   if (!loading && totalPts === 0) {
     return /*#__PURE__*/React.createElement("div", {
@@ -7689,11 +7694,19 @@ const LeaderboardScreen = ({
     }, "Leaderboard")), /*#__PURE__*/React.createElement("p", {
       className: "text-xs text-center mb-5",
       style: { color: 'var(--c-text-sub)' }
-    }, "Week ", weekNum, " \xB7 Mon\u2013Sun \xB7 resets Monday 00:00 UTC"), /*#__PURE__*/React.createElement(FrostedCard, {
+    }, "Week ", weekNum, " \xB7 Mon\u2013Sun \xB7 resets Monday 00:00 UTC"), /*#__PURE__*/React.createElement("div", {
+      className: "flex gap-2 mb-5 justify-center"
+    }, /*#__PURE__*/React.createElement(Pill, {
+      active: tab === 'this',
+      onClick: () => setTab('this')
+    }, "This week"), /*#__PURE__*/React.createElement(Pill, {
+      active: tab === 'last',
+      onClick: () => setTab('last')
+    }, "Last week")), /*#__PURE__*/React.createElement(FrostedCard, {
       className: "p-8 text-center anim-pop-in"
     }, /*#__PURE__*/React.createElement(EmptyState, {
-      title: "No scores yet this week",
-      subtitle: "Play a round to get on the board!"
+      title: tab === 'last' ? "No scores from last week" : "No scores yet this week",
+      subtitle: tab === 'last' ? "Check back after this week ends!" : "Play a round to get on the board!"
     })));
   }
   const myRank = merged.findIndex(r => r.me) + 1;
@@ -7763,7 +7776,7 @@ const LeaderboardScreen = ({
     }, "@", row.name, isMe ? ' (you)' : ''), /*#__PURE__*/React.createElement("div", {
       className: "font-display font-semibold text-base tabular-nums",
       style: {
-        color: '#4140FF'
+        color: 'var(--c-accent)'
       }
     }, /*#__PURE__*/React.createElement(CountUp, {
       value: row.pts,
@@ -7815,7 +7828,7 @@ const LeaderboardScreen = ({
     }, isMe ? `@${row.name} (you)` : `@${row.name}`), /*#__PURE__*/React.createElement("div", {
       className: "font-display font-semibold tabular-nums",
       style: {
-        color: '#4140FF'
+        color: 'var(--c-accent)'
       }
     }, row.pts));
   }), myRank > 20 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
@@ -7845,7 +7858,7 @@ const LeaderboardScreen = ({
   }, "@", profile.name, " (you)"), /*#__PURE__*/React.createElement("div", {
     className: "font-bold tabular-nums",
     style: {
-      color: '#4140FF'
+      color: 'var(--c-accent)'
     }
   }, weekPts)))));
 };
@@ -7944,7 +7957,7 @@ const ProfileScreen = ({
     style: {
       background: 'linear-gradient(135deg,#4140FF,#C5B3E6)',
       color: '#fff',
-      border: '2px solid #2D2D3F',
+      border: '2px solid var(--c-text)',
       boxShadow: '0 4px 14px rgba(65,64,255,0.35)'
     }
   }, /*#__PURE__*/React.createElement(CrownIcon, {
@@ -7984,7 +7997,7 @@ const ProfileScreen = ({
       className: "w-full h-2.5 rounded-full overflow-hidden",
       style: {
         background: 'var(--c-stat-bg)',
-        border: '1px solid #E8E0F0'
+        border: '1px solid var(--c-border)'
       }
     }, /*#__PURE__*/React.createElement("div", {
       className: "h-full rounded-full transition-all",
@@ -8106,7 +8119,7 @@ const ProfileScreen = ({
       key: a.id,
       className: "rounded-xl p-2.5 transition-all",
       style: {
-        background: unlocked ? `${a.tint}cc` : 'rgba(255,255,255,0.5)',
+        background: unlocked ? `${a.tint}cc` : 'var(--c-stat-bg)',
         border: `1.5px solid ${unlocked ? STROKE : 'var(--c-border)'}`,
         opacity: unlocked ? 1 : 0.8,
         filter: unlocked ? 'none' : 'grayscale(0.45)'
@@ -8116,7 +8129,7 @@ const ProfileScreen = ({
     }, /*#__PURE__*/React.createElement("div", {
       className: "w-9 h-9 rounded-lg shrink-0 flex items-center justify-center",
       style: {
-        background: unlocked ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)',
+        background: unlocked ? 'var(--c-result-bg)' : 'var(--c-pill-inactive)',
         border: `1px solid ${unlocked ? STROKE : 'var(--c-border)'}`
       }
     }, /*#__PURE__*/React.createElement(CrownIcon, {
@@ -8137,7 +8150,7 @@ const ProfileScreen = ({
       className: "w-full h-1 rounded-full overflow-hidden",
       style: {
         background: 'var(--c-stat-bg)',
-        border: '1px solid #E8E0F0'
+        border: '1px solid var(--c-border)'
       }
     }, /*#__PURE__*/React.createElement("div", {
       className: "h-full",
@@ -8170,7 +8183,7 @@ const ProfileScreen = ({
     className: "w-full h-2 rounded-full overflow-hidden mb-3",
     style: {
       background: 'var(--c-stat-bg)',
-      border: '1px solid #E8E0F0'
+      border: '1px solid var(--c-border)'
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "h-full",
@@ -8256,7 +8269,7 @@ const BottomNav = ({
     label: t('play'),
     icon: a => /*#__PURE__*/React.createElement(StarNavIcon, {
       size: 24,
-      fill: a ? '#A8E6CF' : 'rgba(255,255,255,0.5)'
+      fill: a ? '#A8E6CF' : 'var(--c-stat-bg)'
     })
   }, {
     id: 'board',
@@ -8269,7 +8282,7 @@ const BottomNav = ({
     label: t('profile'),
     icon: a => /*#__PURE__*/React.createElement(FaceIcon, {
       size: 24,
-      fill: a ? '#FFAB91' : 'rgba(255,255,255,0.5)'
+      fill: a ? '#FFAB91' : 'var(--c-stat-bg)'
     })
   }];
   const idx = Math.max(0, items.findIndex(it => it.id === tab));
@@ -8299,7 +8312,7 @@ const BottomNav = ({
     }, it.icon(active)), /*#__PURE__*/React.createElement("span", {
       className: "text-[11px] lg:text-xs font-bold tracking-wider uppercase",
       style: {
-        color: active ? '#4140FF' : '#7B7B9A'
+        color: active ? 'var(--c-accent)' : 'var(--c-text-sub)'
       }
     }, it.label));
   })));
@@ -9290,7 +9303,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     .doodle-letter {
       display: inline-block;
       font-weight: 600;
-      color: #2D2D3F;
+      color: var(--c-text);
       animation: waterBob 4.2s ease-in-out infinite;
       will-change: transform;
     }
@@ -9400,7 +9413,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
       width: 120px; height: 120px;
       object-fit: cover;
       border-radius: 50%;
-      border: 3px solid rgba(255,255,255,0.92);
+      border: 3px solid var(--c-card-solid);
       box-shadow:
         0 8px 24px rgba(15,13,46,0.35),
         0 0 0 1px rgba(255,255,255,0.2) inset;
@@ -9422,10 +9435,10 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
       align-items: center;
       padding: 6px 14px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.55);
+      background: var(--c-stat-bg);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,0.75);
+      border: 1px solid var(--c-border);
       animation: degosGlowSoft 3.6s ease-in-out infinite;
     }
     .degos-sig {
@@ -9434,7 +9447,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
       font-size: 12px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: #2D2D3F;
+      color: var(--c-text);
       display: inline-flex;
       white-space: nowrap;
     }
@@ -9455,7 +9468,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     }
 
     /* ===== Utility: range slider thumb ===== */
-    input[type=range]::-webkit-slider-thumb { background: #FFF; border: 2px solid ${"#2D2D3F"}; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+    input[type=range]::-webkit-slider-thumb { background: var(--c-card-solid); border: 2px solid var(--c-text); border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
 
     /* Crown bob (podium) */
     @keyframes crownBob { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-3px) rotate(6deg); } }
@@ -9712,7 +9725,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
       width: 20px; height: 20px;
       margin-left: -10px; margin-top: -10px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.6);
+      background: var(--c-pill-inactive);
       opacity: 0;
       pointer-events: none;
     }

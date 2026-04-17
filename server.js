@@ -31,7 +31,8 @@ const writeLimiter = rateLimit({ windowMs: 60 * 1000, max: 60 });
 // ----- API -----
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/progress', writeLimiter, progressRoutes);
-app.use('/api/leaderboard', leaderboardRoutes);
+const readLimiter = rateLimit({ windowMs: 60 * 1000, max: 120 });
+app.use('/api/leaderboard', readLimiter, leaderboardRoutes);
 app.use('/api/dex', writeLimiter, dexRoutes);
 app.use('/api/achievements', writeLimiter, achievementsRoutes);
 app.use('/api/leagues', writeLimiter, leaguesRoutes);

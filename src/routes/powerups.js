@@ -34,7 +34,7 @@ router.get('/today', requireAuth, async (req, res) => {
   try {
     const day = todayISO();
     const row = await prisma.powerup.findUnique({ where: { userId_day: { userId: req.userId, day } } });
-    res.json(row || { day, hintsUsed: 0, skipsUsed: 0 });
+    res.json(row || { day, hintsUsed: 0, skipsUsed: 0, freezesUsed: 0 });
   } catch (err) {
     console.error('GET /today error:', err);
     res.status(500).json({ error: 'server_error' });
