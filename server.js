@@ -66,8 +66,14 @@ app.use(
 app.use(express.static(PUBLIC_DIR, {
   etag: true, lastModified: true,
   setHeaders(res, filePath) {
-    if (filePath.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
-    else res.setHeader('Cache-Control', 'public, max-age=86400');
+    // Critical app files: always revalidate so deploys take effect immediately
+    if (filePath.endsWith('index.html') || filePath.endsWith('sw.js') || filePath.endsWith('app.js') || filePath.endsWith('api.js')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+    // Static assets (images, icons, fonts, CSS): cache 24h
+    else {
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+    }
   }
 }));
 
