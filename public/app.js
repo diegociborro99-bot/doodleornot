@@ -3735,13 +3735,13 @@ const DexModal = ({
   onOpenDoodle
 }) => {
   useBodyScrollLock(open);
-  if (!open) return null;
   const doodles = DOODLES;
   const doodleMap = useMemo(() => {
     const m = new Map();
     for (const d of doodles) m.set(d.id, d);
     return m;
   }, [doodles]);
+  if (!open) return null;
   const total = doodles.length;
   const seen = ids.length;
   return /*#__PURE__*/React.createElement("div", {
