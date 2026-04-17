@@ -1,29 +1,35 @@
-/* Doodle or Not — Service Worker (cache-first for shell & dataset) */
-const VERSION = 'don-v3-2026-04-15';
+/* Doodle or Not — Service Worker
+   Strategy: network-first for HTML/JS (always fresh), cache-first for assets (images/fonts).
+   Bumping VERSION forces a full cache refresh on next visit. */
+const VERSION = 'don-v4-2026-04-17';
+
 const CORE = [
   './',
   './index.html',
+  './app.js',
+  './api.js',
   './doodles-dataset.js',
   './manifest.json',
   './icon.svg',
   './icon-192.png',
   './icon-512.png',
-  'https://cdn.tailwindcss.com',
-  'https://unpkg.com/react@18/umd/react.production.min.js',
-  'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-  'https://unpkg.com/@babel/standalone/babel.min.js',
-  'https://unpkg.com/tone@14.8.49/build/Tone.js'
+  'https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js'
 ];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(VERSION).then((c) => c.addAll(CORE).catch(() => {})).then(() => self.skipWaiting())
+    caches.open(VERSION)
+      .then((c) => c.addAll(CORE).catch(() => {}))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -31,14 +37,40 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+
+  // API calls: always network, never cache
+  if (url.pathname.startsWith('/api/')) return;
+
+  // HTML & own JS: network-first (always get latest), fall back to cache
+  const isAppShell = url.pathname.endsWith('.html')
+    || url.pathname === '/'
+    || url.pathname.endsWith('.js');
+
+  if (isAppShell && url.origin === self.location.origin) {
+    e.respondWith(
+      fetch(req)
+        .then((resp) => {
+          const copy = resp.clone();
+          caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
+          return resp;
+        })
+        .catch(() => caches.match(req).then((hit) => hit || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // Everything else (CDN libs, images, fonts): cache-first
   e.respondWith(
     caches.match(req).then((hit) => {
       if (hit) return hit;
       return fetch(req).then((resp) => {
-        const copy = resp.clone();
-        caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
+        if (resp.ok) {
+          const copy = resp.clone();
+          caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
+        }
         return resp;
-      }).catch(() => caches.match('./index.html'));
+      });
     })
   );
 });

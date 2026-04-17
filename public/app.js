@@ -56,7 +56,6 @@ const storage = {
 
 /* ---------- Auth: client-side only (toy app). Passwords hashed SHA-256. ---------- */
 const ADMIN_USERNAME = 'degos';
-const ADMIN_PASSWORD_PLAIN = 'Labfhj23ñ'; // admin credential (client-side, intentionally hardcoded)
 
 async function sha256Hex(text) {
   try {
@@ -4901,7 +4900,7 @@ const AuthScreen = ({
           }
           // Mirror into local cache for legacy code paths
           const users = getUsers();
-          const isAdminUser = key === ADMIN_USERNAME && password === ADMIN_PASSWORD_PLAIN;
+          const isAdminUser = key === ADMIN_USERNAME;
           const existing = users[key] || {};
           users[key] = {
             ...existing,
@@ -4971,26 +4970,6 @@ const AuthScreen = ({
       }
 
       // -------- LOCAL FALLBACK (no network / no server) --------
-      if (mode === 'login' && username.toLowerCase() === ADMIN_USERNAME && password === ADMIN_PASSWORD_PLAIN) {
-        const users = getUsers();
-        const adminHash = await sha256Hex(ADMIN_PASSWORD_PLAIN);
-        users[ADMIN_USERNAME] = {
-          ...(users[ADMIN_USERNAME] || {}),
-          name: ADMIN_USERNAME,
-          passHash: adminHash,
-          color: users[ADMIN_USERNAME]?.color || 'var(--c-accent)',
-          avatar: users[ADMIN_USERNAME]?.avatar || null,
-          joined: users[ADMIN_USERNAME]?.joined || Date.now(),
-          isAdmin: true
-        };
-        saveUsers(users);
-        setSession({
-          username: ADMIN_USERNAME,
-          remember
-        });
-        onAuth(users[ADMIN_USERNAME]);
-        return;
-      }
       const users = getUsers();
       const hash = await sha256Hex(password);
       if (mode === 'register') {
