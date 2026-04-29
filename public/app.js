@@ -8244,6 +8244,7 @@ const ProfileScreen = ({
   }, "Delete account")));
 };
 
+
 /* ==========================================================================
    DOODLES RUN CLUB — SVG Icons
    ========================================================================== */
@@ -8292,12 +8293,6 @@ const LockIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
 }, /*#__PURE__*/React.createElement("rect", { x: 5, y: 11, width: 14, height: 10, rx: 2 }),
   /*#__PURE__*/React.createElement("path", { d: "M8 11V7a4 4 0 018 0v4" }));
 
-const ShieldCheckIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
-  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
-  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
-}, /*#__PURE__*/React.createElement("path", { d: "M12 2l7 4v5c0 5.25-3.5 9.74-7 11-3.5-1.26-7-5.75-7-11V6l7-4z" }),
-  /*#__PURE__*/React.createElement("path", { d: "M9 12l2 2 4-4" }));
-
 const BrainIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
   viewBox: "0 0 24 24", width: size, height: size, fill: "none",
   stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
@@ -8310,6 +8305,101 @@ const BadgeIcon = ({ size = 20, tint }) => /*#__PURE__*/React.createElement("svg
 }, /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 10, r: 6 }),
   /*#__PURE__*/React.createElement("path", { d: "M8.5 15.5L7 22l5-2 5 2-1.5-6.5" }));
 
+const TargetIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 12, r: 10 }),
+  /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 12, r: 6 }),
+  /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 12, r: 2 }));
+
+const InfinityIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z" }));
+
+/* ==========================================================================
+   DOODLES RUN CLUB — CSS Animations (injected once)
+   ========================================================================== */
+
+const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
+  @keyframes rcPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
+  @keyframes rcBreathe { 0%,100% { box-shadow: 0 0 20px rgba(123,123,255,0.3); } 50% { box-shadow: 0 0 40px rgba(123,123,255,0.6); } }
+  @keyframes rcGlow { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+  @keyframes rcSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes rcSlideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes rcPopIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+  @keyframes rcCountUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes rcConfetti { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(-120px) rotate(720deg); opacity: 0; } }
+  @keyframes rcRingPulse { 0%,100% { stroke-opacity: 1; } 50% { stroke-opacity: 0.5; } }
+  @keyframes rcShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  @keyframes rcProgressGlow { 0%,100% { filter: drop-shadow(0 0 4px rgba(123,123,255,0.4)); } 50% { filter: drop-shadow(0 0 12px rgba(123,123,255,0.8)); } }
+  @keyframes rcDotPing { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+  .rc-slide-up { animation: rcSlideUp 0.5s cubic-bezier(.22,1,.36,1) both; }
+  .rc-slide-in { animation: rcSlideIn 0.4s cubic-bezier(.22,1,.36,1) both; }
+  .rc-pop-in { animation: rcPopIn 0.4s cubic-bezier(.22,1.2,.36,1) both; }
+  .rc-count-up { animation: rcCountUp 0.3s ease-out both; }
+  .rc-stagger > *:nth-child(1) { animation-delay: 0s; }
+  .rc-stagger > *:nth-child(2) { animation-delay: 0.06s; }
+  .rc-stagger > *:nth-child(3) { animation-delay: 0.12s; }
+  .rc-stagger > *:nth-child(4) { animation-delay: 0.18s; }
+  .rc-stagger > *:nth-child(5) { animation-delay: 0.24s; }
+  .rc-stagger > *:nth-child(6) { animation-delay: 0.30s; }
+  .rc-shimmer { background: linear-gradient(90deg, transparent, rgba(123,123,255,0.08), transparent); background-size: 200% 100%; animation: rcShimmer 2s infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .rc-slide-up, .rc-slide-in, .rc-pop-in, .rc-count-up { animation: none !important; }
+  }
+`);
+
+/* ==========================================================================
+   DOODLES RUN CLUB — Progress Ring SVG
+   ========================================================================== */
+
+const RCProgressRing = ({ progress, size = 200, stroke = 8, label, sublabel }) => {
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - Math.min(1, Math.max(0, progress)) * circumference;
+  return /*#__PURE__*/React.createElement("div", { className: "relative flex items-center justify-center" },
+    /*#__PURE__*/React.createElement("svg", {
+      width: size, height: size, className: "transform -rotate-90",
+      style: { animation: 'rcProgressGlow 3s ease-in-out infinite' }
+    },
+      // Background ring
+      /*#__PURE__*/React.createElement("circle", {
+        cx: size / 2, cy: size / 2, r: radius, fill: "none",
+        stroke: "rgba(123,123,255,0.1)", strokeWidth: stroke
+      }),
+      // Progress ring
+      /*#__PURE__*/React.createElement("circle", {
+        cx: size / 2, cy: size / 2, r: radius, fill: "none",
+        stroke: "url(#rcGrad)", strokeWidth: stroke,
+        strokeDasharray: circumference, strokeDashoffset: offset,
+        strokeLinecap: "round",
+        style: { transition: 'stroke-dashoffset 1s cubic-bezier(.22,1,.36,1)' }
+      }),
+      // Gradient def
+      /*#__PURE__*/React.createElement("defs", null,
+        /*#__PURE__*/React.createElement("linearGradient", { id: "rcGrad", x1: "0", y1: "0", x2: "1", y2: "1" },
+          /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: "#7B7BFF" }),
+          /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: "#A8E6CF" })
+        )
+      )
+    ),
+    // Center content
+    /*#__PURE__*/React.createElement("div", {
+      className: "absolute inset-0 flex flex-col items-center justify-center"
+    },
+      /*#__PURE__*/React.createElement("div", {
+        className: "font-display rc-count-up",
+        style: { fontSize: 'clamp(28px, 8vw, 40px)', lineHeight: 1, color: '#E8E0F0' }
+      }, label),
+      sublabel && /*#__PURE__*/React.createElement("div", {
+        className: "text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5",
+        style: { color: '#9B95B0' }
+      }, sublabel)
+    )
+  );
+};
+
 /* ==========================================================================
    DOODLES RUN CLUB — Helpers
    ========================================================================== */
@@ -8318,20 +8408,16 @@ const formatDistance = (meters) => {
   if (meters < 1000) return `${meters}m`;
   return (meters / 1000).toFixed(2) + ' km';
 };
-
 const formatDistanceMiles = (meters) => {
   const miles = meters / 1609.344;
-  if (miles < 0.01) return '0.00';
-  return miles.toFixed(2);
+  return miles < 0.01 ? '0.00' : miles.toFixed(2);
 };
-
 const formatPace = (secPerKm) => {
   if (!secPerKm || secPerKm <= 0) return '--:--';
   const min = Math.floor(secPerKm / 60);
   const sec = Math.floor(secPerKm % 60);
   return `${min}:${sec.toString().padStart(2, '0')}`;
 };
-
 const formatDuration = (totalSec) => {
   const h = Math.floor(totalSec / 3600);
   const m = Math.floor((totalSec % 3600) / 60);
@@ -8339,24 +8425,17 @@ const formatDuration = (totalSec) => {
   if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
-
 const formatDateShort = (iso) => {
   const d = new Date(iso);
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return `${months[d.getMonth()]} ${d.getDate()}`;
 };
-
-const estimateCalories = (distanceM, durationSec) => {
-  return Math.round((distanceM / 1000) * 60);
-};
-
+const estimateCalories = (distanceM) => Math.round((distanceM / 1000) * 60);
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon / 2) ** 2;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
@@ -8387,6 +8466,12 @@ const RunClubScreen = ({ profile }) => {
   const [coachTips, setCoachTips] = useState([]);
   const [showPostRun, setShowPostRun] = useState(false);
 
+  // Run mode: 'free' or { unit: 'mi'|'km', target: number }
+  const [runMode, setRunMode] = useState(null); // null = picking, 'free' = free run, object = goal mode
+  const [goalUnit, setGoalUnit] = useState('mi');
+  const [goalTarget, setGoalTarget] = useState('3');
+  const [goalReached, setGoalReached] = useState(false);
+
   // GPS run state
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -8395,13 +8480,12 @@ const RunClubScreen = ({ profile }) => {
   const [gpsRoute, setGpsRoute] = useState([]);
   const [gpsError, setGpsError] = useState(null);
   const [gpsAccuracy, setGpsAccuracy] = useState(null);
-  const [splits, setSplits] = useState([]); // per-km splits [{km, timeSec}]
+  const [splits, setSplits] = useState([]);
   const watchIdRef = useRef(null);
   const startTimeRef = useRef(null);
   const pausedAtRef = useRef(0);
   const timerRef = useRef(null);
   const lastPosRef = useRef(null);
-  const lastSplitDistRef = useRef(0);
   const lastSplitTimeRef = useRef(0);
 
   // Check access
@@ -8437,16 +8521,12 @@ const RunClubScreen = ({ profile }) => {
 
   useEffect(() => {
     if (!api || view !== 'leaderboard') return;
-    api.runLeaderboard(lbScope, 20).then(lb => {
-      if (lb && lb.rows) setLbRows(lb.rows);
-    }).catch(() => {});
+    api.runLeaderboard(lbScope, 20).then(lb => { if (lb && lb.rows) setLbRows(lb.rows); }).catch(() => {});
   }, [lbScope]);
 
   useEffect(() => {
     if (!api || !isAdmin || view !== 'admin') return;
-    api.pendingAccess().then(data => {
-      if (data && data.requests) setPendingRequests(data.requests);
-    }).catch(() => {});
+    api.pendingAccess().then(data => { if (data && data.requests) setPendingRequests(data.requests); }).catch(() => {});
   }, [view, isAdmin]);
 
   const handleRequestAccess = async () => {
@@ -8459,10 +8539,7 @@ const RunClubScreen = ({ profile }) => {
 
   const handleReview = async (id, decision) => {
     if (!api) return;
-    try {
-      await api.reviewAccess(id, decision);
-      setPendingRequests(prev => prev.filter(r => r.id !== id));
-    } catch (e) { console.warn('Review failed:', e); }
+    try { await api.reviewAccess(id, decision); setPendingRequests(prev => prev.filter(r => r.id !== id)); } catch (e) {}
   };
 
   // Timer tick
@@ -8475,25 +8552,33 @@ const RunClubScreen = ({ profile }) => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isRunning, isPaused]);
 
+  // Goal reached detection
+  useEffect(() => {
+    if (!runMode || runMode === 'free' || goalReached) return;
+    const targetM = runMode.unit === 'mi' ? runMode.target * 1609.344 : runMode.target * 1000;
+    if (distance >= targetM) {
+      setGoalReached(true);
+      // Vibrate on goal reached
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]);
+    }
+  }, [distance, runMode, goalReached]);
+
   const startGpsWatch = () => {
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
         setGpsAccuracy(Math.round(accuracy));
         if (accuracy > 50) return;
-        const point = { lat: latitude, lng: longitude, ts: Date.now() };
-        setGpsRoute(prev => [...prev, point]);
+        setGpsRoute(prev => [...prev, { lat: latitude, lng: longitude, ts: Date.now() }]);
         if (lastPosRef.current) {
           const d = haversineDistance(lastPosRef.current.lat, lastPosRef.current.lng, latitude, longitude);
           if (d > 3 && d < 500) {
             setDistance(prev => {
               const newDist = prev + d;
-              // Check for km splits
               const currentKm = Math.floor(newDist / 1000);
               const lastKm = Math.floor(prev / 1000);
               if (currentKm > lastKm && currentKm > 0) {
-                const now = Date.now();
-                const splitTime = Math.floor((now - startTimeRef.current) / 1000) + pausedAtRef.current;
+                const splitTime = Math.floor((Date.now() - startTimeRef.current) / 1000) + pausedAtRef.current;
                 const splitDuration = splitTime - lastSplitTimeRef.current;
                 setSplits(s => [...s, { km: currentKm, timeSec: splitDuration }]);
                 lastSplitTimeRef.current = splitTime;
@@ -8506,140 +8591,108 @@ const RunClubScreen = ({ profile }) => {
           lastPosRef.current = { lat: latitude, lng: longitude };
         }
       },
-      (err) => {
-        setGpsError(err.code === 1 ? 'Location permission denied' :
-                    err.code === 2 ? 'GPS unavailable' : 'GPS timeout');
-      },
+      (err) => { setGpsError(err.code === 1 ? 'Location permission denied' : err.code === 2 ? 'GPS unavailable' : 'GPS timeout'); },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 }
     );
   };
 
-  const startRun = () => {
+  const startRun = (mode) => {
     if (!navigator.geolocation) { setGpsError('GPS not available'); return; }
-    setGpsError(null);
-    setDistance(0);
-    setElapsed(0);
-    setGpsRoute([]);
-    setSplits([]);
-    lastPosRef.current = null;
-    pausedAtRef.current = 0;
-    lastSplitTimeRef.current = 0;
+    setRunMode(mode);
+    setGoalReached(false);
+    setGpsError(null); setDistance(0); setElapsed(0); setGpsRoute([]); setSplits([]);
+    lastPosRef.current = null; pausedAtRef.current = 0; lastSplitTimeRef.current = 0;
     startTimeRef.current = Date.now();
-    setIsRunning(true);
-    setIsPaused(false);
-    setView('active');
+    setIsRunning(true); setIsPaused(false); setView('active');
     startGpsWatch();
   };
 
   const pauseRun = () => {
-    setIsPaused(true);
-    pausedAtRef.current = elapsed;
-    if (watchIdRef.current !== null) {
-      navigator.geolocation.clearWatch(watchIdRef.current);
-      watchIdRef.current = null;
-    }
+    setIsPaused(true); pausedAtRef.current = elapsed;
+    if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
   };
 
   const resumeRun = () => {
-    setIsPaused(false);
-    startTimeRef.current = Date.now();
-    startGpsWatch();
+    setIsPaused(false); startTimeRef.current = Date.now(); startGpsWatch();
   };
 
   const finishRun = async () => {
     if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
     if (timerRef.current) clearInterval(timerRef.current);
-
     const dist = Math.round(distance);
     const dur = elapsed;
     const pace = dist > 0 ? Math.round((dur / (dist / 1000))) : 0;
-    const cal = estimateCalories(dist, dur);
+    const cal = estimateCalories(dist);
 
     if (api && dist > 10) {
       try {
         const result = await api.saveRun({
           startedAt: new Date(startTimeRef.current).toISOString(),
           endedAt: new Date().toISOString(),
-          distanceM: dist, durationSec: dur, avgPaceSec: pace,
-          calories: cal,
-          route: gpsRoute.length > 0 ? gpsRoute : null,
-          status: 'completed'
+          distanceM: dist, durationSec: dur, avgPaceSec: pace, calories: cal,
+          route: gpsRoute.length > 0 ? gpsRoute : null, status: 'completed'
         });
         if (result && result.coachTips) setCoachTips(result.coachTips);
         setShowPostRun(true);
-        // Refresh
-        const newStats = await api.getRunStats().catch(() => null);
+        const [newStats, newRuns, achv] = await Promise.all([
+          api.getRunStats().catch(() => null),
+          api.getRuns(10).catch(() => ({ runs: [] })),
+          api.runAchievements().catch(() => null)
+        ]);
         if (newStats) setRunStats(newStats);
-        const newRuns = await api.getRuns(10).catch(() => ({ runs: [] }));
         if (newRuns && newRuns.runs) setRuns(newRuns.runs);
-        const achv = await api.runAchievements().catch(() => null);
         if (achv && achv.achievements) setAchievements(achv.achievements);
       } catch (e) { console.warn('Failed to save run:', e); }
     }
-
-    setIsRunning(false);
-    setIsPaused(false);
+    setIsRunning(false); setIsPaused(false);
   };
 
   const discardRun = () => {
     if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
     if (timerRef.current) clearInterval(timerRef.current);
-    setIsRunning(false);
-    setIsPaused(false);
-    setDistance(0);
-    setElapsed(0);
-    setGpsRoute([]);
-    setSplits([]);
-    setView('dashboard');
+    setIsRunning(false); setIsPaused(false); setDistance(0); setElapsed(0);
+    setGpsRoute([]); setSplits([]); setRunMode(null); setView('dashboard');
   };
 
   const currentPace = distance > 100 && elapsed > 0 ? Math.round(elapsed / (distance / 1000)) : 0;
 
+  // Goal progress (0-1)
+  const goalProgress = runMode && runMode !== 'free' ? (() => {
+    const targetM = runMode.unit === 'mi' ? runMode.target * 1609.344 : runMode.target * 1000;
+    return Math.min(1, distance / targetM);
+  })() : 0;
+
   // ---- ACCESS LOADING ----
   if (accessLoading) {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "px-4 pt-12 pb-nav flex justify-center"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "w-6 h-6 rounded-full border-2 animate-spin",
-      style: { borderColor: 'var(--c-border)', borderTopColor: 'var(--c-accent)' }
-    }));
+    return /*#__PURE__*/React.createElement("div", { className: "px-4 pt-12 pb-nav flex justify-center" },
+      /*#__PURE__*/React.createElement(RunClubStyles, null),
+      /*#__PURE__*/React.createElement("div", { className: "w-6 h-6 rounded-full border-2 animate-spin",
+        style: { borderColor: 'var(--c-border)', borderTopColor: 'var(--c-accent)' } }));
   }
 
   // ---- ACCESS GATE ----
   if (accessStatus !== 'approved') {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "px-6 pt-10 pb-nav max-w-[420px] mx-auto"
-    },
-      // Header
-      /*#__PURE__*/React.createElement("div", { className: "text-center mb-8" },
+    return /*#__PURE__*/React.createElement("div", { className: "px-6 pt-10 pb-nav max-w-[420px] mx-auto" },
+      /*#__PURE__*/React.createElement(RunClubStyles, null),
+      /*#__PURE__*/React.createElement("div", { className: "text-center mb-8 rc-slide-up" },
         /*#__PURE__*/React.createElement("div", {
           className: "w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center",
           style: { background: 'linear-gradient(135deg, rgba(168,230,207,0.3), rgba(197,179,230,0.3))', border: '2px solid var(--c-border)' }
         }, /*#__PURE__*/React.createElement(RunShoeIcon, { size: 36 })),
-        /*#__PURE__*/React.createElement("h1", {
-          className: "font-display text-2xl mb-2", style: { color: 'var(--c-text)' }
-        }, "Doodles Run Club"),
-        /*#__PURE__*/React.createElement("p", {
-          className: "text-sm leading-relaxed", style: { color: 'var(--c-text-sub)' }
-        }, "An exclusive running community for Doodles holders. Track your runs with GPS, compete on the leaderboard, and earn achievements.")
+        /*#__PURE__*/React.createElement("h1", { className: "font-display text-2xl mb-2", style: { color: 'var(--c-text)' } }, "Doodles Run Club"),
+        /*#__PURE__*/React.createElement("p", { className: "text-sm leading-relaxed", style: { color: 'var(--c-text-sub)' } },
+          "An exclusive running community for Doodles holders. Track your runs with GPS, compete on the leaderboard, and earn achievements.")
       ),
-
-      accessStatus === 'none' && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-5" },
-        /*#__PURE__*/React.createElement("h2", {
-          className: "font-semibold text-base mb-3", style: { color: 'var(--c-text)' }
-        }, "Request Access"),
-        /*#__PURE__*/React.createElement("label", {
-          className: "block text-xs font-semibold mb-1", style: { color: 'var(--c-text-sub)' }
-        }, "Your OpenSea / Twitter / Discord"),
+      accessStatus === 'none' && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-5 rc-pop-in" },
+        /*#__PURE__*/React.createElement("h2", { className: "font-semibold text-base mb-3", style: { color: 'var(--c-text)' } }, "Request Access"),
+        /*#__PURE__*/React.createElement("label", { className: "block text-xs font-semibold mb-1", style: { color: 'var(--c-text-sub)' } }, "Your OpenSea / Twitter / Discord"),
         /*#__PURE__*/React.createElement("input", {
           type: "text", value: requestSocial, onChange: e => setRequestSocial(e.target.value),
           placeholder: "e.g. @yourhandle or opensea.io/...",
           className: "w-full rounded-xl px-3 py-2.5 text-sm mb-3 border",
           style: { background: 'var(--c-input-bg)', borderColor: 'var(--c-border)', color: 'var(--c-text)' }
         }),
-        /*#__PURE__*/React.createElement("label", {
-          className: "block text-xs font-semibold mb-1", style: { color: 'var(--c-text-sub)' }
-        }, "Message (optional)"),
+        /*#__PURE__*/React.createElement("label", { className: "block text-xs font-semibold mb-1", style: { color: 'var(--c-text-sub)' } }, "Message (optional)"),
         /*#__PURE__*/React.createElement("input", {
           type: "text", value: requestMsg, onChange: e => setRequestMsg(e.target.value),
           placeholder: "I hold Doodle #1234...",
@@ -8652,33 +8705,16 @@ const RunClubScreen = ({ profile }) => {
           style: { background: 'var(--c-accent)', color: '#FFF' }
         }, "Request Access")
       ),
-
-      accessStatus === 'pending' && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center" },
-        /*#__PURE__*/React.createElement("div", {
-          className: "w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center",
-          style: { background: 'rgba(255,224,130,0.2)' }
-        }, /*#__PURE__*/React.createElement("div", {
-          className: "w-5 h-5 rounded-full border-2 animate-spin",
-          style: { borderColor: '#FFE082', borderTopColor: 'transparent' }
-        })),
-        /*#__PURE__*/React.createElement("h2", {
-          className: "font-semibold text-base mb-1", style: { color: 'var(--c-text)' }
-        }, "Request Pending"),
-        /*#__PURE__*/React.createElement("p", {
-          className: "text-sm", style: { color: 'var(--c-text-sub)' }
-        }, "Your request is being reviewed. You'll get access once an admin verifies your Doodle.")
+      accessStatus === 'pending' && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center rc-pop-in" },
+        /*#__PURE__*/React.createElement("div", { className: "w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center", style: { background: 'rgba(255,224,130,0.2)' } },
+          /*#__PURE__*/React.createElement("div", { className: "w-5 h-5 rounded-full border-2 animate-spin", style: { borderColor: '#FFE082', borderTopColor: 'transparent' } })),
+        /*#__PURE__*/React.createElement("h2", { className: "font-semibold text-base mb-1", style: { color: 'var(--c-text)' } }, "Request Pending"),
+        /*#__PURE__*/React.createElement("p", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "Your request is being reviewed.")
       ),
-
-      accessStatus === 'denied' && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center" },
-        /*#__PURE__*/React.createElement("h2", {
-          className: "font-semibold text-base mb-1", style: { color: 'var(--c-wrong)' }
-        }, "Access Denied"),
-        /*#__PURE__*/React.createElement("p", {
-          className: "text-sm", style: { color: 'var(--c-text-sub)' }
-        }, "Your request was not approved. Contact an admin if you think this is an error.")
+      accessStatus === 'denied' && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center rc-pop-in" },
+        /*#__PURE__*/React.createElement("h2", { className: "font-semibold text-base mb-1", style: { color: 'var(--c-wrong)' } }, "Access Denied"),
+        /*#__PURE__*/React.createElement("p", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "Contact an admin if you think this is an error.")
       ),
-
-      // Admin link
       isAdmin && /*#__PURE__*/React.createElement("button", {
         onClick: () => setView('admin'),
         className: "mt-4 w-full py-3 rounded-xl font-semibold text-sm",
@@ -8687,73 +8723,50 @@ const RunClubScreen = ({ profile }) => {
     );
   }
 
-  // ---- POST-RUN SUMMARY (AI Coach) ----
+  // ---- POST-RUN SUMMARY ----
   if (showPostRun) {
     const dist = Math.round(distance);
     const dur = elapsed;
     const pace = dist > 0 ? Math.round((dur / (dist / 1000))) : 0;
+    const hitGoal = runMode && runMode !== 'free' && goalReached;
     return /*#__PURE__*/React.createElement("div", {
       className: "fixed inset-0 z-50 flex flex-col overflow-y-auto",
       style: { background: 'var(--c-bg)', paddingTop: 'max(20px, env(safe-area-inset-top))', paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }
     },
+      /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { className: "px-6 pt-4 pb-8 max-w-[420px] mx-auto w-full" },
-        // Title
-        /*#__PURE__*/React.createElement("div", { className: "text-center mb-6" },
-          /*#__PURE__*/React.createElement("div", {
-            className: "text-3xl mb-2"
-          }, "Run Complete!"),
-          /*#__PURE__*/React.createElement("h1", {
-            className: "font-display text-4xl", style: { color: 'var(--c-accent)' }
-          }, formatDistanceMiles(dist), " mi")
+        /*#__PURE__*/React.createElement("div", { className: "text-center mb-6 rc-slide-up" },
+          hitGoal && /*#__PURE__*/React.createElement("div", {
+            className: "text-sm font-bold mb-2 px-3 py-1.5 rounded-full inline-block",
+            style: { background: 'rgba(168,230,207,0.2)', color: '#7DD8A0' }
+          }, "Goal Reached!"),
+          /*#__PURE__*/React.createElement("h1", { className: "font-display text-4xl", style: { color: 'var(--c-accent)' } },
+            formatDistanceMiles(dist), " mi")
         ),
-
-        // Stats grid
-        /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-3 gap-3 mb-6" },
-          /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3 text-center" },
-            /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, formatDuration(dur)),
-            /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-wider mt-1", style: { color: 'var(--c-text-sub)' } }, "Time")
-          ),
-          /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3 text-center" },
-            /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, formatPace(pace)),
-            /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-wider mt-1", style: { color: 'var(--c-text-sub)' } }, "Pace/km")
-          ),
-          /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3 text-center" },
-            /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, estimateCalories(dist, dur)),
-            /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-wider mt-1", style: { color: 'var(--c-text-sub)' } }, "Cal")
-          )
+        /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-3 gap-3 mb-6 rc-stagger" },
+          [['Time', formatDuration(dur)], ['Pace/km', formatPace(pace)], ['Cal', estimateCalories(dist)]].map(([l, v], i) =>
+            /*#__PURE__*/React.createElement(FrostedCard, { key: i, className: "p-3 text-center rc-pop-in" },
+              /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, v),
+              /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-wider mt-1", style: { color: 'var(--c-text-sub)' } }, l)
+            ))
         ),
-
-        // Splits
-        splits.length > 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-4 mb-4" },
-          /*#__PURE__*/React.createElement("h3", {
-            className: "font-semibold text-sm mb-3", style: { color: 'var(--c-text)' }
-          }, "Km Splits"),
+        splits.length > 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-4 mb-4 rc-slide-up" },
+          /*#__PURE__*/React.createElement("h3", { className: "font-semibold text-sm mb-3", style: { color: 'var(--c-text)' } }, "Km Splits"),
           splits.map((s, i) => /*#__PURE__*/React.createElement("div", {
-            key: i, className: "flex justify-between py-1.5 border-b last:border-b-0",
-            style: { borderColor: 'var(--c-border)' }
-          },
-            /*#__PURE__*/React.createElement("span", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "Km ", s.km),
-            /*#__PURE__*/React.createElement("span", { className: "text-sm font-semibold", style: { color: 'var(--c-text)' } }, formatPace(s.timeSec))
-          ))
+            key: i, className: "flex justify-between py-1.5 border-b last:border-b-0", style: { borderColor: 'var(--c-border)' }
+          }, /*#__PURE__*/React.createElement("span", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "Km ", s.km),
+            /*#__PURE__*/React.createElement("span", { className: "text-sm font-semibold", style: { color: 'var(--c-text)' } }, formatPace(s.timeSec))))
         ),
-
-        // AI Coach Tips
-        coachTips.length > 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-4 mb-4" },
+        coachTips.length > 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-4 mb-4 rc-slide-up" },
           /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-3" },
             /*#__PURE__*/React.createElement(BrainIcon, { size: 18 }),
-            /*#__PURE__*/React.createElement("h3", { className: "font-semibold text-sm", style: { color: 'var(--c-text)' } }, "AI Coach")
-          ),
+            /*#__PURE__*/React.createElement("h3", { className: "font-semibold text-sm", style: { color: 'var(--c-text)' } }, "AI Coach")),
           coachTips.map((tip, i) => /*#__PURE__*/React.createElement("div", {
-            key: i, className: "py-2 border-b last:border-b-0",
-            style: { borderColor: 'var(--c-border)' }
-          }, /*#__PURE__*/React.createElement("p", {
-            className: "text-sm leading-relaxed", style: { color: 'var(--c-text-sub)' }
-          }, tip.text)))
+            key: i, className: "py-2 border-b last:border-b-0", style: { borderColor: 'var(--c-border)' }
+          }, /*#__PURE__*/React.createElement("p", { className: "text-sm leading-relaxed", style: { color: 'var(--c-text-sub)' } }, tip.text)))
         ),
-
-        // Done button
         /*#__PURE__*/React.createElement("button", {
-          onClick: () => { setShowPostRun(false); setDistance(0); setElapsed(0); setSplits([]); setCoachTips([]); setView('dashboard'); },
+          onClick: () => { setShowPostRun(false); setDistance(0); setElapsed(0); setSplits([]); setCoachTips([]); setRunMode(null); setGoalReached(false); setView('dashboard'); },
           className: "w-full py-3.5 rounded-2xl font-semibold text-base active:scale-95 transition-transform",
           style: { background: 'var(--c-accent)', color: '#FFF' }
         }, "Done")
@@ -8761,16 +8774,113 @@ const RunClubScreen = ({ profile }) => {
     );
   }
 
+  // ---- RUN MODE PICKER ----
+  if (view === 'start') {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "fixed inset-0 z-50 flex flex-col",
+      style: { background: 'linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 100%)', paddingTop: 'max(16px, env(safe-area-inset-top))', paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }
+    },
+      /*#__PURE__*/React.createElement(RunClubStyles, null),
+      // Back
+      /*#__PURE__*/React.createElement("div", { className: "px-5 pt-3" },
+        /*#__PURE__*/React.createElement("button", {
+          onClick: () => setView('dashboard'),
+          className: "text-sm font-semibold", style: { color: '#9B95B0' }
+        }, "← Cancel")
+      ),
+      /*#__PURE__*/React.createElement("div", { className: "flex-1 flex flex-col items-center justify-center px-6" },
+        /*#__PURE__*/React.createElement("h1", {
+          className: "font-display text-2xl mb-8 rc-slide-up", style: { color: '#E8E0F0' }
+        }, "Choose your run"),
+
+        // Free Run card
+        /*#__PURE__*/React.createElement("button", {
+          onClick: () => startRun('free'),
+          className: "w-full max-w-[320px] p-5 rounded-2xl mb-4 text-left active:scale-95 transition-all rc-pop-in",
+          style: { background: 'rgba(123,123,255,0.1)', border: '1px solid rgba(123,123,255,0.2)' }
+        },
+          /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-3 mb-2" },
+            /*#__PURE__*/React.createElement("div", {
+              className: "w-10 h-10 rounded-xl flex items-center justify-center",
+              style: { background: 'rgba(123,123,255,0.15)' }
+            }, /*#__PURE__*/React.createElement(InfinityIcon, { size: 22 })),
+            /*#__PURE__*/React.createElement("div", null,
+              /*#__PURE__*/React.createElement("div", { className: "font-semibold text-base", style: { color: '#E8E0F0' } }, "Free Run"),
+              /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: '#9B95B0' } }, "Run as far as you want"))
+          )
+        ),
+
+        // Goal Run card
+        /*#__PURE__*/React.createElement("div", {
+          className: "w-full max-w-[320px] p-5 rounded-2xl rc-pop-in",
+          style: { background: 'rgba(168,230,207,0.08)', border: '1px solid rgba(168,230,207,0.2)', animationDelay: '0.1s' }
+        },
+          /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-3 mb-4" },
+            /*#__PURE__*/React.createElement("div", {
+              className: "w-10 h-10 rounded-xl flex items-center justify-center",
+              style: { background: 'rgba(168,230,207,0.15)' }
+            }, /*#__PURE__*/React.createElement(TargetIcon, { size: 22 })),
+            /*#__PURE__*/React.createElement("div", null,
+              /*#__PURE__*/React.createElement("div", { className: "font-semibold text-base", style: { color: '#E8E0F0' } }, "Goal Run"),
+              /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: '#9B95B0' } }, "Set a distance target"))
+          ),
+
+          // Unit toggle
+          /*#__PURE__*/React.createElement("div", { className: "flex gap-2 mb-3" },
+            ['mi', 'km'].map(u => /*#__PURE__*/React.createElement("button", {
+              key: u, onClick: () => setGoalUnit(u),
+              className: "flex-1 py-2 rounded-xl text-sm font-semibold transition-all",
+              style: { background: goalUnit === u ? 'rgba(123,123,255,0.2)' : 'transparent',
+                       color: goalUnit === u ? '#7B7BFF' : '#9B95B0', border: `1px solid ${goalUnit === u ? 'rgba(123,123,255,0.3)' : 'rgba(155,149,176,0.2)'}` }
+            }, u.toUpperCase()))
+          ),
+
+          // Distance presets
+          /*#__PURE__*/React.createElement("div", { className: "flex gap-2 mb-3 flex-wrap justify-center" },
+            (goalUnit === 'mi' ? ['1', '2', '3', '5', '10'] : ['1', '3', '5', '10', '21']).map(v =>
+              /*#__PURE__*/React.createElement("button", {
+                key: v, onClick: () => setGoalTarget(v),
+                className: "px-3 py-1.5 rounded-lg text-sm font-semibold transition-all",
+                style: { background: goalTarget === v ? 'rgba(168,230,207,0.2)' : 'transparent',
+                         color: goalTarget === v ? '#A8E6CF' : '#9B95B0', border: `1px solid ${goalTarget === v ? 'rgba(168,230,207,0.3)' : 'transparent'}` }
+              }, v))
+          ),
+
+          // Custom input
+          /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-4" },
+            /*#__PURE__*/React.createElement("input", {
+              type: "number", inputMode: "decimal", value: goalTarget,
+              onChange: e => setGoalTarget(e.target.value),
+              className: "flex-1 rounded-xl px-3 py-2 text-sm text-center font-semibold border",
+              style: { background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(155,149,176,0.2)', color: '#E8E0F0' }
+            }),
+            /*#__PURE__*/React.createElement("span", { className: "text-sm font-semibold", style: { color: '#9B95B0' } }, goalUnit)
+          ),
+
+          // Start goal run button
+          /*#__PURE__*/React.createElement("button", {
+            onClick: () => { const t = parseFloat(goalTarget); if (t > 0) startRun({ unit: goalUnit, target: t }); },
+            className: "w-full py-3 rounded-xl font-semibold text-sm active:scale-95 transition-transform",
+            style: { background: 'linear-gradient(135deg, #A8E6CF 0%, #7B7BFF 100%)', color: '#FFF' }
+          }, "Start Goal Run")
+        )
+      )
+    );
+  }
+
   // ---- ACTIVE RUN VIEW ----
   if (view === 'active') {
+    const isGoalMode = runMode && runMode !== 'free';
+    const targetLabel = isGoalMode ? `${runMode.target} ${runMode.unit}` : null;
+
     return /*#__PURE__*/React.createElement("div", {
       className: "fixed inset-0 z-50 flex flex-col",
       style: {
         background: 'linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%)',
-        paddingTop: 'max(12px, env(safe-area-inset-top))',
-        paddingBottom: 'max(20px, env(safe-area-inset-bottom))'
+        paddingTop: 'max(12px, env(safe-area-inset-top))', paddingBottom: 'max(20px, env(safe-area-inset-bottom))'
       }
     },
+      /*#__PURE__*/React.createElement(RunClubStyles, null),
       // Top bar
       /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-between px-5 pt-2 pb-1" },
         /*#__PURE__*/React.createElement("button", {
@@ -8781,75 +8891,97 @@ const RunClubScreen = ({ profile }) => {
         /*#__PURE__*/React.createElement("div", {
           className: "flex items-center gap-1.5 text-xs font-semibold",
           style: { color: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#9B95B0' }
-        }, /*#__PURE__*/React.createElement(GpsIcon, { size: 12, color: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#9B95B0' }),
+        },
+          // Animated GPS dot
+          /*#__PURE__*/React.createElement("div", { className: "relative" },
+            /*#__PURE__*/React.createElement("div", {
+              className: "w-2 h-2 rounded-full",
+              style: { background: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#9B95B0', animation: 'rcPulse 2s ease-in-out infinite' }
+            }),
+            gpsAccuracy && gpsAccuracy < 20 && /*#__PURE__*/React.createElement("div", {
+              className: "absolute inset-0 w-2 h-2 rounded-full",
+              style: { background: '#7DD8A0', animation: 'rcDotPing 2s ease-out infinite' }
+            })
+          ),
           gpsAccuracy ? `${gpsAccuracy}m` : '...'
         ),
         /*#__PURE__*/React.createElement("div", {
           className: "text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full",
           style: { background: isPaused ? 'rgba(255,171,145,0.15)' : 'rgba(168,230,207,0.15)',
                    color: isPaused ? '#FFAB91' : '#7DD8A0' }
-        }, isPaused ? 'PAUSED' : 'ACTIVE')
+        }, isPaused ? 'PAUSED' : isGoalMode ? targetLabel : 'FREE RUN')
       ),
 
       // Main metrics
-      /*#__PURE__*/React.createElement("div", {
-        className: "flex-1 flex flex-col items-center justify-center px-6"
-      },
-        // Time
-        /*#__PURE__*/React.createElement("div", {
-          className: "text-[11px] font-bold uppercase tracking-[0.2em] mb-1",
-          style: { color: '#9B95B0' }
-        }, "Duration"),
-        /*#__PURE__*/React.createElement("div", {
-          className: "font-display",
-          style: { fontSize: 'clamp(52px, 14vw, 72px)', lineHeight: 1, color: '#E8E0F0', letterSpacing: '-0.03em' }
-        }, formatDuration(elapsed)),
-
-        // Distance
-        /*#__PURE__*/React.createElement("div", { className: "mt-6 text-center" },
+      /*#__PURE__*/React.createElement("div", { className: "flex-1 flex flex-col items-center justify-center px-6" },
+        // Progress ring for goal mode, or just big numbers for free mode
+        isGoalMode ? /*#__PURE__*/React.createElement(React.Fragment, null,
+          /*#__PURE__*/React.createElement("div", { className: "mb-4" },
+            /*#__PURE__*/React.createElement(RCProgressRing, {
+              progress: goalProgress,
+              size: 220,
+              stroke: 10,
+              label: formatDistanceMiles(Math.round(distance)),
+              sublabel: "miles"
+            })
+          ),
+          goalReached && /*#__PURE__*/React.createElement("div", {
+            className: "text-sm font-bold mb-3 px-4 py-1.5 rounded-full rc-pop-in",
+            style: { background: 'rgba(168,230,207,0.15)', color: '#A8E6CF' }
+          }, "Goal reached! Keep going or finish"),
+          /*#__PURE__*/React.createElement("div", {
+            className: "font-display rc-count-up",
+            style: { fontSize: 'clamp(36px, 10vw, 48px)', lineHeight: 1, color: '#E8E0F0', letterSpacing: '-0.03em' }
+          }, formatDuration(elapsed)),
+          /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-[0.2em] mt-1", style: { color: '#9B95B0' } }, "Duration")
+        ) : /*#__PURE__*/React.createElement(React.Fragment, null,
+          // Free run: big duration + distance
+          /*#__PURE__*/React.createElement("div", { className: "text-[11px] font-bold uppercase tracking-[0.2em] mb-1", style: { color: '#9B95B0' } }, "Duration"),
           /*#__PURE__*/React.createElement("div", {
             className: "font-display",
-            style: { fontSize: 'clamp(36px, 10vw, 52px)', lineHeight: 1, color: '#7B7BFF' }
-          }, formatDistanceMiles(Math.round(distance))),
-          /*#__PURE__*/React.createElement("div", {
-            className: "text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5",
-            style: { color: '#9B95B0' }
-          }, "Miles")
-        ),
-
-        // Pace + Cal
-        /*#__PURE__*/React.createElement("div", {
-          className: "flex gap-10 mt-8"
-        },
-          /*#__PURE__*/React.createElement("div", { className: "text-center" },
-            /*#__PURE__*/React.createElement("div", {
-              className: "font-display text-xl", style: { color: '#E8E0F0' }
-            }, formatPace(currentPace)),
-            /*#__PURE__*/React.createElement("div", {
-              className: "text-[9px] font-bold uppercase tracking-[0.15em] mt-0.5", style: { color: '#9B95B0' }
-            }, "Pace /km")
-          ),
-          /*#__PURE__*/React.createElement("div", { className: "text-center" },
-            /*#__PURE__*/React.createElement("div", {
-              className: "font-display text-xl", style: { color: '#E8E0F0' }
-            }, estimateCalories(Math.round(distance), elapsed)),
-            /*#__PURE__*/React.createElement("div", {
-              className: "text-[9px] font-bold uppercase tracking-[0.15em] mt-0.5", style: { color: '#9B95B0' }
-            }, "Cal")
+            style: { fontSize: 'clamp(52px, 14vw, 72px)', lineHeight: 1, color: '#E8E0F0', letterSpacing: '-0.03em' }
+          }, formatDuration(elapsed)),
+          /*#__PURE__*/React.createElement("div", { className: "mt-6 text-center" },
+            /*#__PURE__*/React.createElement("div", { className: "font-display",
+              style: { fontSize: 'clamp(36px, 10vw, 52px)', lineHeight: 1, color: '#7B7BFF' }
+            }, formatDistanceMiles(Math.round(distance))),
+            /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5", style: { color: '#9B95B0' } }, "Miles")
           )
         ),
 
-        // Current split
-        splits.length > 0 && /*#__PURE__*/React.createElement("div", {
-          className: "mt-5 px-4 py-2 rounded-xl",
-          style: { background: 'rgba(123,123,255,0.1)' }
-        }, /*#__PURE__*/React.createElement("span", {
-          className: "text-xs font-semibold", style: { color: '#9B95B0' }
-        }, "Last km: "), /*#__PURE__*/React.createElement("span", {
-          className: "text-sm font-bold", style: { color: '#7B7BFF' }
-        }, formatPace(splits[splits.length - 1].timeSec))),
+        // Pace + Cal + Split
+        /*#__PURE__*/React.createElement("div", { className: "flex gap-8 mt-6" },
+          /*#__PURE__*/React.createElement("div", { className: "text-center" },
+            /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: '#E8E0F0' } }, formatPace(currentPace)),
+            /*#__PURE__*/React.createElement("div", { className: "text-[9px] font-bold uppercase tracking-[0.15em] mt-0.5", style: { color: '#9B95B0' } }, "Pace /km")),
+          /*#__PURE__*/React.createElement("div", { className: "text-center" },
+            /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: '#E8E0F0' } }, estimateCalories(Math.round(distance))),
+            /*#__PURE__*/React.createElement("div", { className: "text-[9px] font-bold uppercase tracking-[0.15em] mt-0.5", style: { color: '#9B95B0' } }, "Cal")),
+          splits.length > 0 && /*#__PURE__*/React.createElement("div", { className: "text-center" },
+            /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: '#A8E6CF' } }, formatPace(splits[splits.length - 1].timeSec)),
+            /*#__PURE__*/React.createElement("div", { className: "text-[9px] font-bold uppercase tracking-[0.15em] mt-0.5", style: { color: '#9B95B0' } }, "Last km"))
+        ),
 
-        // GPS error
+        // Linear progress bar (free mode: shows km markers; goal mode: shows % bar)
+        /*#__PURE__*/React.createElement("div", { className: "w-full max-w-[300px] mt-6" },
+          /*#__PURE__*/React.createElement("div", {
+            className: "w-full h-1.5 rounded-full overflow-hidden",
+            style: { background: 'rgba(123,123,255,0.1)' }
+          }, /*#__PURE__*/React.createElement("div", {
+            className: "h-full rounded-full",
+            style: {
+              width: isGoalMode ? `${goalProgress * 100}%` : `${Math.min(100, (distance / 10000) * 100)}%`,
+              background: 'linear-gradient(90deg, #7B7BFF, #A8E6CF)',
+              transition: 'width 1s ease-out',
+              boxShadow: '0 0 8px rgba(123,123,255,0.5)'
+            }
+          })),
+          isGoalMode && /*#__PURE__*/React.createElement("div", {
+            className: "flex justify-between mt-1 text-[9px] font-semibold",
+            style: { color: '#9B95B0' }
+          }, /*#__PURE__*/React.createElement("span", null, "0"), /*#__PURE__*/React.createElement("span", null, targetLabel))
+        ),
+
         gpsError && /*#__PURE__*/React.createElement("div", {
           className: "text-xs font-semibold mt-4 px-4 py-2 rounded-xl",
           style: { color: '#FF8A8A', background: 'rgba(255,138,138,0.08)' }
@@ -8857,9 +8989,7 @@ const RunClubScreen = ({ profile }) => {
       ),
 
       // Controls
-      /*#__PURE__*/React.createElement("div", {
-        className: "flex items-center justify-center gap-6 pb-4 pt-2"
-      },
+      /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-center gap-6 pb-4 pt-2" },
         isPaused ? /*#__PURE__*/React.createElement(React.Fragment, null,
           /*#__PURE__*/React.createElement("button", {
             onClick: finishRun,
@@ -8869,12 +8999,12 @@ const RunClubScreen = ({ profile }) => {
           /*#__PURE__*/React.createElement("button", {
             onClick: resumeRun,
             className: "w-20 h-20 rounded-full flex items-center justify-center active:scale-90 transition-transform",
-            style: { background: '#7B7BFF', color: '#FFF', boxShadow: '0 0 30px rgba(123,123,255,0.4)' }
+            style: { background: '#7B7BFF', color: '#FFF', animation: 'rcBreathe 3s ease-in-out infinite' }
           }, /*#__PURE__*/React.createElement(PlayIcon, { size: 30 }))
         ) : /*#__PURE__*/React.createElement("button", {
           onClick: pauseRun,
           className: "w-20 h-20 rounded-full flex items-center justify-center active:scale-90 transition-transform",
-          style: { background: '#7B7BFF', color: '#FFF', boxShadow: '0 0 30px rgba(123,123,255,0.4)' }
+          style: { background: '#7B7BFF', color: '#FFF', animation: 'rcBreathe 3s ease-in-out infinite' }
         }, /*#__PURE__*/React.createElement(PauseIcon, { size: 30 }))
       )
     );
@@ -8882,303 +9012,177 @@ const RunClubScreen = ({ profile }) => {
 
   // ---- ADMIN PANEL ----
   if (view === 'admin' && isAdmin) {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "px-4 pt-6 pb-nav max-w-[420px] mx-auto"
-    },
+    return /*#__PURE__*/React.createElement("div", { className: "px-4 pt-6 pb-nav max-w-[420px] mx-auto" },
+      /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-5" },
-        /*#__PURE__*/React.createElement("button", {
-          onClick: () => setView('dashboard'),
-          className: "text-sm font-semibold", style: { color: 'var(--c-accent)' }
-        }, "← Back"),
-        /*#__PURE__*/React.createElement("h1", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, "Access Requests")
-      ),
+        /*#__PURE__*/React.createElement("button", { onClick: () => setView('dashboard'), className: "text-sm font-semibold", style: { color: 'var(--c-accent)' } }, "← Back"),
+        /*#__PURE__*/React.createElement("h1", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, "Access Requests")),
       pendingRequests.length === 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center" },
-        /*#__PURE__*/React.createElement("p", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "No pending requests")
-      ),
-      pendingRequests.map(r => /*#__PURE__*/React.createElement(FrostedCard, {
-        key: r.id, className: "p-4 mb-3"
-      },
+        /*#__PURE__*/React.createElement("p", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "No pending requests")),
+      pendingRequests.map(r => /*#__PURE__*/React.createElement(FrostedCard, { key: r.id, className: "p-4 mb-3 rc-slide-in" },
         /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-2" },
-          /*#__PURE__*/React.createElement("div", {
-            className: "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
-            style: { background: r.user.avatarColor || '#C5B3E6', color: '#FFF' }
-          }, (r.user.username || '?')[0].toUpperCase()),
+          /*#__PURE__*/React.createElement("div", { className: "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+            style: { background: r.user.avatarColor || '#C5B3E6', color: '#FFF' } }, (r.user.username || '?')[0].toUpperCase()),
           /*#__PURE__*/React.createElement("div", null,
             /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm", style: { color: 'var(--c-text)' } }, r.user.username),
-            r.socialProof && /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, r.socialProof)
-          )
-        ),
-        r.message && /*#__PURE__*/React.createElement("p", {
-          className: "text-xs mb-3 px-2 py-1.5 rounded-lg",
-          style: { background: 'var(--c-input-bg)', color: 'var(--c-text-sub)' }
-        }, '"', r.message, '"'),
+            r.socialProof && /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, r.socialProof))),
+        r.message && /*#__PURE__*/React.createElement("p", { className: "text-xs mb-3 px-2 py-1.5 rounded-lg",
+          style: { background: 'var(--c-input-bg)', color: 'var(--c-text-sub)' } }, '"', r.message, '"'),
         /*#__PURE__*/React.createElement("div", { className: "flex gap-2" },
-          /*#__PURE__*/React.createElement("button", {
-            onClick: () => handleReview(r.id, 'approved'),
+          /*#__PURE__*/React.createElement("button", { onClick: () => handleReview(r.id, 'approved'),
             className: "flex-1 py-2 rounded-xl font-semibold text-sm active:scale-95",
-            style: { background: 'rgba(168,230,207,0.2)', color: '#7DD8A0' }
-          }, "Approve"),
-          /*#__PURE__*/React.createElement("button", {
-            onClick: () => handleReview(r.id, 'denied'),
+            style: { background: 'rgba(168,230,207,0.2)', color: '#7DD8A0' } }, "Approve"),
+          /*#__PURE__*/React.createElement("button", { onClick: () => handleReview(r.id, 'denied'),
             className: "flex-1 py-2 rounded-xl font-semibold text-sm active:scale-95",
-            style: { background: 'rgba(255,138,138,0.12)', color: '#FF8A8A' }
-          }, "Deny")
-        )
+            style: { background: 'rgba(255,138,138,0.12)', color: '#FF8A8A' } }, "Deny"))
       ))
     );
   }
 
   // ---- REUSABLE SUB-COMPONENTS ----
-  const StatCard = ({ label, value, sub, icon, tint }) => /*#__PURE__*/React.createElement(FrostedCard, {
-    className: "p-3.5"
-  },
+  const StatCard = ({ label, value, sub, icon, tint }) => /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3.5 rc-pop-in" },
     /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-1.5" },
-      icon && /*#__PURE__*/React.createElement("div", {
-        className: "w-7 h-7 rounded-lg flex items-center justify-center",
-        style: { background: tint || 'rgba(168,230,207,0.2)' }
-      }, icon),
-      /*#__PURE__*/React.createElement("span", {
-        className: "text-[9px] font-bold uppercase tracking-[0.15em]",
-        style: { color: 'var(--c-text-sub)' }
-      }, label)
-    ),
-    /*#__PURE__*/React.createElement("div", {
-      className: "font-display text-xl", style: { color: 'var(--c-text)' }
-    }, value),
-    sub && /*#__PURE__*/React.createElement("div", {
-      className: "text-[11px] mt-0.5", style: { color: 'var(--c-text-sub)' }
-    }, sub)
-  );
+      icon && /*#__PURE__*/React.createElement("div", { className: "w-7 h-7 rounded-lg flex items-center justify-center", style: { background: tint || 'rgba(168,230,207,0.2)' } }, icon),
+      /*#__PURE__*/React.createElement("span", { className: "text-[9px] font-bold uppercase tracking-[0.15em]", style: { color: 'var(--c-text-sub)' } }, label)),
+    /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, value),
+    sub && /*#__PURE__*/React.createElement("div", { className: "text-[11px] mt-0.5", style: { color: 'var(--c-text-sub)' } }, sub));
 
-  const RunRow = ({ run }) => /*#__PURE__*/React.createElement(FrostedCard, {
-    className: "p-3.5 mb-2"
+  const RunRow = ({ run, delay }) => /*#__PURE__*/React.createElement(FrostedCard, {
+    className: "p-3.5 mb-2 rc-slide-in", style: delay ? { animationDelay: `${delay}s` } : undefined
   }, /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-between" },
     /*#__PURE__*/React.createElement("div", null,
-      /*#__PURE__*/React.createElement("div", {
-        className: "font-semibold text-sm", style: { color: 'var(--c-text)' }
-      }, formatDistanceMiles(run.distanceM), " mi"),
-      /*#__PURE__*/React.createElement("div", {
-        className: "text-xs", style: { color: 'var(--c-text-sub)' }
-      }, formatDateShort(run.startedAt), " \xB7 ", formatDuration(run.durationSec))
-    ),
+      /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm", style: { color: 'var(--c-text)' } }, formatDistanceMiles(run.distanceM), " mi"),
+      /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, formatDateShort(run.startedAt), " \xB7 ", formatDuration(run.durationSec))),
     /*#__PURE__*/React.createElement("div", { className: "text-right" },
-      /*#__PURE__*/React.createElement("div", {
-        className: "font-semibold text-sm", style: { color: 'var(--c-accent)' }
-      }, formatPace(run.avgPaceSec), " /km"),
-      /*#__PURE__*/React.createElement("div", {
-        className: "text-xs", style: { color: 'var(--c-text-sub)' }
-      }, run.calories || estimateCalories(run.distanceM, run.durationSec), " cal")
-    )
-  ));
+      /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm", style: { color: 'var(--c-accent)' } }, formatPace(run.avgPaceSec), " /km"),
+      /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, run.calories || estimateCalories(run.distanceM), " cal"))));
 
   const s = runStats || {};
   const unlockedCount = achievements.filter(a => a.unlocked).length;
 
-  return /*#__PURE__*/React.createElement("div", {
-    className: "px-4 pt-6 pb-nav max-w-[420px] mx-auto scroll-momentum"
-  },
+  return /*#__PURE__*/React.createElement("div", { className: "px-4 pt-6 pb-nav max-w-[420px] mx-auto scroll-momentum" },
+    /*#__PURE__*/React.createElement(RunClubStyles, null),
+
     // Header
-    /*#__PURE__*/React.createElement("div", { className: "text-center mb-4" },
-      /*#__PURE__*/React.createElement("h1", {
-        className: "font-display text-xl", style: { color: 'var(--c-text)' }
-      }, "Run Club"),
-      /*#__PURE__*/React.createElement("p", {
-        className: "text-[11px] font-semibold tracking-wider uppercase",
-        style: { color: 'var(--c-text-sub)' }
-      }, "Doodles runners")
-    ),
+    /*#__PURE__*/React.createElement("div", { className: "text-center mb-4 rc-slide-up" },
+      /*#__PURE__*/React.createElement("h1", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, "Run Club"),
+      /*#__PURE__*/React.createElement("p", { className: "text-[11px] font-semibold tracking-wider uppercase", style: { color: 'var(--c-text-sub)' } }, "Doodles runners")),
 
     // Community banner
-    community && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3 mb-4 text-center" },
+    community && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3 mb-4 text-center rc-pop-in" },
       /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-center gap-4 text-xs" },
         /*#__PURE__*/React.createElement("div", null,
-          /*#__PURE__*/React.createElement("span", { className: "font-display text-base", style: { color: 'var(--c-accent)' } },
-            formatDistanceMiles(community.totalDistanceM)),
-          /*#__PURE__*/React.createElement("span", { className: "ml-1", style: { color: 'var(--c-text-sub)' } }, "total mi")
-        ),
-        /*#__PURE__*/React.createElement("div", {
-          style: { width: 1, height: 16, background: 'var(--c-border)' }
-        }),
+          /*#__PURE__*/React.createElement("span", { className: "font-display text-base", style: { color: 'var(--c-accent)' } }, formatDistanceMiles(community.totalDistanceM)),
+          /*#__PURE__*/React.createElement("span", { className: "ml-1", style: { color: 'var(--c-text-sub)' } }, "total mi")),
+        /*#__PURE__*/React.createElement("div", { style: { width: 1, height: 16, background: 'var(--c-border)' } }),
         /*#__PURE__*/React.createElement("div", null,
-          /*#__PURE__*/React.createElement("span", { className: "font-display text-base", style: { color: 'var(--c-text)' } },
-            community.totalRunners),
-          /*#__PURE__*/React.createElement("span", { className: "ml-1", style: { color: 'var(--c-text-sub)' } }, "runners")
-        )
-      ),
-      // Weekly challenge
+          /*#__PURE__*/React.createElement("span", { className: "font-display text-base", style: { color: 'var(--c-text)' } }, community.totalRunners),
+          /*#__PURE__*/React.createElement("span", { className: "ml-1", style: { color: 'var(--c-text-sub)' } }, "runners"))),
       community.challenge && /*#__PURE__*/React.createElement("div", { className: "mt-2 pt-2", style: { borderTop: '1px solid var(--c-border)' } },
-        /*#__PURE__*/React.createElement("div", { className: "text-xs font-semibold mb-1", style: { color: 'var(--c-text)' } },
-          "Weekly Challenge: ", community.challenge.title),
-        /*#__PURE__*/React.createElement("div", {
-          className: "w-full h-2 rounded-full overflow-hidden",
-          style: { background: 'var(--c-stat-bg)' }
-        }, /*#__PURE__*/React.createElement("div", {
-          className: "h-full rounded-full transition-all",
-          style: {
-            width: `${Math.min(100, (community.challenge.currentM / community.challenge.goalM) * 100)}%`,
-            background: 'linear-gradient(90deg, var(--c-accent), #A8E6CF)'
-          }
-        })),
+        /*#__PURE__*/React.createElement("div", { className: "text-xs font-semibold mb-1", style: { color: 'var(--c-text)' } }, "Challenge: ", community.challenge.title),
+        /*#__PURE__*/React.createElement("div", { className: "w-full h-2 rounded-full overflow-hidden", style: { background: 'var(--c-stat-bg)' } },
+          /*#__PURE__*/React.createElement("div", { className: "h-full rounded-full",
+            style: { width: `${Math.min(100, (community.challenge.currentM / community.challenge.goalM) * 100)}%`,
+                     background: 'linear-gradient(90deg, var(--c-accent), #A8E6CF)', transition: 'width 1s ease-out' } })),
         /*#__PURE__*/React.createElement("div", { className: "text-[10px] mt-1", style: { color: 'var(--c-text-sub)' } },
-          formatDistanceMiles(community.challenge.currentM), " / ", formatDistanceMiles(community.challenge.goalM), " mi")
-      )
+          formatDistanceMiles(community.challenge.currentM), " / ", formatDistanceMiles(community.challenge.goalM), " mi"))
     ),
 
     // Sub-nav
-    /*#__PURE__*/React.createElement("div", {
-      className: "flex gap-1.5 mb-4 justify-center flex-wrap"
-    },
+    /*#__PURE__*/React.createElement("div", { className: "flex gap-1.5 mb-4 justify-center flex-wrap" },
       /*#__PURE__*/React.createElement(Pill, { active: view === 'dashboard', onClick: () => setView('dashboard') }, "Home"),
       /*#__PURE__*/React.createElement(Pill, { active: view === 'history', onClick: () => setView('history') }, "History"),
       /*#__PURE__*/React.createElement(Pill, { active: view === 'leaderboard', onClick: () => setView('leaderboard') }, "Board"),
       /*#__PURE__*/React.createElement(Pill, { active: view === 'achievements', onClick: () => setView('achievements') }, "Badges"),
-      isAdmin && /*#__PURE__*/React.createElement(Pill, { active: view === 'admin', onClick: () => setView('admin'), color: '#7DD8A0' }, "Admin")
-    ),
+      isAdmin && /*#__PURE__*/React.createElement(Pill, { active: view === 'admin', onClick: () => setView('admin'), color: '#7DD8A0' }, "Admin")),
 
     // Start Run Button
     view === 'dashboard' && /*#__PURE__*/React.createElement("button", {
-      onClick: startRun,
-      className: "w-full py-4 rounded-2xl font-display font-semibold text-lg active:scale-95 transition-all mb-5",
-      style: {
-        background: 'linear-gradient(135deg, var(--c-accent) 0%, #7B7BFF 100%)',
-        color: '#FFF',
-        boxShadow: '0 6px 24px rgba(65,64,255,0.25)',
-        border: 'none'
-      }
+      onClick: () => setView('start'),
+      className: "w-full py-4 rounded-2xl font-display font-semibold text-lg active:scale-95 transition-all mb-5 rc-pop-in",
+      style: { background: 'linear-gradient(135deg, var(--c-accent) 0%, #7B7BFF 100%)', color: '#FFF',
+               boxShadow: '0 6px 24px rgba(65,64,255,0.25)', border: 'none' }
     }, /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-center gap-2.5" },
-      /*#__PURE__*/React.createElement(GpsIcon, { size: 20, color: '#FFF' }), "Start Run"
-    )),
+      /*#__PURE__*/React.createElement(GpsIcon, { size: 20, color: '#FFF' }), "Start Run")),
 
     // === DASHBOARD ===
     view === 'dashboard' && !loading && /*#__PURE__*/React.createElement(React.Fragment, null,
-      /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-2 gap-2.5 mb-4" },
-        /*#__PURE__*/React.createElement(StatCard, {
-          label: "This Week", value: formatDistanceMiles(s.weekDistanceM || 0) + ' mi',
-          sub: `${s.weekRuns || 0} runs`,
-          icon: /*#__PURE__*/React.createElement(RouteIcon, { size: 16, color: '#A8E6CF' }), tint: 'rgba(168,230,207,0.2)'
-        }),
-        /*#__PURE__*/React.createElement(StatCard, {
-          label: "Total", value: formatDistanceMiles(s.totalDistanceM || 0) + ' mi',
-          sub: `${s.totalRuns || 0} runs`,
-          icon: /*#__PURE__*/React.createElement(RunShoeIcon, { size: 16 }), tint: 'rgba(197,179,230,0.2)'
-        }),
-        /*#__PURE__*/React.createElement(StatCard, {
-          label: "Streak", value: `${s.streakDays || 0}d`,
-          sub: 'days running',
-          icon: /*#__PURE__*/React.createElement(FireIcon, { size: 16 }), tint: 'rgba(255,171,145,0.2)'
-        }),
-        /*#__PURE__*/React.createElement(StatCard, {
-          label: "Best Pace", value: formatPace(s.bestPaceSec || 0),
-          sub: '/km',
-          icon: /*#__PURE__*/React.createElement(GpsIcon, { size: 16 }), tint: 'rgba(144,202,249,0.2)'
-        })
-      ),
-
-      // Badges preview
-      achievements.length > 0 && /*#__PURE__*/React.createElement(FrostedCard, {
-        className: "p-3 mb-4",
-        onClick: () => setView('achievements')
-      },
+      /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-2 gap-2.5 mb-4 rc-stagger" },
+        /*#__PURE__*/React.createElement(StatCard, { label: "This Week", value: formatDistanceMiles(s.weekDistanceM || 0) + ' mi', sub: `${s.weekRuns || 0} runs`,
+          icon: /*#__PURE__*/React.createElement(RouteIcon, { size: 16, color: '#A8E6CF' }), tint: 'rgba(168,230,207,0.2)' }),
+        /*#__PURE__*/React.createElement(StatCard, { label: "Total", value: formatDistanceMiles(s.totalDistanceM || 0) + ' mi', sub: `${s.totalRuns || 0} runs`,
+          icon: /*#__PURE__*/React.createElement(RunShoeIcon, { size: 16 }), tint: 'rgba(197,179,230,0.2)' }),
+        /*#__PURE__*/React.createElement(StatCard, { label: "Streak", value: `${s.streakDays || 0}d`, sub: 'days running',
+          icon: /*#__PURE__*/React.createElement(FireIcon, { size: 16 }), tint: 'rgba(255,171,145,0.2)' }),
+        /*#__PURE__*/React.createElement(StatCard, { label: "Best Pace", value: formatPace(s.bestPaceSec || 0), sub: '/km',
+          icon: /*#__PURE__*/React.createElement(GpsIcon, { size: 16 }), tint: 'rgba(144,202,249,0.2)' })),
+      achievements.length > 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3 mb-4 rc-slide-in", onClick: () => setView('achievements') },
         /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-between" },
           /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2" },
             /*#__PURE__*/React.createElement(BadgeIcon, { size: 16, tint: '#FFE082' }),
-            /*#__PURE__*/React.createElement("span", { className: "text-sm font-semibold", style: { color: 'var(--c-text)' } },
-              unlockedCount, "/", achievements.length, " Badges")
-          ),
-          /*#__PURE__*/React.createElement("span", { className: "text-xs", style: { color: 'var(--c-accent)' } }, "View all →")
-        )
-      ),
-
-      // Recent runs
+            /*#__PURE__*/React.createElement("span", { className: "text-sm font-semibold", style: { color: 'var(--c-text)' } }, unlockedCount, "/", achievements.length, " Badges")),
+          /*#__PURE__*/React.createElement("span", { className: "text-xs", style: { color: 'var(--c-accent)' } }, "View all →"))),
       runs.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
         /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm mb-2", style: { color: 'var(--c-text)' } }, "Recent Runs"),
-        runs.slice(0, 4).map(r => /*#__PURE__*/React.createElement(RunRow, { key: r.id, run: r }))
-      ),
-
-      runs.length === 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center mt-2" },
+        runs.slice(0, 4).map((r, i) => /*#__PURE__*/React.createElement(RunRow, { key: r.id, run: r, delay: i * 0.06 }))),
+      runs.length === 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center mt-2 rc-pop-in" },
         /*#__PURE__*/React.createElement("div", { className: "font-display text-base mb-1", style: { color: 'var(--c-text)' } }, "No runs yet"),
-        /*#__PURE__*/React.createElement("p", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, "Tap Start Run to begin!")
-      )
+        /*#__PURE__*/React.createElement("p", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, "Tap Start Run to begin!"))
     ),
 
     // === HISTORY ===
     view === 'history' && /*#__PURE__*/React.createElement(React.Fragment, null,
-      runs.map(r => /*#__PURE__*/React.createElement(RunRow, { key: r.id, run: r })),
+      runs.map((r, i) => /*#__PURE__*/React.createElement(RunRow, { key: r.id, run: r, delay: i * 0.04 })),
       runs.length === 0 && !loading && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center" },
-        /*#__PURE__*/React.createElement(EmptyState, { title: "No runs yet", subtitle: "Complete a run to see it here!" })
-      )
-    ),
+        /*#__PURE__*/React.createElement(EmptyState, { title: "No runs yet", subtitle: "Complete a run to see it here!" }))),
 
     // === LEADERBOARD ===
     view === 'leaderboard' && /*#__PURE__*/React.createElement(React.Fragment, null,
       /*#__PURE__*/React.createElement("div", { className: "flex gap-2 mb-3 justify-center" },
         /*#__PURE__*/React.createElement(Pill, { active: lbScope === 'weekly', onClick: () => setLbScope('weekly') }, "This Week"),
-        /*#__PURE__*/React.createElement(Pill, { active: lbScope === 'alltime', onClick: () => setLbScope('alltime') }, "All Time")
-      ),
+        /*#__PURE__*/React.createElement(Pill, { active: lbScope === 'alltime', onClick: () => setLbScope('alltime') }, "All Time")),
       lbRows.map((r, i) => /*#__PURE__*/React.createElement(FrostedCard, {
-        key: i, className: "p-3 mb-2 flex items-center gap-3"
+        key: i, className: "p-3 mb-2 flex items-center gap-3 rc-slide-in", style: { animationDelay: `${i * 0.04}s` }
       },
         /*#__PURE__*/React.createElement("div", {
           className: "w-7 h-7 rounded-full flex items-center justify-center font-display font-bold text-xs",
-          style: {
-            background: i === 0 ? 'rgba(255,224,130,0.3)' : i === 1 ? 'rgba(224,224,232,0.3)' : i === 2 ? 'rgba(255,171,145,0.3)' : 'var(--c-stat-bg)',
-            color: 'var(--c-text)'
-          }
+          style: { background: i === 0 ? 'rgba(255,224,130,0.3)' : i === 1 ? 'rgba(224,224,232,0.3)' : i === 2 ? 'rgba(255,171,145,0.3)' : 'var(--c-stat-bg)', color: 'var(--c-text)' }
         }, r.rank),
-        /*#__PURE__*/React.createElement("div", {
-          className: "w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold",
-          style: { background: r.avatarColor || '#C5B3E6', color: '#FFF' }
-        }, (r.username || '?')[0].toUpperCase()),
+        /*#__PURE__*/React.createElement("div", { className: "w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold",
+          style: { background: r.avatarColor || '#C5B3E6', color: '#FFF' } }, (r.username || '?')[0].toUpperCase()),
         /*#__PURE__*/React.createElement("div", { className: "flex-1 min-w-0" },
-          /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm truncate", style: { color: 'var(--c-text)' } }, r.username)
-        ),
+          /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm truncate", style: { color: 'var(--c-text)' } }, r.username)),
         /*#__PURE__*/React.createElement("div", { className: "text-right" },
-          /*#__PURE__*/React.createElement("div", { className: "font-display text-sm", style: { color: 'var(--c-accent)' } },
-            formatDistanceMiles(r.distanceM), " mi"),
-          /*#__PURE__*/React.createElement("div", { className: "text-[10px]", style: { color: 'var(--c-text-sub)' } }, r.runs, " runs")
-        )
-      )),
+          /*#__PURE__*/React.createElement("div", { className: "font-display text-sm", style: { color: 'var(--c-accent)' } }, formatDistanceMiles(r.distanceM), " mi"),
+          /*#__PURE__*/React.createElement("div", { className: "text-[10px]", style: { color: 'var(--c-text-sub)' } }, r.runs, " runs")))),
       lbRows.length === 0 && !loading && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center" },
-        /*#__PURE__*/React.createElement(EmptyState, { title: "No runners yet", subtitle: "Be the first!" })
-      )
-    ),
+        /*#__PURE__*/React.createElement(EmptyState, { title: "No runners yet", subtitle: "Be the first!" }))),
 
     // === ACHIEVEMENTS ===
     view === 'achievements' && /*#__PURE__*/React.createElement(React.Fragment, null,
-      /*#__PURE__*/React.createElement("div", { className: "text-center mb-3" },
-        /*#__PURE__*/React.createElement("div", { className: "font-display text-lg", style: { color: 'var(--c-text)' } },
-          unlockedCount, " / ", achievements.length),
-        /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, "badges earned")
-      ),
-      achievements.map(a => /*#__PURE__*/React.createElement(FrostedCard, {
-        key: a.id,
-        className: "p-3.5 mb-2 flex items-center gap-3",
-        style: { opacity: a.unlocked ? 1 : 0.45 }
+      /*#__PURE__*/React.createElement("div", { className: "text-center mb-3 rc-slide-up" },
+        /*#__PURE__*/React.createElement("div", { className: "font-display text-lg", style: { color: 'var(--c-text)' } }, unlockedCount, " / ", achievements.length),
+        /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, "badges earned")),
+      achievements.map((a, i) => /*#__PURE__*/React.createElement(FrostedCard, {
+        key: a.id, className: "p-3.5 mb-2 flex items-center gap-3 rc-slide-in",
+        style: { opacity: a.unlocked ? 1 : 0.45, animationDelay: `${i * 0.04}s` }
       },
-        /*#__PURE__*/React.createElement("div", {
-          className: "w-10 h-10 rounded-xl flex items-center justify-center",
-          style: { background: a.unlocked ? 'rgba(255,224,130,0.25)' : 'var(--c-stat-bg)' }
-        }, /*#__PURE__*/React.createElement(BadgeIcon, { size: 22, tint: a.unlocked ? '#FFE082' : 'var(--c-text-sub)' })),
+        /*#__PURE__*/React.createElement("div", { className: "w-10 h-10 rounded-xl flex items-center justify-center",
+          style: { background: a.unlocked ? 'rgba(255,224,130,0.25)' : 'var(--c-stat-bg)' } },
+          /*#__PURE__*/React.createElement(BadgeIcon, { size: 22, tint: a.unlocked ? '#FFE082' : 'var(--c-text-sub)' })),
         /*#__PURE__*/React.createElement("div", { className: "flex-1 min-w-0" },
           /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm", style: { color: 'var(--c-text)' } }, a.name),
-          /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, a.desc)
-        ),
-        a.unlocked && /*#__PURE__*/React.createElement("div", {
-          className: "text-[10px] font-semibold px-2 py-1 rounded-full",
-          style: { background: 'rgba(168,230,207,0.2)', color: '#7DD8A0' }
-        }, formatDateShort(a.unlockedAt))
-      ))
-    ),
+          /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, a.desc)),
+        a.unlocked && /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-semibold px-2 py-1 rounded-full",
+          style: { background: 'rgba(168,230,207,0.2)', color: '#7DD8A0' } }, formatDateShort(a.unlockedAt))))),
 
     // Loading
-    loading && accessStatus === 'approved' && /*#__PURE__*/React.createElement("div", {
-      className: "flex justify-center py-12"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "w-6 h-6 rounded-full border-2 animate-spin",
-      style: { borderColor: 'var(--c-border)', borderTopColor: 'var(--c-accent)' }
-    }))
+    loading && accessStatus === 'approved' && /*#__PURE__*/React.createElement("div", { className: "flex justify-center py-12" },
+      /*#__PURE__*/React.createElement("div", { className: "w-6 h-6 rounded-full border-2 animate-spin",
+        style: { borderColor: 'var(--c-border)', borderTopColor: 'var(--c-accent)' } }))
   );
 };
+
 
 /* ==========================================================================
    BOTTOM NAV
