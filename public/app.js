@@ -8245,9 +8245,14 @@ const ProfileScreen = ({
 };
 
 
+
 /* ==========================================================================
-   DOODLES RUN CLUB — SVG Icons
+   DOODLES RUN CLUB — v4 Complete Rewrite
+   Solid backgrounds, mobile+PC optimized, access gate, admin inbox,
+   custom achievement medals, all in English
    ========================================================================== */
+
+/* ---------- SVG Icons ---------- */
 
 const RunShoeIcon = ({ size = 24, active }) => /*#__PURE__*/React.createElement("svg", {
   viewBox: "0 0 24 24", width: size, height: size, fill: "none",
@@ -8299,12 +8304,6 @@ const BrainIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
 }, /*#__PURE__*/React.createElement("path", { d: "M12 2a5 5 0 015 5c0 1.5-.5 2.5-1.5 3.5L12 14l-3.5-3.5C7.5 9.5 7 8.5 7 7a5 5 0 015-5z" }),
   /*#__PURE__*/React.createElement("path", { d: "M12 14v8M8 18h8" }));
 
-const BadgeIcon = ({ size = 20, tint }) => /*#__PURE__*/React.createElement("svg", {
-  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
-  stroke: tint || "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
-}, /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 10, r: 6 }),
-  /*#__PURE__*/React.createElement("path", { d: "M8.5 15.5L7 22l5-2 5 2-1.5-6.5" }));
-
 const TargetIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
   viewBox: "0 0 24 24", width: size, height: size, fill: "none",
   stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
@@ -8317,130 +8316,238 @@ const InfinityIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", 
   stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
 }, /*#__PURE__*/React.createElement("path", { d: "M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z" }));
 
-/* ==========================================================================
-   DOODLES RUN CLUB — CSS Animations (injected once)
-   ========================================================================== */
+const CheckCircleIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 12, r: 10 }),
+  /*#__PURE__*/React.createElement("path", { d: "M9 12l2 2 4-4" }));
+
+const ClockIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 12, r: 10 }),
+  /*#__PURE__*/React.createElement("path", { d: "M12 6v6l4 2" }));
+
+const InboxIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M22 12h-6l-2 3H10l-2-3H2" }),
+  /*#__PURE__*/React.createElement("path", { d: "M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" }));
+
+/* ---------- Custom Achievement Medal SVGs ---------- */
+const ACHIEVEMENT_MEDALS = {
+  first_run: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FFE082' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? '#FFD54F' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 24, textAnchor: "middle", fontSize: 14, fill: unlocked ? '#5D4037' : '#666' }, "1"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#4140FF' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  ran_5k: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#A8E6CF' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? '#81C784' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 10, fontWeight: "bold", fill: unlocked ? '#1B5E20' : '#666' }, "5"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#2E7D32' : '#666' }, "KM"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#A8E6CF' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  ran_10k: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#90CAF9' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? '#64B5F6' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 9, fontWeight: "bold", fill: unlocked ? '#0D47A1' : '#666' }, "10"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#1565C0' : '#666' }, "KM"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#90CAF9' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  half_marathon: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#CE93D8' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? '#AB47BC' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 7, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "HALF"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 26, textAnchor: "middle", fontSize: 6, fill: unlocked ? '#E1BEE7' : '#666' }, "21.1K"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#CE93D8' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  marathon: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null,
+      /*#__PURE__*/React.createElement("linearGradient", { id: "marathonGrad", x1: "0", y1: "0", x2: "1", y2: "1" },
+        /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#FFD700' : '#3A3550' }),
+        /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#FF6B35' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#marathonGrad)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? '#FF8F00' : '#2A2740', opacity: unlocked ? 0.8 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 6, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "FULL"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 26, textAnchor: "middle", fontSize: 6, fill: unlocked ? '#FFF8E1' : '#666' }, "42.2K"),
+    /*#__PURE__*/React.createElement("polygon", { points: "16,36 24,44 32,36 29,36 24,41 19,36", fill: unlocked ? '#FFD700' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  total_50mi: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("rect", { x: 6, y: 6, width: 36, height: 28, rx: 6, fill: unlocked ? '#FFAB91' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 11, fontWeight: "bold", fill: unlocked ? '#BF360C' : '#666' }, "50"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#D84315' : '#666' }, "MILES"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF8A65' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  total_100mi: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("rect", { x: 6, y: 6, width: 36, height: 28, rx: 6, fill: unlocked ? '#EF5350' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 10, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "100"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#FFCDD2' : '#666' }, "MILES"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#EF5350' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  total_500mi: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null,
+      /*#__PURE__*/React.createElement("linearGradient", { id: "g500", x1: "0", y1: "0", x2: "1", y2: "1" },
+        /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#E040FB' : '#3A3550' }),
+        /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#7C4DFF' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("rect", { x: 6, y: 6, width: 36, height: 28, rx: 6, fill: "url(#g500)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 10, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "500"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#E1BEE7' : '#666' }, "MILES"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#E040FB' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  streak_7: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FF7043' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 16, textAnchor: "middle", fontSize: 12, fill: unlocked ? '#FFF' : '#666' }, "🔥"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 7, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "7 DAYS"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF7043' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  streak_30: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null,
+      /*#__PURE__*/React.createElement("linearGradient", { id: "g30", x1: "0", y1: "0", x2: "1", y2: "1" },
+        /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#FF5722' : '#3A3550' }),
+        /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#FF9800' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g30)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 16, textAnchor: "middle", fontSize: 11, fill: unlocked ? '#FFF' : '#666' }, "🔥"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 6, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "30 DAYS"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF5722' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  speed_demon: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#40C4FF' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 16, textAnchor: "middle", fontSize: 13, fill: unlocked ? '#FFF' : '#666' }, "⚡"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "SPEED"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#40C4FF' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  ten_runs: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#66BB6A' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 11, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "10"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 6, fill: unlocked ? '#C8E6C9' : '#666' }, "RUNS"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#66BB6A' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  fifty_runs: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null,
+      /*#__PURE__*/React.createElement("linearGradient", { id: "g50r", x1: "0", y1: "0", x2: "1", y2: "1" },
+        /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#7B7BFF' : '#3A3550' }),
+        /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#A8E6CF' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g50r)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 11, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "50"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 6, fill: unlocked ? '#E8E0F0' : '#666' }, "RUNS"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#7B7BFF' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  early_bird: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FFF9C4' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 14, fill: unlocked ? '#F57F17' : '#666' }, "☀"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 29, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#F57F17' : '#666' }, "EARLY"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FFF176' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  night_owl: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#1A237E' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 14, fill: unlocked ? '#FFF' : '#666' }, "🌙"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 29, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#9FA8DA' : '#666' }, "NIGHT"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#3F51B5' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 }))
+};
+
+const getAchievementMedal = (id, unlocked) => {
+  const renderer = ACHIEVEMENT_MEDALS[id];
+  return renderer ? renderer(unlocked) : /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#B0BEC5' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 24, textAnchor: "middle", fontSize: 10, fill: unlocked ? '#37474F' : '#666' }, "?"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#B0BEC5' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 }));
+};
+
+/* ---------- CSS injected once ---------- */
 
 const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
   @keyframes rcPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
   @keyframes rcBreathe { 0%,100% { box-shadow: 0 0 20px rgba(123,123,255,0.3); } 50% { box-shadow: 0 0 40px rgba(123,123,255,0.6); } }
-  @keyframes rcGlow { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
-  @keyframes rcSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes rcSlideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
-  @keyframes rcPopIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
-  @keyframes rcCountUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes rcConfetti { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(-120px) rotate(720deg); opacity: 0; } }
-  @keyframes rcRingPulse { 0%,100% { stroke-opacity: 1; } 50% { stroke-opacity: 0.5; } }
-  @keyframes rcShimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-  @keyframes rcProgressGlow { 0%,100% { filter: drop-shadow(0 0 4px rgba(123,123,255,0.4)); } 50% { filter: drop-shadow(0 0 12px rgba(123,123,255,0.8)); } }
+  @keyframes rcSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes rcPopIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+  @keyframes rcShine { 0% { filter: brightness(1); } 50% { filter: brightness(1.3); } 100% { filter: brightness(1); } }
   @keyframes rcDotPing { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
-  .rc-slide-up { animation: rcSlideUp 0.5s cubic-bezier(.22,1,.36,1) both; }
-  .rc-slide-in { animation: rcSlideIn 0.4s cubic-bezier(.22,1,.36,1) both; }
-  .rc-pop-in { animation: rcPopIn 0.4s cubic-bezier(.22,1.2,.36,1) both; }
-  .rc-count-up { animation: rcCountUp 0.3s ease-out both; }
+  @keyframes rcProgressGlow { 0%,100% { filter: drop-shadow(0 0 4px rgba(123,123,255,0.3)); } 50% { filter: drop-shadow(0 0 12px rgba(123,123,255,0.7)); } }
+  .rc-slide-up { animation: rcSlideUp 0.45s cubic-bezier(.22,1,.36,1) both; }
+  .rc-pop-in { animation: rcPopIn 0.35s cubic-bezier(.22,1.2,.36,1) both; }
+  .rc-shine { animation: rcShine 2s ease-in-out infinite; }
   .rc-stagger > *:nth-child(1) { animation-delay: 0s; }
   .rc-stagger > *:nth-child(2) { animation-delay: 0.06s; }
-  .rc-stagger > *:nth-child(3) { animation-delay: 0.12s; }
-  .rc-stagger > *:nth-child(4) { animation-delay: 0.18s; }
-  .rc-stagger > *:nth-child(5) { animation-delay: 0.24s; }
-  .rc-stagger > *:nth-child(6) { animation-delay: 0.30s; }
-  .rc-shimmer { background: linear-gradient(90deg, transparent, rgba(123,123,255,0.08), transparent); background-size: 200% 100%; animation: rcShimmer 2s infinite; }
+  .rc-stagger > *:nth-child(3) { animation-delay: 0.08s; }
+  .rc-stagger > *:nth-child(4) { animation-delay: 0.12s; }
+  .rc-wrap {
+    position: fixed; inset: 0; z-index: 40;
+    background: var(--c-bg);
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .rc-inner {
+    width: 100%; max-width: 480px; margin: 0 auto;
+    padding: 16px 20px calc(100px + env(safe-area-inset-bottom)) 20px;
+    min-height: 100%;
+  }
+  .rc-card {
+    background: var(--c-card-solid);
+    border: 1px solid var(--c-border);
+    border-radius: 16px;
+    padding: 16px;
+  }
   @media (prefers-reduced-motion: reduce) {
-    .rc-slide-up, .rc-slide-in, .rc-pop-in, .rc-count-up { animation: none !important; }
+    .rc-slide-up, .rc-pop-in, .rc-shine { animation: none !important; }
   }
 `);
 
-/* ==========================================================================
-   DOODLES RUN CLUB — Progress Ring SVG
-   ========================================================================== */
+/* ---------- Progress Ring ---------- */
 
 const RCProgressRing = ({ progress, size = 200, stroke = 8, label, sublabel }) => {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - Math.min(1, Math.max(0, progress)) * circumference;
-  return /*#__PURE__*/React.createElement("div", { className: "relative flex items-center justify-center" },
+  return /*#__PURE__*/React.createElement("div", { style: { position: 'relative', width: size, height: size } },
     /*#__PURE__*/React.createElement("svg", {
-      width: size, height: size, className: "transform -rotate-90",
-      style: { animation: 'rcProgressGlow 3s ease-in-out infinite' }
+      width: size, height: size,
+      style: { transform: 'rotate(-90deg)', animation: 'rcProgressGlow 3s ease-in-out infinite' }
     },
-      // Background ring
-      /*#__PURE__*/React.createElement("circle", {
-        cx: size / 2, cy: size / 2, r: radius, fill: "none",
-        stroke: "rgba(123,123,255,0.1)", strokeWidth: stroke
-      }),
-      // Progress ring
-      /*#__PURE__*/React.createElement("circle", {
-        cx: size / 2, cy: size / 2, r: radius, fill: "none",
-        stroke: "url(#rcGrad)", strokeWidth: stroke,
-        strokeDasharray: circumference, strokeDashoffset: offset,
-        strokeLinecap: "round",
-        style: { transition: 'stroke-dashoffset 1s cubic-bezier(.22,1,.36,1)' }
-      }),
-      // Gradient def
+      /*#__PURE__*/React.createElement("circle", { cx: size/2, cy: size/2, r: radius, fill: "none", stroke: "rgba(123,123,255,0.12)", strokeWidth: stroke }),
+      /*#__PURE__*/React.createElement("circle", { cx: size/2, cy: size/2, r: radius, fill: "none", stroke: "url(#rcGradV4)", strokeWidth: stroke,
+        strokeDasharray: circumference, strokeDashoffset: offset, strokeLinecap: "round",
+        style: { transition: 'stroke-dashoffset 1s cubic-bezier(.22,1,.36,1)' } }),
       /*#__PURE__*/React.createElement("defs", null,
-        /*#__PURE__*/React.createElement("linearGradient", { id: "rcGrad", x1: "0", y1: "0", x2: "1", y2: "1" },
+        /*#__PURE__*/React.createElement("linearGradient", { id: "rcGradV4", x1: "0", y1: "0", x2: "1", y2: "1" },
           /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: "#7B7BFF" }),
-          /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: "#A8E6CF" })
-        )
-      )
+          /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: "#A8E6CF" })))
     ),
-    // Center content
     /*#__PURE__*/React.createElement("div", {
-      className: "absolute inset-0 flex flex-col items-center justify-center"
+      style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }
     },
       /*#__PURE__*/React.createElement("div", {
-        className: "font-display rc-count-up",
-        style: { fontSize: 'clamp(28px, 8vw, 40px)', lineHeight: 1, color: '#E8E0F0' }
+        className: "font-display",
+        style: { fontSize: Math.round(size * 0.18), lineHeight: 1, color: '#E8E0F0' }
       }, label),
       sublabel && /*#__PURE__*/React.createElement("div", {
-        className: "text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5",
-        style: { color: '#9B95B0' }
+        style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 4, color: '#9B95B0' }
       }, sublabel)
     )
   );
 };
 
-/* ==========================================================================
-   DOODLES RUN CLUB — Helpers
-   ========================================================================== */
+/* ---------- Helpers ---------- */
 
-const formatDistance = (meters) => {
-  if (meters < 1000) return `${meters}m`;
-  return (meters / 1000).toFixed(2) + ' km';
-};
-const formatDistanceMiles = (meters) => {
-  const miles = meters / 1609.344;
-  return miles < 0.01 ? '0.00' : miles.toFixed(2);
-};
-const formatPace = (secPerKm) => {
-  if (!secPerKm || secPerKm <= 0) return '--:--';
-  const min = Math.floor(secPerKm / 60);
-  const sec = Math.floor(secPerKm % 60);
-  return `${min}:${sec.toString().padStart(2, '0')}`;
-};
+const formatDistance = (meters) => { if (meters < 1000) return meters + 'm'; return (meters / 1000).toFixed(2) + ' km'; };
+const formatDistanceMiles = (meters) => { const mi = meters / 1609.344; return mi < 0.01 ? '0.00' : mi.toFixed(2); };
+const formatPace = (secPerKm) => { if (!secPerKm || secPerKm <= 0) return '--:--'; const m = Math.floor(secPerKm / 60); const s = Math.floor(secPerKm % 60); return m + ':' + s.toString().padStart(2, '0'); };
 const formatDuration = (totalSec) => {
-  const h = Math.floor(totalSec / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-  const s = Math.floor(totalSec % 60);
-  if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  const h = Math.floor(totalSec / 3600); const m = Math.floor((totalSec % 3600) / 60); const s = Math.floor(totalSec % 60);
+  if (h > 0) return h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
+  return m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
 };
-const formatDateShort = (iso) => {
-  const d = new Date(iso);
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return `${months[d.getMonth()]} ${d.getDate()}`;
-};
+const formatDateShort = (iso) => { const d = new Date(iso); const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return mo[d.getMonth()] + ' ' + d.getDate(); };
 const estimateCalories = (distanceM) => Math.round((distanceM / 1000) * 60);
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371000;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  const R = 6371000; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
 /* ==========================================================================
-   DOODLES RUN CLUB — Main Screen
+   MAIN COMPONENT
    ========================================================================== */
 
 const RunClubScreen = ({ profile }) => {
@@ -8459,6 +8566,8 @@ const RunClubScreen = ({ profile }) => {
   const [requestSocial, setRequestSocial] = useState('');
   const [requestMsg, setRequestMsg] = useState('');
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [allRequests, setAllRequests] = useState([]);
+  const [reviewNote, setReviewNote] = useState('');
 
   // Achievements + community + coach
   const [achievements, setAchievements] = useState([]);
@@ -8466,13 +8575,13 @@ const RunClubScreen = ({ profile }) => {
   const [coachTips, setCoachTips] = useState([]);
   const [showPostRun, setShowPostRun] = useState(false);
 
-  // Run mode: 'free' or { unit: 'mi'|'km', target: number }
-  const [runMode, setRunMode] = useState(null); // null = picking, 'free' = free run, object = goal mode
+  // Run mode
+  const [runMode, setRunMode] = useState(null);
   const [goalUnit, setGoalUnit] = useState('mi');
   const [goalTarget, setGoalTarget] = useState('3');
   const [goalReached, setGoalReached] = useState(false);
 
-  // GPS run state
+  // GPS state
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -8493,13 +8602,11 @@ const RunClubScreen = ({ profile }) => {
     if (!api) return;
     setAccessLoading(true);
     api.runAccessStatus().then(data => {
-      setAccessStatus(data.status);
-      setIsAdmin(!!data.isAdmin);
-      setAccessLoading(false);
+      setAccessStatus(data.status); setIsAdmin(!!data.isAdmin); setAccessLoading(false);
     }).catch(() => { setAccessStatus('none'); setAccessLoading(false); });
   }, []);
 
-  // Load data once approved
+  // Load data
   useEffect(() => {
     if (!api || accessStatus !== 'approved') return;
     setLoading(true);
@@ -8524,9 +8631,16 @@ const RunClubScreen = ({ profile }) => {
     api.runLeaderboard(lbScope, 20).then(lb => { if (lb && lb.rows) setLbRows(lb.rows); }).catch(() => {});
   }, [lbScope]);
 
+  // Admin: load ALL requests (pending + reviewed)
   useEffect(() => {
     if (!api || !isAdmin || view !== 'admin') return;
-    api.pendingAccess().then(data => { if (data && data.requests) setPendingRequests(data.requests); }).catch(() => {});
+    Promise.all([
+      api.pendingAccess().catch(() => ({ requests: [] })),
+      api.allAccess().catch(() => ({ requests: [] }))
+    ]).then(([pending, all]) => {
+      if (pending && pending.requests) setPendingRequests(pending.requests);
+      if (all && all.requests) setAllRequests(all.requests);
+    });
   }, [view, isAdmin]);
 
   const handleRequestAccess = async () => {
@@ -8539,10 +8653,15 @@ const RunClubScreen = ({ profile }) => {
 
   const handleReview = async (id, decision) => {
     if (!api) return;
-    try { await api.reviewAccess(id, decision); setPendingRequests(prev => prev.filter(r => r.id !== id)); } catch (e) {}
+    try {
+      await api.reviewAccess(id, decision, reviewNote);
+      setPendingRequests(prev => prev.filter(r => r.id !== id));
+      setAllRequests(prev => prev.map(r => r.id === id ? { ...r, status: decision } : r));
+      setReviewNote('');
+    } catch (e) {}
   };
 
-  // Timer tick
+  // Timer
   useEffect(() => {
     if (isRunning && !isPaused) {
       timerRef.current = setInterval(() => {
@@ -8552,15 +8671,11 @@ const RunClubScreen = ({ profile }) => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isRunning, isPaused]);
 
-  // Goal reached detection
+  // Goal reached
   useEffect(() => {
     if (!runMode || runMode === 'free' || goalReached) return;
     const targetM = runMode.unit === 'mi' ? runMode.target * 1609.344 : runMode.target * 1000;
-    if (distance >= targetM) {
-      setGoalReached(true);
-      // Vibrate on goal reached
-      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]);
-    }
+    if (distance >= targetM) { setGoalReached(true); if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]); }
   }, [distance, runMode, goalReached]);
 
   const startGpsWatch = () => {
@@ -8579,17 +8694,14 @@ const RunClubScreen = ({ profile }) => {
               const lastKm = Math.floor(prev / 1000);
               if (currentKm > lastKm && currentKm > 0) {
                 const splitTime = Math.floor((Date.now() - startTimeRef.current) / 1000) + pausedAtRef.current;
-                const splitDuration = splitTime - lastSplitTimeRef.current;
-                setSplits(s => [...s, { km: currentKm, timeSec: splitDuration }]);
+                setSplits(s => [...s, { km: currentKm, timeSec: splitTime - lastSplitTimeRef.current }]);
                 lastSplitTimeRef.current = splitTime;
               }
               return newDist;
             });
             lastPosRef.current = { lat: latitude, lng: longitude };
           }
-        } else {
-          lastPosRef.current = { lat: latitude, lng: longitude };
-        }
+        } else { lastPosRef.current = { lat: latitude, lng: longitude }; }
       },
       (err) => { setGpsError(err.code === 1 ? 'Location permission denied' : err.code === 2 ? 'GPS unavailable' : 'GPS timeout'); },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 }
@@ -8598,46 +8710,33 @@ const RunClubScreen = ({ profile }) => {
 
   const startRun = (mode) => {
     if (!navigator.geolocation) { setGpsError('GPS not available'); return; }
-    setRunMode(mode);
-    setGoalReached(false);
-    setGpsError(null); setDistance(0); setElapsed(0); setGpsRoute([]); setSplits([]);
+    setRunMode(mode); setGoalReached(false); setGpsError(null); setDistance(0); setElapsed(0); setGpsRoute([]); setSplits([]);
     lastPosRef.current = null; pausedAtRef.current = 0; lastSplitTimeRef.current = 0;
     startTimeRef.current = Date.now();
     setIsRunning(true); setIsPaused(false); setView('active');
     startGpsWatch();
   };
 
-  const pauseRun = () => {
-    setIsPaused(true); pausedAtRef.current = elapsed;
-    if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
-  };
-
-  const resumeRun = () => {
-    setIsPaused(false); startTimeRef.current = Date.now(); startGpsWatch();
-  };
+  const pauseRun = () => { setIsPaused(true); pausedAtRef.current = elapsed; if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; } };
+  const resumeRun = () => { setIsPaused(false); startTimeRef.current = Date.now(); startGpsWatch(); };
 
   const finishRun = async () => {
     if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
     if (timerRef.current) clearInterval(timerRef.current);
-    const dist = Math.round(distance);
-    const dur = elapsed;
+    const dist = Math.round(distance); const dur = elapsed;
     const pace = dist > 0 ? Math.round((dur / (dist / 1000))) : 0;
     const cal = estimateCalories(dist);
-
     if (api && dist > 10) {
       try {
         const result = await api.saveRun({
-          startedAt: new Date(startTimeRef.current).toISOString(),
-          endedAt: new Date().toISOString(),
+          startedAt: new Date(startTimeRef.current).toISOString(), endedAt: new Date().toISOString(),
           distanceM: dist, durationSec: dur, avgPaceSec: pace, calories: cal,
           route: gpsRoute.length > 0 ? gpsRoute : null, status: 'completed'
         });
         if (result && result.coachTips) setCoachTips(result.coachTips);
         setShowPostRun(true);
         const [newStats, newRuns, achv] = await Promise.all([
-          api.getRunStats().catch(() => null),
-          api.getRuns(10).catch(() => ({ runs: [] })),
-          api.runAchievements().catch(() => null)
+          api.getRunStats().catch(() => null), api.getRuns(10).catch(() => ({ runs: [] })), api.runAchievements().catch(() => null)
         ]);
         if (newStats) setRunStats(newStats);
         if (newRuns && newRuns.runs) setRuns(newRuns.runs);
@@ -8655,531 +8754,546 @@ const RunClubScreen = ({ profile }) => {
   };
 
   const currentPace = distance > 100 && elapsed > 0 ? Math.round(elapsed / (distance / 1000)) : 0;
+  const goalProgress = runMode && runMode !== 'free' ? Math.min(1, distance / (runMode.unit === 'mi' ? runMode.target * 1609.344 : runMode.target * 1000)) : 0;
 
-  // Goal progress (0-1)
-  const goalProgress = runMode && runMode !== 'free' ? (() => {
-    const targetM = runMode.unit === 'mi' ? runMode.target * 1609.344 : runMode.target * 1000;
-    return Math.min(1, distance / targetM);
-  })() : 0;
-
-  // ---- ACCESS LOADING ----
+  /* ========== ACCESS LOADING ========== */
   if (accessLoading) {
-    return /*#__PURE__*/React.createElement("div", { className: "px-4 pt-12 pb-nav flex justify-center" },
+    return /*#__PURE__*/React.createElement("div", { className: "rc-wrap" },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
-      /*#__PURE__*/React.createElement("div", { className: "w-6 h-6 rounded-full border-2 animate-spin",
-        style: { borderColor: 'var(--c-border)', borderTopColor: 'var(--c-accent)' } }));
+      /*#__PURE__*/React.createElement("div", { className: "rc-inner", style: { display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+        /*#__PURE__*/React.createElement("div", { style: { width: 24, height: 24, borderRadius: '50%', border: '2px solid var(--c-border)', borderTopColor: 'var(--c-accent)', animation: 'rcPulse 1s linear infinite' } })));
   }
 
-  // ---- ACCESS GATE ----
+  /* ========== ACCESS GATE — Apply to Join ========== */
   if (accessStatus !== 'approved') {
-    return /*#__PURE__*/React.createElement("div", { className: "px-6 pt-10 pb-nav max-w-[420px] mx-auto" },
+    return /*#__PURE__*/React.createElement("div", { className: "rc-wrap" },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
-      /*#__PURE__*/React.createElement("div", { className: "text-center mb-8 rc-slide-up" },
-        /*#__PURE__*/React.createElement("div", {
-          className: "w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center",
-          style: { background: 'linear-gradient(135deg, rgba(168,230,207,0.3), rgba(197,179,230,0.3))', border: '2px solid var(--c-border)' }
-        }, /*#__PURE__*/React.createElement(RunShoeIcon, { size: 36 })),
-        /*#__PURE__*/React.createElement("h1", { className: "font-display text-2xl mb-2", style: { color: 'var(--c-text)' } }, "Doodles Run Club"),
-        /*#__PURE__*/React.createElement("p", { className: "text-sm leading-relaxed", style: { color: 'var(--c-text-sub)' } },
-          "An exclusive running community for Doodles holders. Track your runs with GPS, compete on the leaderboard, and earn achievements.")
-      ),
-      accessStatus === 'none' && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-5 rc-pop-in" },
-        /*#__PURE__*/React.createElement("h2", { className: "font-semibold text-base mb-3", style: { color: 'var(--c-text)' } }, "Request Access"),
-        /*#__PURE__*/React.createElement("label", { className: "block text-xs font-semibold mb-1", style: { color: 'var(--c-text-sub)' } }, "Your OpenSea / Twitter / Discord"),
-        /*#__PURE__*/React.createElement("input", {
-          type: "text", value: requestSocial, onChange: e => setRequestSocial(e.target.value),
-          placeholder: "e.g. @yourhandle or opensea.io/...",
-          className: "w-full rounded-xl px-3 py-2.5 text-sm mb-3 border",
-          style: { background: 'var(--c-input-bg)', borderColor: 'var(--c-border)', color: 'var(--c-text)' }
-        }),
-        /*#__PURE__*/React.createElement("label", { className: "block text-xs font-semibold mb-1", style: { color: 'var(--c-text-sub)' } }, "Message (optional)"),
-        /*#__PURE__*/React.createElement("input", {
-          type: "text", value: requestMsg, onChange: e => setRequestMsg(e.target.value),
-          placeholder: "I hold Doodle #1234...",
-          className: "w-full rounded-xl px-3 py-2.5 text-sm mb-4 border",
-          style: { background: 'var(--c-input-bg)', borderColor: 'var(--c-border)', color: 'var(--c-text)' }
-        }),
-        /*#__PURE__*/React.createElement("button", {
-          onClick: handleRequestAccess,
-          className: "w-full py-3 rounded-xl font-semibold text-sm active:scale-95 transition-transform",
-          style: { background: 'var(--c-accent)', color: '#FFF' }
-        }, "Request Access")
-      ),
-      accessStatus === 'pending' && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center rc-pop-in" },
-        /*#__PURE__*/React.createElement("div", { className: "w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center", style: { background: 'rgba(255,224,130,0.2)' } },
-          /*#__PURE__*/React.createElement("div", { className: "w-5 h-5 rounded-full border-2 animate-spin", style: { borderColor: '#FFE082', borderTopColor: 'transparent' } })),
-        /*#__PURE__*/React.createElement("h2", { className: "font-semibold text-base mb-1", style: { color: 'var(--c-text)' } }, "Request Pending"),
-        /*#__PURE__*/React.createElement("p", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "Your request is being reviewed.")
-      ),
-      accessStatus === 'denied' && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center rc-pop-in" },
-        /*#__PURE__*/React.createElement("h2", { className: "font-semibold text-base mb-1", style: { color: 'var(--c-wrong)' } }, "Access Denied"),
-        /*#__PURE__*/React.createElement("p", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "Contact an admin if you think this is an error.")
-      ),
-      isAdmin && /*#__PURE__*/React.createElement("button", {
-        onClick: () => setView('admin'),
-        className: "mt-4 w-full py-3 rounded-xl font-semibold text-sm",
-        style: { background: 'rgba(168,230,207,0.15)', color: 'var(--c-correct)', border: '1px solid rgba(168,230,207,0.3)' }
-      }, "Admin: Review Requests")
+      /*#__PURE__*/React.createElement("div", { className: "rc-inner", style: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' } },
+
+        // Logo + Title
+        /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 32 } },
+          /*#__PURE__*/React.createElement("div", {
+            style: { width: 80, height: 80, borderRadius: '50%', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                     background: 'linear-gradient(135deg, rgba(168,230,207,0.25), rgba(123,123,255,0.25))', border: '2px solid var(--c-border)' }
+          }, /*#__PURE__*/React.createElement(RunShoeIcon, { size: 36 })),
+          /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 28, color: 'var(--c-text)', marginBottom: 8 } }, "Doodles Run Club"),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, lineHeight: 1.6, color: 'var(--c-text-sub)', maxWidth: 320, margin: '0 auto' } },
+            "An exclusive running community for Doodles holders. Track your runs, compete on leaderboards, and earn achievements.")
+        ),
+
+        // STATUS: none — show application form
+        accessStatus === 'none' && /*#__PURE__*/React.createElement("div", { className: "rc-card rc-pop-in", style: { width: '100%', maxWidth: 360 } },
+          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 16, fontWeight: 600, color: 'var(--c-text)', marginBottom: 16 } }, "Apply to Join"),
+          /*#__PURE__*/React.createElement("label", { style: { display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--c-text-sub)', marginBottom: 6 } }, "Your OpenSea / Twitter / Discord"),
+          /*#__PURE__*/React.createElement("input", {
+            type: "text", value: requestSocial, onChange: e => setRequestSocial(e.target.value),
+            placeholder: "e.g. @yourhandle or opensea.io/...",
+            style: { width: '100%', padding: '10px 14px', borderRadius: 12, fontSize: 14, border: '1px solid var(--c-border)',
+                     background: 'var(--c-input-bg)', color: 'var(--c-text)', marginBottom: 12, boxSizing: 'border-box', outline: 'none' }
+          }),
+          /*#__PURE__*/React.createElement("label", { style: { display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--c-text-sub)', marginBottom: 6 } }, "Message (optional)"),
+          /*#__PURE__*/React.createElement("input", {
+            type: "text", value: requestMsg, onChange: e => setRequestMsg(e.target.value),
+            placeholder: "I hold Doodle #1234...",
+            style: { width: '100%', padding: '10px 14px', borderRadius: 12, fontSize: 14, border: '1px solid var(--c-border)',
+                     background: 'var(--c-input-bg)', color: 'var(--c-text)', marginBottom: 16, boxSizing: 'border-box', outline: 'none' }
+          }),
+          /*#__PURE__*/React.createElement("button", {
+            onClick: handleRequestAccess, disabled: !requestSocial.trim(),
+            style: { width: '100%', padding: '12px', borderRadius: 14, fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer',
+                     background: requestSocial.trim() ? 'var(--c-accent)' : 'var(--c-border)', color: '#FFF', transition: 'all 0.2s' }
+          }, "Submit Request")
+        ),
+
+        // STATUS: pending — waiting screen
+        accessStatus === 'pending' && /*#__PURE__*/React.createElement("div", { className: "rc-card rc-pop-in", style: { width: '100%', maxWidth: 360, textAlign: 'center' } },
+          /*#__PURE__*/React.createElement("div", { style: { width: 56, height: 56, borderRadius: '50%', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                     background: 'rgba(255,224,130,0.15)' } },
+            /*#__PURE__*/React.createElement(ClockIcon, { size: 28 })),
+          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 18, fontWeight: 600, color: 'var(--c-text)', marginBottom: 8 } }, "Request Submitted"),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', lineHeight: 1.6, marginBottom: 4 } },
+            "Your request has been received and is being reviewed by an admin."),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 13, color: 'var(--c-text-sub)', marginTop: 8 } },
+            "You'll get access as soon as it's approved. Check back soon!")
+        ),
+
+        // STATUS: denied
+        accessStatus === 'denied' && /*#__PURE__*/React.createElement("div", { className: "rc-card rc-pop-in", style: { width: '100%', maxWidth: 360, textAlign: 'center' } },
+          /*#__PURE__*/React.createElement("div", { style: { width: 56, height: 56, borderRadius: '50%', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                     background: 'rgba(255,138,138,0.12)' } },
+            /*#__PURE__*/React.createElement(LockIcon, { size: 28 })),
+          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 18, fontWeight: 600, color: 'var(--c-wrong)', marginBottom: 8 } }, "Access Denied"),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', lineHeight: 1.6 } },
+            "Your request was not approved. Contact an admin if you believe this is an error.")
+        ),
+
+        // Admin shortcut (even on access gate screen)
+        isAdmin && /*#__PURE__*/React.createElement("button", {
+          onClick: () => { setAccessStatus('approved'); setView('admin'); },
+          style: { marginTop: 20, padding: '10px 24px', borderRadius: 12, fontSize: 14, fontWeight: 600, border: '1px solid rgba(168,230,207,0.3)',
+                   background: 'rgba(168,230,207,0.1)', color: 'var(--c-correct)', cursor: 'pointer' }
+        }, "Admin Panel")
+      )
     );
   }
 
-  // ---- POST-RUN SUMMARY ----
+  /* ========== POST-RUN SUMMARY ========== */
   if (showPostRun) {
-    const dist = Math.round(distance);
-    const dur = elapsed;
+    const dist = Math.round(distance); const dur = elapsed;
     const pace = dist > 0 ? Math.round((dur / (dist / 1000))) : 0;
     const hitGoal = runMode && runMode !== 'free' && goalReached;
-    return /*#__PURE__*/React.createElement("div", {
-      className: "fixed inset-0 z-50 flex flex-col overflow-y-auto",
-      style: { background: 'var(--c-bg)', paddingTop: 'max(20px, env(safe-area-inset-top))', paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }
-    },
+    return /*#__PURE__*/React.createElement("div", { className: "rc-wrap" },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
-      /*#__PURE__*/React.createElement("div", { className: "px-6 pt-4 pb-8 max-w-[420px] mx-auto w-full" },
-        /*#__PURE__*/React.createElement("div", { className: "text-center mb-6 rc-slide-up" },
+      /*#__PURE__*/React.createElement("div", { className: "rc-inner" },
+        /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 24 } },
           hitGoal && /*#__PURE__*/React.createElement("div", {
-            className: "text-sm font-bold mb-2 px-3 py-1.5 rounded-full inline-block",
-            style: { background: 'rgba(168,230,207,0.2)', color: '#7DD8A0' }
+            style: { display: 'inline-block', fontSize: 13, fontWeight: 700, padding: '6px 16px', borderRadius: 20,
+                     background: 'rgba(168,230,207,0.15)', color: '#7DD8A0', marginBottom: 8 }
           }, "Goal Reached!"),
-          /*#__PURE__*/React.createElement("h1", { className: "font-display text-4xl", style: { color: 'var(--c-accent)' } },
-            formatDistanceMiles(dist), " mi")
+          /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 42, color: 'var(--c-accent)' } },
+            formatDistanceMiles(dist) + ' mi')
         ),
-        /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-3 gap-3 mb-6 rc-stagger" },
-          [['Time', formatDuration(dur)], ['Pace/km', formatPace(pace)], ['Cal', estimateCalories(dist)]].map(([l, v], i) =>
-            /*#__PURE__*/React.createElement(FrostedCard, { key: i, className: "p-3 text-center rc-pop-in" },
-              /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, v),
-              /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-wider mt-1", style: { color: 'var(--c-text-sub)' } }, l)
-            ))
+        /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 20 } },
+          [['Time', formatDuration(dur)], ['Pace/km', formatPace(pace)], ['Cal', estimateCalories(dist)]].map(function(pair, i) {
+            return /*#__PURE__*/React.createElement("div", { key: i, className: "rc-card rc-pop-in", style: { textAlign: 'center', padding: 12 } },
+              /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: 'var(--c-text)' } }, pair[1]),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 4, color: 'var(--c-text-sub)' } }, pair[0]));
+          })
         ),
-        splits.length > 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-4 mb-4 rc-slide-up" },
-          /*#__PURE__*/React.createElement("h3", { className: "font-semibold text-sm mb-3", style: { color: 'var(--c-text)' } }, "Km Splits"),
-          splits.map((s, i) => /*#__PURE__*/React.createElement("div", {
-            key: i, className: "flex justify-between py-1.5 border-b last:border-b-0", style: { borderColor: 'var(--c-border)' }
-          }, /*#__PURE__*/React.createElement("span", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "Km ", s.km),
-            /*#__PURE__*/React.createElement("span", { className: "text-sm font-semibold", style: { color: 'var(--c-text)' } }, formatPace(s.timeSec))))
+        splits.length > 0 && /*#__PURE__*/React.createElement("div", { className: "rc-card rc-slide-up", style: { marginBottom: 16 } },
+          /*#__PURE__*/React.createElement("h3", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)', marginBottom: 12 } }, "Km Splits"),
+          splits.map(function(s, i) {
+            return /*#__PURE__*/React.createElement("div", { key: i, style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < splits.length - 1 ? '1px solid var(--c-border)' : 'none' } },
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, color: 'var(--c-text-sub)' } }, "Km " + s.km),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text)' } }, formatPace(s.timeSec)));
+          })
         ),
-        coachTips.length > 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-4 mb-4 rc-slide-up" },
-          /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-3" },
+        coachTips.length > 0 && /*#__PURE__*/React.createElement("div", { className: "rc-card rc-slide-up", style: { marginBottom: 16 } },
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 } },
             /*#__PURE__*/React.createElement(BrainIcon, { size: 18 }),
-            /*#__PURE__*/React.createElement("h3", { className: "font-semibold text-sm", style: { color: 'var(--c-text)' } }, "AI Coach")),
-          coachTips.map((tip, i) => /*#__PURE__*/React.createElement("div", {
-            key: i, className: "py-2 border-b last:border-b-0", style: { borderColor: 'var(--c-border)' }
-          }, /*#__PURE__*/React.createElement("p", { className: "text-sm leading-relaxed", style: { color: 'var(--c-text-sub)' } }, tip.text)))
+            /*#__PURE__*/React.createElement("h3", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)' } }, "AI Coach")),
+          coachTips.map(function(tip, i) {
+            return /*#__PURE__*/React.createElement("p", { key: i, style: { fontSize: 13, lineHeight: 1.6, color: 'var(--c-text-sub)', padding: '6px 0',
+                     borderBottom: i < coachTips.length - 1 ? '1px solid var(--c-border)' : 'none' } }, tip.text);
+          })
         ),
         /*#__PURE__*/React.createElement("button", {
           onClick: () => { setShowPostRun(false); setDistance(0); setElapsed(0); setSplits([]); setCoachTips([]); setRunMode(null); setGoalReached(false); setView('dashboard'); },
-          className: "w-full py-3.5 rounded-2xl font-semibold text-base active:scale-95 transition-transform",
-          style: { background: 'var(--c-accent)', color: '#FFF' }
+          style: { width: '100%', padding: 14, borderRadius: 16, fontSize: 16, fontWeight: 600, border: 'none', cursor: 'pointer',
+                   background: 'var(--c-accent)', color: '#FFF' }
         }, "Done")
       )
     );
   }
 
-  // ---- RUN MODE PICKER ----
+  /* ========== RUN MODE PICKER ========== */
   if (view === 'start') {
-    return /*#__PURE__*/React.createElement("div", {
-      className: "fixed inset-0 z-50 flex flex-col",
-      style: { background: 'linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 100%)', paddingTop: 'max(16px, env(safe-area-inset-top))', paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }
-    },
+    return /*#__PURE__*/React.createElement("div", { className: "rc-wrap",
+      style: { background: 'linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 100%)' } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
-      // Back
-      /*#__PURE__*/React.createElement("div", { className: "px-5 pt-3" },
-        /*#__PURE__*/React.createElement("button", {
-          onClick: () => setView('dashboard'),
-          className: "text-sm font-semibold", style: { color: '#9B95B0' }
-        }, "← Cancel")
-      ),
-      /*#__PURE__*/React.createElement("div", { className: "flex-1 flex flex-col items-center justify-center px-6" },
-        /*#__PURE__*/React.createElement("h1", {
-          className: "font-display text-2xl mb-8 rc-slide-up", style: { color: '#E8E0F0' }
-        }, "Choose your run"),
+      /*#__PURE__*/React.createElement("div", { className: "rc-inner", style: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' } },
+        /*#__PURE__*/React.createElement("button", { onClick: () => setView('dashboard'),
+          style: { position: 'absolute', top: 20, left: 20, fontSize: 14, fontWeight: 600, color: '#9B95B0', background: 'none', border: 'none', cursor: 'pointer' }
+        }, "← Cancel"),
 
-        // Free Run card
+        /*#__PURE__*/React.createElement("h1", { className: "font-display rc-slide-up", style: { fontSize: 24, color: '#E8E0F0', marginBottom: 32 } }, "Choose Your Run"),
+
+        // Free Run
         /*#__PURE__*/React.createElement("button", {
           onClick: () => startRun('free'),
-          className: "w-full max-w-[320px] p-5 rounded-2xl mb-4 text-left active:scale-95 transition-all rc-pop-in",
-          style: { background: 'rgba(123,123,255,0.1)', border: '1px solid rgba(123,123,255,0.2)' }
+          className: "rc-pop-in",
+          style: { width: '100%', maxWidth: 320, padding: 20, borderRadius: 16, textAlign: 'left', cursor: 'pointer', marginBottom: 16,
+                   background: 'rgba(123,123,255,0.08)', border: '1px solid rgba(123,123,255,0.2)', transition: 'all 0.2s' }
         },
-          /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-3 mb-2" },
-            /*#__PURE__*/React.createElement("div", {
-              className: "w-10 h-10 rounded-xl flex items-center justify-center",
-              style: { background: 'rgba(123,123,255,0.15)' }
-            }, /*#__PURE__*/React.createElement(InfinityIcon, { size: 22 })),
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+            /*#__PURE__*/React.createElement("div", { style: { width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                     background: 'rgba(123,123,255,0.12)' } }, /*#__PURE__*/React.createElement(InfinityIcon, { size: 22 })),
             /*#__PURE__*/React.createElement("div", null,
-              /*#__PURE__*/React.createElement("div", { className: "font-semibold text-base", style: { color: '#E8E0F0' } }, "Free Run"),
-              /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: '#9B95B0' } }, "Run as far as you want"))
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 16, fontWeight: 600, color: '#E8E0F0' } }, "Free Run"),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: '#9B95B0', marginTop: 2 } }, "Run as far as you want"))
           )
         ),
 
-        // Goal Run card
-        /*#__PURE__*/React.createElement("div", {
-          className: "w-full max-w-[320px] p-5 rounded-2xl rc-pop-in",
-          style: { background: 'rgba(168,230,207,0.08)', border: '1px solid rgba(168,230,207,0.2)', animationDelay: '0.1s' }
-        },
-          /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-3 mb-4" },
-            /*#__PURE__*/React.createElement("div", {
-              className: "w-10 h-10 rounded-xl flex items-center justify-center",
-              style: { background: 'rgba(168,230,207,0.15)' }
-            }, /*#__PURE__*/React.createElement(TargetIcon, { size: 22 })),
+        // Goal Run
+        /*#__PURE__*/React.createElement("div", { className: "rc-pop-in",
+          style: { width: '100%', maxWidth: 320, padding: 20, borderRadius: 16, animationDelay: '0.1s',
+                   background: 'rgba(168,230,207,0.06)', border: '1px solid rgba(168,230,207,0.2)' } },
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 } },
+            /*#__PURE__*/React.createElement("div", { style: { width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                     background: 'rgba(168,230,207,0.12)' } }, /*#__PURE__*/React.createElement(TargetIcon, { size: 22 })),
             /*#__PURE__*/React.createElement("div", null,
-              /*#__PURE__*/React.createElement("div", { className: "font-semibold text-base", style: { color: '#E8E0F0' } }, "Goal Run"),
-              /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: '#9B95B0' } }, "Set a distance target"))
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 16, fontWeight: 600, color: '#E8E0F0' } }, "Goal Run"),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: '#9B95B0', marginTop: 2 } }, "Set a distance target"))
           ),
-
           // Unit toggle
-          /*#__PURE__*/React.createElement("div", { className: "flex gap-2 mb-3" },
-            ['mi', 'km'].map(u => /*#__PURE__*/React.createElement("button", {
-              key: u, onClick: () => setGoalUnit(u),
-              className: "flex-1 py-2 rounded-xl text-sm font-semibold transition-all",
-              style: { background: goalUnit === u ? 'rgba(123,123,255,0.2)' : 'transparent',
-                       color: goalUnit === u ? '#7B7BFF' : '#9B95B0', border: `1px solid ${goalUnit === u ? 'rgba(123,123,255,0.3)' : 'rgba(155,149,176,0.2)'}` }
-            }, u.toUpperCase()))
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 8, marginBottom: 12 } },
+            ['mi', 'km'].map(function(u) {
+              return /*#__PURE__*/React.createElement("button", { key: u, onClick: () => setGoalUnit(u),
+                style: { flex: 1, padding: '8px 0', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                         background: goalUnit === u ? 'rgba(123,123,255,0.15)' : 'transparent',
+                         color: goalUnit === u ? '#7B7BFF' : '#9B95B0', border: '1px solid ' + (goalUnit === u ? 'rgba(123,123,255,0.3)' : 'rgba(155,149,176,0.15)') }
+              }, u.toUpperCase());
+            })
           ),
-
-          // Distance presets
-          /*#__PURE__*/React.createElement("div", { className: "flex gap-2 mb-3 flex-wrap justify-center" },
-            (goalUnit === 'mi' ? ['1', '2', '3', '5', '10'] : ['1', '3', '5', '10', '21']).map(v =>
-              /*#__PURE__*/React.createElement("button", {
-                key: v, onClick: () => setGoalTarget(v),
-                className: "px-3 py-1.5 rounded-lg text-sm font-semibold transition-all",
-                style: { background: goalTarget === v ? 'rgba(168,230,207,0.2)' : 'transparent',
-                         color: goalTarget === v ? '#A8E6CF' : '#9B95B0', border: `1px solid ${goalTarget === v ? 'rgba(168,230,207,0.3)' : 'transparent'}` }
-              }, v))
+          // Presets
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap', justifyContent: 'center' } },
+            (goalUnit === 'mi' ? ['1','2','3','5','10'] : ['1','3','5','10','21']).map(function(v) {
+              return /*#__PURE__*/React.createElement("button", { key: v, onClick: () => setGoalTarget(v),
+                style: { padding: '6px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                         background: goalTarget === v ? 'rgba(168,230,207,0.15)' : 'transparent',
+                         color: goalTarget === v ? '#A8E6CF' : '#9B95B0', border: '1px solid ' + (goalTarget === v ? 'rgba(168,230,207,0.3)' : 'transparent') }
+              }, v);
+            })
           ),
-
           // Custom input
-          /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-4" },
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 } },
             /*#__PURE__*/React.createElement("input", {
-              type: "number", inputMode: "decimal", value: goalTarget,
-              onChange: e => setGoalTarget(e.target.value),
-              className: "flex-1 rounded-xl px-3 py-2 text-sm text-center font-semibold border",
-              style: { background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(155,149,176,0.2)', color: '#E8E0F0' }
+              type: "number", inputMode: "decimal", value: goalTarget, onChange: e => setGoalTarget(e.target.value),
+              style: { flex: 1, padding: '8px 12px', borderRadius: 10, fontSize: 14, fontWeight: 600, textAlign: 'center',
+                       background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(155,149,176,0.15)', color: '#E8E0F0', outline: 'none' }
             }),
-            /*#__PURE__*/React.createElement("span", { className: "text-sm font-semibold", style: { color: '#9B95B0' } }, goalUnit)
+            /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: '#9B95B0' } }, goalUnit)
           ),
-
-          // Start goal run button
           /*#__PURE__*/React.createElement("button", {
-            onClick: () => { const t = parseFloat(goalTarget); if (t > 0) startRun({ unit: goalUnit, target: t }); },
-            className: "w-full py-3 rounded-xl font-semibold text-sm active:scale-95 transition-transform",
-            style: { background: 'linear-gradient(135deg, #A8E6CF 0%, #7B7BFF 100%)', color: '#FFF' }
+            onClick: () => { var t = parseFloat(goalTarget); if (t > 0) startRun({ unit: goalUnit, target: t }); },
+            style: { width: '100%', padding: 12, borderRadius: 12, fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer',
+                     background: 'linear-gradient(135deg, #A8E6CF 0%, #7B7BFF 100%)', color: '#FFF' }
           }, "Start Goal Run")
         )
       )
     );
   }
 
-  // ---- ACTIVE RUN VIEW ----
+  /* ========== ACTIVE RUN ========== */
   if (view === 'active') {
-    const isGoalMode = runMode && runMode !== 'free';
-    const targetLabel = isGoalMode ? `${runMode.target} ${runMode.unit}` : null;
+    var isGoalMode = runMode && runMode !== 'free';
+    var targetLabel = isGoalMode ? runMode.target + ' ' + runMode.unit : null;
 
-    return /*#__PURE__*/React.createElement("div", {
-      className: "fixed inset-0 z-50 flex flex-col",
-      style: {
-        background: 'linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%)',
-        paddingTop: 'max(12px, env(safe-area-inset-top))', paddingBottom: 'max(20px, env(safe-area-inset-bottom))'
-      }
-    },
+    return /*#__PURE__*/React.createElement("div", { className: "rc-wrap",
+      style: { background: 'linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%)' } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       // Top bar
-      /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-between px-5 pt-2 pb-1" },
-        /*#__PURE__*/React.createElement("button", {
-          onClick: discardRun,
-          className: "text-xs font-bold rounded-full px-3 py-1.5",
-          style: { color: '#FF8A8A', background: 'rgba(255,138,138,0.12)' }
+      /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 8px',
+                   paddingTop: 'max(16px, env(safe-area-inset-top))' } },
+        /*#__PURE__*/React.createElement("button", { onClick: discardRun,
+          style: { fontSize: 12, fontWeight: 700, borderRadius: 20, padding: '6px 12px', background: 'rgba(255,138,138,0.1)', color: '#FF8A8A', border: 'none', cursor: 'pointer' }
         }, "Discard"),
-        /*#__PURE__*/React.createElement("div", {
-          className: "flex items-center gap-1.5 text-xs font-semibold",
-          style: { color: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#9B95B0' }
-        },
-          // Animated GPS dot
-          /*#__PURE__*/React.createElement("div", { className: "relative" },
-            /*#__PURE__*/React.createElement("div", {
-              className: "w-2 h-2 rounded-full",
-              style: { background: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#9B95B0', animation: 'rcPulse 2s ease-in-out infinite' }
-            }),
-            gpsAccuracy && gpsAccuracy < 20 && /*#__PURE__*/React.createElement("div", {
-              className: "absolute inset-0 w-2 h-2 rounded-full",
-              style: { background: '#7DD8A0', animation: 'rcDotPing 2s ease-out infinite' }
-            })
+        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
+                     color: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#9B95B0' } },
+          /*#__PURE__*/React.createElement("div", { style: { position: 'relative' } },
+            /*#__PURE__*/React.createElement("div", { style: { width: 8, height: 8, borderRadius: '50%',
+                       background: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#9B95B0', animation: 'rcPulse 2s ease-in-out infinite' } }),
+            gpsAccuracy && gpsAccuracy < 20 && /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', inset: 0, width: 8, height: 8, borderRadius: '50%',
+                       background: '#7DD8A0', animation: 'rcDotPing 2s ease-out infinite' } })
           ),
-          gpsAccuracy ? `${gpsAccuracy}m` : '...'
+          gpsAccuracy ? gpsAccuracy + 'm' : '...'
         ),
         /*#__PURE__*/React.createElement("div", {
-          className: "text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full",
-          style: { background: isPaused ? 'rgba(255,171,145,0.15)' : 'rgba(168,230,207,0.15)',
+          style: { fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', padding: '4px 10px', borderRadius: 20,
+                   background: isPaused ? 'rgba(255,171,145,0.12)' : 'rgba(168,230,207,0.12)',
                    color: isPaused ? '#FFAB91' : '#7DD8A0' }
         }, isPaused ? 'PAUSED' : isGoalMode ? targetLabel : 'FREE RUN')
       ),
 
-      // Main metrics
-      /*#__PURE__*/React.createElement("div", { className: "flex-1 flex flex-col items-center justify-center px-6" },
-        // Progress ring for goal mode, or just big numbers for free mode
-        isGoalMode ? /*#__PURE__*/React.createElement(React.Fragment, null,
-          /*#__PURE__*/React.createElement("div", { className: "mb-4" },
-            /*#__PURE__*/React.createElement(RCProgressRing, {
-              progress: goalProgress,
-              size: 220,
-              stroke: 10,
-              label: formatDistanceMiles(Math.round(distance)),
-              sublabel: "miles"
-            })
-          ),
-          goalReached && /*#__PURE__*/React.createElement("div", {
-            className: "text-sm font-bold mb-3 px-4 py-1.5 rounded-full rc-pop-in",
-            style: { background: 'rgba(168,230,207,0.15)', color: '#A8E6CF' }
-          }, "Goal reached! Keep going or finish"),
-          /*#__PURE__*/React.createElement("div", {
-            className: "font-display rc-count-up",
-            style: { fontSize: 'clamp(36px, 10vw, 48px)', lineHeight: 1, color: '#E8E0F0', letterSpacing: '-0.03em' }
-          }, formatDuration(elapsed)),
-          /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-[0.2em] mt-1", style: { color: '#9B95B0' } }, "Duration")
-        ) : /*#__PURE__*/React.createElement(React.Fragment, null,
-          // Free run: big duration + distance
-          /*#__PURE__*/React.createElement("div", { className: "text-[11px] font-bold uppercase tracking-[0.2em] mb-1", style: { color: '#9B95B0' } }, "Duration"),
-          /*#__PURE__*/React.createElement("div", {
-            className: "font-display",
-            style: { fontSize: 'clamp(52px, 14vw, 72px)', lineHeight: 1, color: '#E8E0F0', letterSpacing: '-0.03em' }
-          }, formatDuration(elapsed)),
-          /*#__PURE__*/React.createElement("div", { className: "mt-6 text-center" },
-            /*#__PURE__*/React.createElement("div", { className: "font-display",
-              style: { fontSize: 'clamp(36px, 10vw, 52px)', lineHeight: 1, color: '#7B7BFF' }
-            }, formatDistanceMiles(Math.round(distance))),
-            /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5", style: { color: '#9B95B0' } }, "Miles")
-          )
+      // Main metrics — centered
+      /*#__PURE__*/React.createElement("div", { style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px' } },
+        isGoalMode
+          ? /*#__PURE__*/React.createElement(React.Fragment, null,
+              /*#__PURE__*/React.createElement("div", { style: { marginBottom: 16 } },
+                /*#__PURE__*/React.createElement(RCProgressRing, { progress: goalProgress, size: 200, stroke: 10,
+                  label: formatDistanceMiles(Math.round(distance)), sublabel: "miles" })),
+              goalReached && /*#__PURE__*/React.createElement("div", { className: "rc-pop-in",
+                style: { fontSize: 13, fontWeight: 700, padding: '6px 16px', borderRadius: 20, marginBottom: 12,
+                         background: 'rgba(168,230,207,0.12)', color: '#A8E6CF' }
+              }, "Goal reached! Keep going or finish"),
+              /*#__PURE__*/React.createElement("div", { className: "font-display",
+                style: { fontSize: 'clamp(36px, 10vw, 48px)', lineHeight: 1, color: '#E8E0F0' }
+              }, formatDuration(elapsed)),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 4, color: '#9B95B0' } }, "Duration")
+            )
+          : /*#__PURE__*/React.createElement(React.Fragment, null,
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#9B95B0', marginBottom: 4 } }, "Duration"),
+              /*#__PURE__*/React.createElement("div", { className: "font-display",
+                style: { fontSize: 'clamp(52px, 14vw, 72px)', lineHeight: 1, color: '#E8E0F0' }
+              }, formatDuration(elapsed)),
+              /*#__PURE__*/React.createElement("div", { style: { marginTop: 24, textAlign: 'center' } },
+                /*#__PURE__*/React.createElement("div", { className: "font-display",
+                  style: { fontSize: 'clamp(36px, 10vw, 52px)', lineHeight: 1, color: '#7B7BFF' }
+                }, formatDistanceMiles(Math.round(distance))),
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 6, color: '#9B95B0' } }, "Miles"))
+            ),
+
+        // Pace + Cal
+        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 32, marginTop: 24 } },
+          /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: '#E8E0F0' } }, formatPace(currentPace)),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: '#9B95B0' } }, "Pace /km")),
+          /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: '#E8E0F0' } }, estimateCalories(Math.round(distance))),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: '#9B95B0' } }, "Cal")),
+          splits.length > 0 && /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: '#A8E6CF' } }, formatPace(splits[splits.length - 1].timeSec)),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: '#9B95B0' } }, "Last km"))
         ),
 
-        // Pace + Cal + Split
-        /*#__PURE__*/React.createElement("div", { className: "flex gap-8 mt-6" },
-          /*#__PURE__*/React.createElement("div", { className: "text-center" },
-            /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: '#E8E0F0' } }, formatPace(currentPace)),
-            /*#__PURE__*/React.createElement("div", { className: "text-[9px] font-bold uppercase tracking-[0.15em] mt-0.5", style: { color: '#9B95B0' } }, "Pace /km")),
-          /*#__PURE__*/React.createElement("div", { className: "text-center" },
-            /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: '#E8E0F0' } }, estimateCalories(Math.round(distance))),
-            /*#__PURE__*/React.createElement("div", { className: "text-[9px] font-bold uppercase tracking-[0.15em] mt-0.5", style: { color: '#9B95B0' } }, "Cal")),
-          splits.length > 0 && /*#__PURE__*/React.createElement("div", { className: "text-center" },
-            /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: '#A8E6CF' } }, formatPace(splits[splits.length - 1].timeSec)),
-            /*#__PURE__*/React.createElement("div", { className: "text-[9px] font-bold uppercase tracking-[0.15em] mt-0.5", style: { color: '#9B95B0' } }, "Last km"))
+        // Progress bar
+        /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 280, marginTop: 24 } },
+          /*#__PURE__*/React.createElement("div", { style: { width: '100%', height: 5, borderRadius: 3, overflow: 'hidden', background: 'rgba(123,123,255,0.08)' } },
+            /*#__PURE__*/React.createElement("div", { style: {
+              height: '100%', borderRadius: 3, transition: 'width 1s ease-out',
+              width: (isGoalMode ? goalProgress * 100 : Math.min(100, (distance / 10000) * 100)) + '%',
+              background: 'linear-gradient(90deg, #7B7BFF, #A8E6CF)', boxShadow: '0 0 8px rgba(123,123,255,0.4)'
+            } })),
+          isGoalMode && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 9, fontWeight: 600, color: '#9B95B0' } },
+            /*#__PURE__*/React.createElement("span", null, "0"), /*#__PURE__*/React.createElement("span", null, targetLabel))
         ),
 
-        // Linear progress bar (free mode: shows km markers; goal mode: shows % bar)
-        /*#__PURE__*/React.createElement("div", { className: "w-full max-w-[300px] mt-6" },
-          /*#__PURE__*/React.createElement("div", {
-            className: "w-full h-1.5 rounded-full overflow-hidden",
-            style: { background: 'rgba(123,123,255,0.1)' }
-          }, /*#__PURE__*/React.createElement("div", {
-            className: "h-full rounded-full",
-            style: {
-              width: isGoalMode ? `${goalProgress * 100}%` : `${Math.min(100, (distance / 10000) * 100)}%`,
-              background: 'linear-gradient(90deg, #7B7BFF, #A8E6CF)',
-              transition: 'width 1s ease-out',
-              boxShadow: '0 0 8px rgba(123,123,255,0.5)'
-            }
-          })),
-          isGoalMode && /*#__PURE__*/React.createElement("div", {
-            className: "flex justify-between mt-1 text-[9px] font-semibold",
-            style: { color: '#9B95B0' }
-          }, /*#__PURE__*/React.createElement("span", null, "0"), /*#__PURE__*/React.createElement("span", null, targetLabel))
-        ),
-
-        gpsError && /*#__PURE__*/React.createElement("div", {
-          className: "text-xs font-semibold mt-4 px-4 py-2 rounded-xl",
-          style: { color: '#FF8A8A', background: 'rgba(255,138,138,0.08)' }
-        }, gpsError)
+        gpsError && /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, fontWeight: 600, marginTop: 16, padding: '8px 16px', borderRadius: 12,
+                   color: '#FF8A8A', background: 'rgba(255,138,138,0.06)' } }, gpsError)
       ),
 
       // Controls
-      /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-center gap-6 pb-4 pt-2" },
-        isPaused ? /*#__PURE__*/React.createElement(React.Fragment, null,
-          /*#__PURE__*/React.createElement("button", {
-            onClick: finishRun,
-            className: "w-16 h-16 rounded-full flex items-center justify-center active:scale-90 transition-transform",
-            style: { background: 'rgba(255,138,138,0.12)', color: '#FF8A8A' }
-          }, /*#__PURE__*/React.createElement(StopSquareIcon, { size: 26 })),
-          /*#__PURE__*/React.createElement("button", {
-            onClick: resumeRun,
-            className: "w-20 h-20 rounded-full flex items-center justify-center active:scale-90 transition-transform",
-            style: { background: '#7B7BFF', color: '#FFF', animation: 'rcBreathe 3s ease-in-out infinite' }
-          }, /*#__PURE__*/React.createElement(PlayIcon, { size: 30 }))
-        ) : /*#__PURE__*/React.createElement("button", {
-          onClick: pauseRun,
-          className: "w-20 h-20 rounded-full flex items-center justify-center active:scale-90 transition-transform",
-          style: { background: '#7B7BFF', color: '#FFF', animation: 'rcBreathe 3s ease-in-out infinite' }
-        }, /*#__PURE__*/React.createElement(PauseIcon, { size: 30 }))
+      /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, padding: '8px 0 24px',
+                   paddingBottom: 'max(24px, env(safe-area-inset-bottom))' } },
+        isPaused
+          ? /*#__PURE__*/React.createElement(React.Fragment, null,
+              /*#__PURE__*/React.createElement("button", { onClick: finishRun,
+                style: { width: 64, height: 64, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         background: 'rgba(255,138,138,0.1)', color: '#FF8A8A', border: 'none', cursor: 'pointer' }
+              }, /*#__PURE__*/React.createElement(StopSquareIcon, { size: 26 })),
+              /*#__PURE__*/React.createElement("button", { onClick: resumeRun,
+                style: { width: 76, height: 76, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         background: '#7B7BFF', color: '#FFF', border: 'none', cursor: 'pointer', animation: 'rcBreathe 3s ease-in-out infinite' }
+              }, /*#__PURE__*/React.createElement(PlayIcon, { size: 30 })))
+          : /*#__PURE__*/React.createElement("button", { onClick: pauseRun,
+              style: { width: 76, height: 76, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                       background: '#7B7BFF', color: '#FFF', border: 'none', cursor: 'pointer', animation: 'rcBreathe 3s ease-in-out infinite' }
+            }, /*#__PURE__*/React.createElement(PauseIcon, { size: 30 }))
       )
     );
   }
 
-  // ---- ADMIN PANEL ----
+  /* ========== ADMIN PANEL ========== */
   if (view === 'admin' && isAdmin) {
-    return /*#__PURE__*/React.createElement("div", { className: "px-4 pt-6 pb-nav max-w-[420px] mx-auto" },
+    var pendingCount = pendingRequests.length;
+    var reviewedList = allRequests.filter(function(r) { return r.status !== 'pending'; });
+
+    return /*#__PURE__*/React.createElement("div", { className: "rc-wrap" },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
-      /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-5" },
-        /*#__PURE__*/React.createElement("button", { onClick: () => setView('dashboard'), className: "text-sm font-semibold", style: { color: 'var(--c-accent)' } }, "← Back"),
-        /*#__PURE__*/React.createElement("h1", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, "Access Requests")),
-      pendingRequests.length === 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center" },
-        /*#__PURE__*/React.createElement("p", { className: "text-sm", style: { color: 'var(--c-text-sub)' } }, "No pending requests")),
-      pendingRequests.map(r => /*#__PURE__*/React.createElement(FrostedCard, { key: r.id, className: "p-4 mb-3 rc-slide-in" },
-        /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-2" },
-          /*#__PURE__*/React.createElement("div", { className: "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
-            style: { background: r.user.avatarColor || '#C5B3E6', color: '#FFF' } }, (r.user.username || '?')[0].toUpperCase()),
-          /*#__PURE__*/React.createElement("div", null,
-            /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm", style: { color: 'var(--c-text)' } }, r.user.username),
-            r.socialProof && /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, r.socialProof))),
-        r.message && /*#__PURE__*/React.createElement("p", { className: "text-xs mb-3 px-2 py-1.5 rounded-lg",
-          style: { background: 'var(--c-input-bg)', color: 'var(--c-text-sub)' } }, '"', r.message, '"'),
-        /*#__PURE__*/React.createElement("div", { className: "flex gap-2" },
-          /*#__PURE__*/React.createElement("button", { onClick: () => handleReview(r.id, 'approved'),
-            className: "flex-1 py-2 rounded-xl font-semibold text-sm active:scale-95",
-            style: { background: 'rgba(168,230,207,0.2)', color: '#7DD8A0' } }, "Approve"),
-          /*#__PURE__*/React.createElement("button", { onClick: () => handleReview(r.id, 'denied'),
-            className: "flex-1 py-2 rounded-xl font-semibold text-sm active:scale-95",
-            style: { background: 'rgba(255,138,138,0.12)', color: '#FF8A8A' } }, "Deny"))
-      ))
+      /*#__PURE__*/React.createElement("div", { className: "rc-inner" },
+        // Header
+        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 } },
+          /*#__PURE__*/React.createElement("button", { onClick: () => setView('dashboard'),
+            style: { fontSize: 14, fontWeight: 600, color: 'var(--c-accent)', background: 'none', border: 'none', cursor: 'pointer' }
+          }, "← Back"),
+          /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, "Admin Inbox"),
+          pendingCount > 0 && /*#__PURE__*/React.createElement("span", {
+            style: { fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: 'rgba(255,138,138,0.15)', color: '#FF8A8A' }
+          }, pendingCount)
+        ),
+
+        // Pending requests section
+        pendingCount > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
+          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 } },
+            /*#__PURE__*/React.createElement(InboxIcon, { size: 16 }), "Pending Requests"),
+          pendingRequests.map(function(r) {
+            return /*#__PURE__*/React.createElement("div", { key: r.id, className: "rc-card rc-pop-in", style: { marginBottom: 12 } },
+              /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 } },
+                /*#__PURE__*/React.createElement("div", { style: { width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         fontSize: 14, fontWeight: 700, background: r.user.avatarColor || '#C5B3E6', color: '#FFF' } },
+                  (r.user.username || '?')[0].toUpperCase()),
+                /*#__PURE__*/React.createElement("div", null,
+                  /*#__PURE__*/React.createElement("div", { style: { fontSize: 15, fontWeight: 600, color: 'var(--c-text)' } }, r.user.username),
+                  r.socialProof && /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)' } }, r.socialProof))
+              ),
+              r.message && /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, color: 'var(--c-text-sub)', padding: '8px 12px', borderRadius: 10,
+                         background: 'var(--c-input-bg)', marginBottom: 12, fontStyle: 'italic' } }, '"' + r.message + '"'),
+              /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 8 } },
+                /*#__PURE__*/React.createElement("button", { onClick: function() { handleReview(r.id, 'approved'); },
+                  style: { flex: 1, padding: '10px', borderRadius: 12, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+                           background: 'rgba(168,230,207,0.15)', color: '#7DD8A0' }
+                }, "Approve"),
+                /*#__PURE__*/React.createElement("button", { onClick: function() { handleReview(r.id, 'denied'); },
+                  style: { flex: 1, padding: '10px', borderRadius: 12, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
+                           background: 'rgba(255,138,138,0.1)', color: '#FF8A8A' }
+                }, "Deny"))
+            );
+          })
+        ),
+
+        pendingCount === 0 && /*#__PURE__*/React.createElement("div", { className: "rc-card", style: { textAlign: 'center', padding: 24, marginBottom: 20 } },
+          /*#__PURE__*/React.createElement(CheckCircleIcon, { size: 28 }),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', marginTop: 8 } }, "No pending requests. All caught up!")),
+
+        // Previously reviewed
+        reviewedList.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
+          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)', marginBottom: 12, marginTop: 8 } }, "Previously Reviewed"),
+          reviewedList.slice(0, 20).map(function(r) {
+            return /*#__PURE__*/React.createElement("div", { key: r.id, className: "rc-card", style: { marginBottom: 8, padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+              /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8 } },
+                /*#__PURE__*/React.createElement("div", { style: { width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         fontSize: 11, fontWeight: 700, background: r.user ? (r.user.avatarColor || '#C5B3E6') : '#888', color: '#FFF' } },
+                  r.user ? (r.user.username || '?')[0].toUpperCase() : '?'),
+                /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 500, color: 'var(--c-text)' } }, r.user ? r.user.username : 'Unknown')),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 8,
+                       background: r.status === 'approved' ? 'rgba(168,230,207,0.15)' : 'rgba(255,138,138,0.1)',
+                       color: r.status === 'approved' ? '#7DD8A0' : '#FF8A8A' } }, r.status === 'approved' ? 'Approved' : 'Denied'));
+          })
+        )
+      )
     );
   }
 
-  // ---- REUSABLE SUB-COMPONENTS ----
-  const StatCard = ({ label, value, sub, icon, tint }) => /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3.5 rc-pop-in" },
-    /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-1.5" },
-      icon && /*#__PURE__*/React.createElement("div", { className: "w-7 h-7 rounded-lg flex items-center justify-center", style: { background: tint || 'rgba(168,230,207,0.2)' } }, icon),
-      /*#__PURE__*/React.createElement("span", { className: "text-[9px] font-bold uppercase tracking-[0.15em]", style: { color: 'var(--c-text-sub)' } }, label)),
-    /*#__PURE__*/React.createElement("div", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, value),
-    sub && /*#__PURE__*/React.createElement("div", { className: "text-[11px] mt-0.5", style: { color: 'var(--c-text-sub)' } }, sub));
+  /* ========== MAIN DASHBOARD ========== */
+  var s = runStats || {};
+  var unlockedCount = achievements.filter(function(a) { return a.unlocked; }).length;
 
-  const RunRow = ({ run, delay }) => /*#__PURE__*/React.createElement(FrostedCard, {
-    className: "p-3.5 mb-2 rc-slide-in", style: delay ? { animationDelay: `${delay}s` } : undefined
-  }, /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-between" },
-    /*#__PURE__*/React.createElement("div", null,
-      /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm", style: { color: 'var(--c-text)' } }, formatDistanceMiles(run.distanceM), " mi"),
-      /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, formatDateShort(run.startedAt), " \xB7 ", formatDuration(run.durationSec))),
-    /*#__PURE__*/React.createElement("div", { className: "text-right" },
-      /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm", style: { color: 'var(--c-accent)' } }, formatPace(run.avgPaceSec), " /km"),
-      /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, run.calories || estimateCalories(run.distanceM), " cal"))));
-
-  const s = runStats || {};
-  const unlockedCount = achievements.filter(a => a.unlocked).length;
-
-  return /*#__PURE__*/React.createElement("div", { className: "px-4 pt-6 pb-nav max-w-[420px] mx-auto scroll-momentum" },
+  return /*#__PURE__*/React.createElement("div", { className: "rc-wrap" },
     /*#__PURE__*/React.createElement(RunClubStyles, null),
+    /*#__PURE__*/React.createElement("div", { className: "rc-inner" },
 
-    // Header
-    /*#__PURE__*/React.createElement("div", { className: "text-center mb-4 rc-slide-up" },
-      /*#__PURE__*/React.createElement("h1", { className: "font-display text-xl", style: { color: 'var(--c-text)' } }, "Run Club"),
-      /*#__PURE__*/React.createElement("p", { className: "text-[11px] font-semibold tracking-wider uppercase", style: { color: 'var(--c-text-sub)' } }, "Doodles runners")),
+      // Header
+      /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 16, paddingTop: 8 } },
+        /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, "Run Club"),
+        /*#__PURE__*/React.createElement("p", { style: { fontSize: 11, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--c-text-sub)' } }, "Doodles Runners")),
 
-    // Community banner
-    community && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3 mb-4 text-center rc-pop-in" },
-      /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-center gap-4 text-xs" },
-        /*#__PURE__*/React.createElement("div", null,
-          /*#__PURE__*/React.createElement("span", { className: "font-display text-base", style: { color: 'var(--c-accent)' } }, formatDistanceMiles(community.totalDistanceM)),
-          /*#__PURE__*/React.createElement("span", { className: "ml-1", style: { color: 'var(--c-text-sub)' } }, "total mi")),
-        /*#__PURE__*/React.createElement("div", { style: { width: 1, height: 16, background: 'var(--c-border)' } }),
-        /*#__PURE__*/React.createElement("div", null,
-          /*#__PURE__*/React.createElement("span", { className: "font-display text-base", style: { color: 'var(--c-text)' } }, community.totalRunners),
-          /*#__PURE__*/React.createElement("span", { className: "ml-1", style: { color: 'var(--c-text-sub)' } }, "runners"))),
-      community.challenge && /*#__PURE__*/React.createElement("div", { className: "mt-2 pt-2", style: { borderTop: '1px solid var(--c-border)' } },
-        /*#__PURE__*/React.createElement("div", { className: "text-xs font-semibold mb-1", style: { color: 'var(--c-text)' } }, "Challenge: ", community.challenge.title),
-        /*#__PURE__*/React.createElement("div", { className: "w-full h-2 rounded-full overflow-hidden", style: { background: 'var(--c-stat-bg)' } },
-          /*#__PURE__*/React.createElement("div", { className: "h-full rounded-full",
-            style: { width: `${Math.min(100, (community.challenge.currentM / community.challenge.goalM) * 100)}%`,
-                     background: 'linear-gradient(90deg, var(--c-accent), #A8E6CF)', transition: 'width 1s ease-out' } })),
-        /*#__PURE__*/React.createElement("div", { className: "text-[10px] mt-1", style: { color: 'var(--c-text-sub)' } },
-          formatDistanceMiles(community.challenge.currentM), " / ", formatDistanceMiles(community.challenge.goalM), " mi"))
-    ),
+      // Sub-nav
+      /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 6, marginBottom: 16, justifyContent: 'center', flexWrap: 'wrap' } },
+        /*#__PURE__*/React.createElement(Pill, { active: view === 'dashboard', onClick: () => setView('dashboard') }, "Home"),
+        /*#__PURE__*/React.createElement(Pill, { active: view === 'history', onClick: () => setView('history') }, "History"),
+        /*#__PURE__*/React.createElement(Pill, { active: view === 'leaderboard', onClick: () => setView('leaderboard') }, "Board"),
+        /*#__PURE__*/React.createElement(Pill, { active: view === 'achievements', onClick: () => setView('achievements') }, "Badges"),
+        isAdmin && /*#__PURE__*/React.createElement(Pill, { active: view === 'admin', onClick: () => setView('admin'), color: '#7DD8A0' }, "Admin")),
 
-    // Sub-nav
-    /*#__PURE__*/React.createElement("div", { className: "flex gap-1.5 mb-4 justify-center flex-wrap" },
-      /*#__PURE__*/React.createElement(Pill, { active: view === 'dashboard', onClick: () => setView('dashboard') }, "Home"),
-      /*#__PURE__*/React.createElement(Pill, { active: view === 'history', onClick: () => setView('history') }, "History"),
-      /*#__PURE__*/React.createElement(Pill, { active: view === 'leaderboard', onClick: () => setView('leaderboard') }, "Board"),
-      /*#__PURE__*/React.createElement(Pill, { active: view === 'achievements', onClick: () => setView('achievements') }, "Badges"),
-      isAdmin && /*#__PURE__*/React.createElement(Pill, { active: view === 'admin', onClick: () => setView('admin'), color: '#7DD8A0' }, "Admin")),
+      // Start Run
+      view === 'dashboard' && /*#__PURE__*/React.createElement("button", {
+        onClick: () => setView('start'),
+        className: "rc-pop-in",
+        style: { width: '100%', padding: 16, borderRadius: 16, fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer', marginBottom: 20,
+                 background: 'linear-gradient(135deg, var(--c-accent) 0%, #7B7BFF 100%)', color: '#FFF',
+                 boxShadow: '0 6px 24px rgba(65,64,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                 fontFamily: "'Paytone One', 'Fredoka', sans-serif" }
+      }, /*#__PURE__*/React.createElement(GpsIcon, { size: 20, color: '#FFF' }), "Start Run"),
 
-    // Start Run Button
-    view === 'dashboard' && /*#__PURE__*/React.createElement("button", {
-      onClick: () => setView('start'),
-      className: "w-full py-4 rounded-2xl font-display font-semibold text-lg active:scale-95 transition-all mb-5 rc-pop-in",
-      style: { background: 'linear-gradient(135deg, var(--c-accent) 0%, #7B7BFF 100%)', color: '#FFF',
-               boxShadow: '0 6px 24px rgba(65,64,255,0.25)', border: 'none' }
-    }, /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-center gap-2.5" },
-      /*#__PURE__*/React.createElement(GpsIcon, { size: 20, color: '#FFF' }), "Start Run")),
+      // === DASHBOARD ===
+      view === 'dashboard' && !loading && /*#__PURE__*/React.createElement(React.Fragment, null,
+        /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 } },
+          /*#__PURE__*/React.createElement("div", { className: "rc-card rc-pop-in", style: { padding: 14 } },
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 } },
+              /*#__PURE__*/React.createElement(RouteIcon, { size: 14, color: '#A8E6CF' }),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--c-text-sub)' } }, "This Week")),
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, formatDistanceMiles(s.weekDistanceM || 0) + ' mi'),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 2 } }, (s.weekRuns || 0) + ' runs')),
 
-    // === DASHBOARD ===
-    view === 'dashboard' && !loading && /*#__PURE__*/React.createElement(React.Fragment, null,
-      /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-2 gap-2.5 mb-4 rc-stagger" },
-        /*#__PURE__*/React.createElement(StatCard, { label: "This Week", value: formatDistanceMiles(s.weekDistanceM || 0) + ' mi', sub: `${s.weekRuns || 0} runs`,
-          icon: /*#__PURE__*/React.createElement(RouteIcon, { size: 16, color: '#A8E6CF' }), tint: 'rgba(168,230,207,0.2)' }),
-        /*#__PURE__*/React.createElement(StatCard, { label: "Total", value: formatDistanceMiles(s.totalDistanceM || 0) + ' mi', sub: `${s.totalRuns || 0} runs`,
-          icon: /*#__PURE__*/React.createElement(RunShoeIcon, { size: 16 }), tint: 'rgba(197,179,230,0.2)' }),
-        /*#__PURE__*/React.createElement(StatCard, { label: "Streak", value: `${s.streakDays || 0}d`, sub: 'days running',
-          icon: /*#__PURE__*/React.createElement(FireIcon, { size: 16 }), tint: 'rgba(255,171,145,0.2)' }),
-        /*#__PURE__*/React.createElement(StatCard, { label: "Best Pace", value: formatPace(s.bestPaceSec || 0), sub: '/km',
-          icon: /*#__PURE__*/React.createElement(GpsIcon, { size: 16 }), tint: 'rgba(144,202,249,0.2)' })),
-      achievements.length > 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-3 mb-4 rc-slide-in", onClick: () => setView('achievements') },
-        /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-between" },
-          /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2" },
-            /*#__PURE__*/React.createElement(BadgeIcon, { size: 16, tint: '#FFE082' }),
-            /*#__PURE__*/React.createElement("span", { className: "text-sm font-semibold", style: { color: 'var(--c-text)' } }, unlockedCount, "/", achievements.length, " Badges")),
-          /*#__PURE__*/React.createElement("span", { className: "text-xs", style: { color: 'var(--c-accent)' } }, "View all →"))),
-      runs.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
-        /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm mb-2", style: { color: 'var(--c-text)' } }, "Recent Runs"),
-        runs.slice(0, 4).map((r, i) => /*#__PURE__*/React.createElement(RunRow, { key: r.id, run: r, delay: i * 0.06 }))),
-      runs.length === 0 && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center mt-2 rc-pop-in" },
-        /*#__PURE__*/React.createElement("div", { className: "font-display text-base mb-1", style: { color: 'var(--c-text)' } }, "No runs yet"),
-        /*#__PURE__*/React.createElement("p", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, "Tap Start Run to begin!"))
-    ),
+          /*#__PURE__*/React.createElement("div", { className: "rc-card rc-pop-in", style: { padding: 14 } },
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 } },
+              /*#__PURE__*/React.createElement(RunShoeIcon, { size: 14 }),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--c-text-sub)' } }, "Total")),
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, formatDistanceMiles(s.totalDistanceM || 0) + ' mi'),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 2 } }, (s.totalRuns || 0) + ' runs')),
 
-    // === HISTORY ===
-    view === 'history' && /*#__PURE__*/React.createElement(React.Fragment, null,
-      runs.map((r, i) => /*#__PURE__*/React.createElement(RunRow, { key: r.id, run: r, delay: i * 0.04 })),
-      runs.length === 0 && !loading && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center" },
-        /*#__PURE__*/React.createElement(EmptyState, { title: "No runs yet", subtitle: "Complete a run to see it here!" }))),
+          /*#__PURE__*/React.createElement("div", { className: "rc-card rc-pop-in", style: { padding: 14 } },
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 } },
+              /*#__PURE__*/React.createElement(FireIcon, { size: 14 }),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--c-text-sub)' } }, "Streak")),
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, (s.streakDays || 0) + 'd'),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 2 } }, "days running")),
 
-    // === LEADERBOARD ===
-    view === 'leaderboard' && /*#__PURE__*/React.createElement(React.Fragment, null,
-      /*#__PURE__*/React.createElement("div", { className: "flex gap-2 mb-3 justify-center" },
-        /*#__PURE__*/React.createElement(Pill, { active: lbScope === 'weekly', onClick: () => setLbScope('weekly') }, "This Week"),
-        /*#__PURE__*/React.createElement(Pill, { active: lbScope === 'alltime', onClick: () => setLbScope('alltime') }, "All Time")),
-      lbRows.map((r, i) => /*#__PURE__*/React.createElement(FrostedCard, {
-        key: i, className: "p-3 mb-2 flex items-center gap-3 rc-slide-in", style: { animationDelay: `${i * 0.04}s` }
-      },
-        /*#__PURE__*/React.createElement("div", {
-          className: "w-7 h-7 rounded-full flex items-center justify-center font-display font-bold text-xs",
-          style: { background: i === 0 ? 'rgba(255,224,130,0.3)' : i === 1 ? 'rgba(224,224,232,0.3)' : i === 2 ? 'rgba(255,171,145,0.3)' : 'var(--c-stat-bg)', color: 'var(--c-text)' }
-        }, r.rank),
-        /*#__PURE__*/React.createElement("div", { className: "w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold",
-          style: { background: r.avatarColor || '#C5B3E6', color: '#FFF' } }, (r.username || '?')[0].toUpperCase()),
-        /*#__PURE__*/React.createElement("div", { className: "flex-1 min-w-0" },
-          /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm truncate", style: { color: 'var(--c-text)' } }, r.username)),
-        /*#__PURE__*/React.createElement("div", { className: "text-right" },
-          /*#__PURE__*/React.createElement("div", { className: "font-display text-sm", style: { color: 'var(--c-accent)' } }, formatDistanceMiles(r.distanceM), " mi"),
-          /*#__PURE__*/React.createElement("div", { className: "text-[10px]", style: { color: 'var(--c-text-sub)' } }, r.runs, " runs")))),
-      lbRows.length === 0 && !loading && /*#__PURE__*/React.createElement(FrostedCard, { className: "p-6 text-center" },
-        /*#__PURE__*/React.createElement(EmptyState, { title: "No runners yet", subtitle: "Be the first!" }))),
+          /*#__PURE__*/React.createElement("div", { className: "rc-card rc-pop-in", style: { padding: 14 } },
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 } },
+              /*#__PURE__*/React.createElement(GpsIcon, { size: 14 }),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--c-text-sub)' } }, "Best Pace")),
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, formatPace(s.bestPaceSec || 0)),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 2 } }, "/km"))
+        ),
 
-    // === ACHIEVEMENTS ===
-    view === 'achievements' && /*#__PURE__*/React.createElement(React.Fragment, null,
-      /*#__PURE__*/React.createElement("div", { className: "text-center mb-3 rc-slide-up" },
-        /*#__PURE__*/React.createElement("div", { className: "font-display text-lg", style: { color: 'var(--c-text)' } }, unlockedCount, " / ", achievements.length),
-        /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, "badges earned")),
-      achievements.map((a, i) => /*#__PURE__*/React.createElement(FrostedCard, {
-        key: a.id, className: "p-3.5 mb-2 flex items-center gap-3 rc-slide-in",
-        style: { opacity: a.unlocked ? 1 : 0.45, animationDelay: `${i * 0.04}s` }
-      },
-        /*#__PURE__*/React.createElement("div", { className: "w-10 h-10 rounded-xl flex items-center justify-center",
-          style: { background: a.unlocked ? 'rgba(255,224,130,0.25)' : 'var(--c-stat-bg)' } },
-          /*#__PURE__*/React.createElement(BadgeIcon, { size: 22, tint: a.unlocked ? '#FFE082' : 'var(--c-text-sub)' })),
-        /*#__PURE__*/React.createElement("div", { className: "flex-1 min-w-0" },
-          /*#__PURE__*/React.createElement("div", { className: "font-semibold text-sm", style: { color: 'var(--c-text)' } }, a.name),
-          /*#__PURE__*/React.createElement("div", { className: "text-xs", style: { color: 'var(--c-text-sub)' } }, a.desc)),
-        a.unlocked && /*#__PURE__*/React.createElement("div", { className: "text-[10px] font-semibold px-2 py-1 rounded-full",
-          style: { background: 'rgba(168,230,207,0.2)', color: '#7DD8A0' } }, formatDateShort(a.unlockedAt))))),
+        // Badges preview
+        achievements.length > 0 && /*#__PURE__*/React.createElement("div", { className: "rc-card rc-pop-in", onClick: () => setView('achievements'),
+          style: { marginBottom: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8 } },
+            /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text)' } }, unlockedCount + '/' + achievements.length + ' Badges')),
+          /*#__PURE__*/React.createElement("span", { style: { fontSize: 12, color: 'var(--c-accent)' } }, "View all →")),
 
-    // Loading
-    loading && accessStatus === 'approved' && /*#__PURE__*/React.createElement("div", { className: "flex justify-center py-12" },
-      /*#__PURE__*/React.createElement("div", { className: "w-6 h-6 rounded-full border-2 animate-spin",
-        style: { borderColor: 'var(--c-border)', borderTopColor: 'var(--c-accent)' } }))
+        // Recent runs
+        runs.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
+          /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)', marginBottom: 8 } }, "Recent Runs"),
+          runs.slice(0, 4).map(function(r, i) {
+            return /*#__PURE__*/React.createElement("div", { key: r.id, className: "rc-card rc-pop-in", style: { marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+              /*#__PURE__*/React.createElement("div", null,
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)' } }, formatDistanceMiles(r.distanceM) + ' mi'),
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)' } }, formatDateShort(r.startedAt) + ' \xB7 ' + formatDuration(r.durationSec))),
+              /*#__PURE__*/React.createElement("div", { style: { textAlign: 'right' } },
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-accent)' } }, formatPace(r.avgPaceSec) + ' /km'),
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)' } }, (r.calories || estimateCalories(r.distanceM)) + ' cal')));
+          })
+        ),
+
+        runs.length === 0 && /*#__PURE__*/React.createElement("div", { className: "rc-card rc-pop-in", style: { textAlign: 'center', padding: 32 } },
+          /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 16, color: 'var(--c-text)', marginBottom: 4 } }, "No runs yet"),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 13, color: 'var(--c-text-sub)' } }, "Tap Start Run to begin!"))
+      ),
+
+      // === HISTORY ===
+      view === 'history' && /*#__PURE__*/React.createElement(React.Fragment, null,
+        runs.map(function(r, i) {
+          return /*#__PURE__*/React.createElement("div", { key: r.id, className: "rc-card rc-pop-in", style: { marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+            /*#__PURE__*/React.createElement("div", null,
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)' } }, formatDistanceMiles(r.distanceM) + ' mi'),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)' } }, formatDateShort(r.startedAt) + ' \xB7 ' + formatDuration(r.durationSec))),
+            /*#__PURE__*/React.createElement("div", { style: { textAlign: 'right' } },
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-accent)' } }, formatPace(r.avgPaceSec) + ' /km'),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)' } }, (r.calories || estimateCalories(r.distanceM)) + ' cal')));
+        }),
+        runs.length === 0 && !loading && /*#__PURE__*/React.createElement("div", { className: "rc-card", style: { textAlign: 'center', padding: 32 } },
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)' } }, "No runs yet. Complete a run to see it here!"))
+      ),
+
+      // === LEADERBOARD ===
+      view === 'leaderboard' && /*#__PURE__*/React.createElement(React.Fragment, null,
+        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 8, marginBottom: 12, justifyContent: 'center' } },
+          /*#__PURE__*/React.createElement(Pill, { active: lbScope === 'weekly', onClick: () => setLbScope('weekly') }, "This Week"),
+          /*#__PURE__*/React.createElement(Pill, { active: lbScope === 'alltime', onClick: () => setLbScope('alltime') }, "All Time")),
+        lbRows.map(function(r, i) {
+          return /*#__PURE__*/React.createElement("div", { key: i, className: "rc-card rc-pop-in", style: { marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 } },
+            /*#__PURE__*/React.createElement("div", { style: { width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                     fontSize: 12, fontWeight: 700, fontFamily: "'Paytone One', sans-serif",
+                     background: i === 0 ? 'rgba(255,224,130,0.25)' : i === 1 ? 'rgba(224,224,232,0.25)' : i === 2 ? 'rgba(255,171,145,0.25)' : 'var(--c-stat-bg)',
+                     color: 'var(--c-text)' } }, r.rank),
+            /*#__PURE__*/React.createElement("div", { style: { width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                     fontSize: 11, fontWeight: 700, background: r.avatarColor || '#C5B3E6', color: '#FFF' } }, (r.username || '?')[0].toUpperCase()),
+            /*#__PURE__*/React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, r.username)),
+            /*#__PURE__*/React.createElement("div", { style: { textAlign: 'right' } },
+              /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 14, color: 'var(--c-accent)' } }, formatDistanceMiles(r.distanceM) + ' mi'),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, color: 'var(--c-text-sub)' } }, r.runs + ' runs')));
+        }),
+        lbRows.length === 0 && !loading && /*#__PURE__*/React.createElement("div", { className: "rc-card", style: { textAlign: 'center', padding: 32 } },
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)' } }, "No runners yet. Be the first!"))
+      ),
+
+      // === ACHIEVEMENTS ===
+      view === 'achievements' && /*#__PURE__*/React.createElement(React.Fragment, null,
+        /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 16 } },
+          /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: 'var(--c-text)' } }, unlockedCount + ' / ' + achievements.length),
+          /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)' } }, "badges earned")),
+        /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 } },
+          achievements.map(function(a, i) {
+            return /*#__PURE__*/React.createElement("div", { key: a.id, className: "rc-card rc-pop-in",
+              style: { textAlign: 'center', padding: '16px 10px', opacity: a.unlocked ? 1 : 0.5, position: 'relative' } },
+              /*#__PURE__*/React.createElement("div", { className: a.unlocked ? 'rc-shine' : '', style: { marginBottom: 8, display: 'flex', justifyContent: 'center' } },
+                getAchievementMedal(a.id, a.unlocked)),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: 'var(--c-text)', marginBottom: 2 } }, a.name),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, color: 'var(--c-text-sub)', lineHeight: 1.4 } }, a.desc),
+              a.unlocked && /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 600, color: 'var(--c-correct)', marginTop: 6 } }, formatDateShort(a.unlockedAt)));
+          })
+        )
+      ),
+
+      // Loading
+      loading && accessStatus === 'approved' && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'center', padding: '48px 0' } },
+        /*#__PURE__*/React.createElement("div", { style: { width: 24, height: 24, borderRadius: '50%', border: '2px solid var(--c-border)', borderTopColor: 'var(--c-accent)',
+                   animation: 'rcPulse 1s linear infinite' } }))
+    )
   );
 };
 
