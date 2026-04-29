@@ -69,6 +69,13 @@
     usePowerup: (kind) => req('/api/powerups/use', { method: 'POST', body: { kind } }),
     todayPowerups: () => req('/api/powerups/today'),
 
+    // ----- runs (Doodles Run Club) -----
+    saveRun:       (data) => req('/api/runs', { method: 'POST', body: data }),
+    getRuns:       (limit = 20, offset = 0) => req(`/api/runs?limit=${limit}&offset=${offset}`),
+    getRun:        (id) => req('/api/runs/' + encodeURIComponent(id)),
+    getRunStats:   () => req('/api/runs/me/stats'),
+    runLeaderboard:(scope = 'weekly', limit = 20) => req(`/api/runs/club/leaderboard?scope=${scope}&limit=${limit}`),
+
     // ----- connectivity -----
     health: () => req('/healthz'),
   };

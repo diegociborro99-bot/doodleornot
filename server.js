@@ -14,6 +14,7 @@ const achievementsRoutes = require('./src/routes/achievements');
 const leaguesRoutes = require('./src/routes/leagues');
 const prefsRoutes = require('./src/routes/preferences');
 const powerupsRoutes = require('./src/routes/powerups');
+const runsRoutes = require('./src/routes/runs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,6 +40,7 @@ app.use('/api/achievements', writeLimiter, achievementsRoutes);
 app.use('/api/leagues', writeLimiter, leaguesRoutes);
 app.use('/api/preferences', writeLimiter, prefsRoutes);
 app.use('/api/powerups', writeLimiter, powerupsRoutes);
+app.use('/api/runs', writeLimiter, runsRoutes);
 
 // ----- health / error guard -----
 app.get('/healthz', async (_req, res) => {

@@ -31,6 +31,8 @@ model User {
   preferences  Preferences?
   scores       Score[]
   createdLeagues League[] @relation("LeagueCreator")
+  runs           Run[]
+  runStats       RunStats?
 
   @@index([username])
 }
@@ -156,4 +158,42 @@ model Preferences {
   lang           String  @default("en")    // 'en' | 'es' | 'de'
   notifications  Boolean @default(false)
   updatedAt      DateTime @updatedAt
+}
+
+// ============================================================
+// DOODLES RUN CLUB
+// ============================================================
+
+model Run {
+  id            String    @id @default(cuid())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  startedAt     DateTime
+  endedAt       DateTime?
+  distanceM     Int       @default(0)      // total meters
+  durationSec   Int       @default(0)      // total seconds
+  avgPaceSec    Int       @default(0)      // seconds per km
+  calories      Int       @default(0)
+  route         Json?                      // [{lat,lng,ts}, ...]
+  status        String    @default("completed") // completed | abandoned
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([userId, startedAt])
+}
+
+model RunStats {
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String   @id
+  totalRuns        Int      @default(0)
+  totalDistanceM   Int      @default(0)
+  totalDurationSec Int      @default(0)
+  longestRunM      Int      @default(0)
+  bestPaceSec      Int      @default(0)    // best avg pace (seconds/km)
+  weekDistanceM    Int      @default(0)
+  weekRuns         Int      @default(0)
+  weekStart        String   @default("")
+  streakDays       Int      @default(0)
+  lastRunDay       String?                 // ISO date
+  updatedAt        DateTime @updatedAt
 }

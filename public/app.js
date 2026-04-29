@@ -8245,6 +8245,626 @@ const ProfileScreen = ({
 };
 
 /* ==========================================================================
+   DOODLES RUN CLUB — SVG Icons
+   ========================================================================== */
+
+const RunShoeIcon = ({ size = 24 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "var(--c-text)", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M3 18h18l-1.5-4c-.4-1.1-1.5-1.8-2.7-1.8H14l-1-2.5c-.3-.8-1.1-1.2-1.9-1L7.5 10 6 8.5 4.5 10l-1 2.5L3 18z"
+}), /*#__PURE__*/React.createElement("path", { d: "M7 15h2M11 15h2M15 15h2" }));
+
+const GpsIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 12, r: 3 }),
+  /*#__PURE__*/React.createElement("path", { d: "M12 2v4M12 18v4M2 12h4M18 12h4" }));
+
+const RouteIcon = ({ size = 20, color }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: color || "var(--c-text)", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M3 17l4-4 4 4 4-8 6 6" }));
+
+const FireIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M12 2c0 4-4 6-4 10a6 6 0 0012 0c0-4-4-6-4-10"
+}), /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 16, r: 2 }));
+
+const PauseIcon = ({ size = 24 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "currentColor"
+}, /*#__PURE__*/React.createElement("rect", { x: 6, y: 4, width: 4, height: 16, rx: 1 }),
+  /*#__PURE__*/React.createElement("rect", { x: 14, y: 4, width: 4, height: 16, rx: 1 }));
+
+const PlayIcon = ({ size = 24 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "currentColor"
+}, /*#__PURE__*/React.createElement("polygon", { points: "6,4 20,12 6,20" }));
+
+const StopSquareIcon = ({ size = 24 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "currentColor"
+}, /*#__PURE__*/React.createElement("rect", { x: 5, y: 5, width: 14, height: 14, rx: 2 }));
+
+/* ==========================================================================
+   DOODLES RUN CLUB — Helpers
+   ========================================================================== */
+
+const formatDistance = (meters) => {
+  if (meters < 1000) return `${meters}m`;
+  return (meters / 1000).toFixed(2) + ' km';
+};
+
+const formatDistanceMiles = (meters) => {
+  const miles = meters / 1609.344;
+  if (miles < 0.01) return '0.00 mi';
+  return miles.toFixed(2) + ' mi';
+};
+
+const formatPace = (secPerKm) => {
+  if (!secPerKm || secPerKm <= 0) return '--:--';
+  const min = Math.floor(secPerKm / 60);
+  const sec = Math.floor(secPerKm % 60);
+  return `${min}:${sec.toString().padStart(2, '0')}`;
+};
+
+const formatDuration = (totalSec) => {
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = Math.floor(totalSec % 60);
+  if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
+const formatDateShort = (iso) => {
+  const d = new Date(iso);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${months[d.getMonth()]} ${d.getDate()}`;
+};
+
+const estimateCalories = (distanceM, durationSec) => {
+  // ~60 cal per km running (approx, weight-independent estimate)
+  return Math.round((distanceM / 1000) * 60);
+};
+
+const haversineDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371000; // Earth radius in meters
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+/* ==========================================================================
+   DOODLES RUN CLUB — Main Screen
+   ========================================================================== */
+
+const RunClubScreen = ({ profile }) => {
+  const [view, setView] = useState('dashboard'); // dashboard | active | history | leaderboard
+  const [runStats, setRunStats] = useState(null);
+  const [runs, setRuns] = useState([]);
+  const [lbRows, setLbRows] = useState([]);
+  const [lbScope, setLbScope] = useState('weekly');
+  const [loading, setLoading] = useState(true);
+  const api = typeof window !== 'undefined' ? window.DON_API : null;
+
+  // GPS run state
+  const [isRunning, setIsRunning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [distance, setDistance] = useState(0);
+  const [gpsRoute, setGpsRoute] = useState([]);
+  const [gpsError, setGpsError] = useState(null);
+  const [gpsAccuracy, setGpsAccuracy] = useState(null);
+  const watchIdRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const pausedAtRef = useRef(0);
+  const timerRef = useRef(null);
+  const lastPosRef = useRef(null);
+
+  // Load data
+  useEffect(() => {
+    if (!api) return;
+    setLoading(true);
+    Promise.all([
+      api.getRunStats().catch(() => null),
+      api.getRuns(10).catch(() => ({ runs: [] })),
+      api.runLeaderboard('weekly', 20).catch(() => ({ rows: [] }))
+    ]).then(([stats, history, lb]) => {
+      if (stats) setRunStats(stats);
+      if (history && history.runs) setRuns(history.runs);
+      if (lb && lb.rows) setLbRows(lb.rows);
+      setLoading(false);
+    });
+  }, [view]);
+
+  // Load leaderboard when scope changes
+  useEffect(() => {
+    if (!api || view !== 'leaderboard') return;
+    api.runLeaderboard(lbScope, 20).then(lb => {
+      if (lb && lb.rows) setLbRows(lb.rows);
+    }).catch(() => {});
+  }, [lbScope]);
+
+  // Timer tick
+  useEffect(() => {
+    if (isRunning && !isPaused) {
+      timerRef.current = setInterval(() => {
+        const now = Date.now();
+        setElapsed(Math.floor((now - startTimeRef.current) / 1000) + pausedAtRef.current);
+      }, 1000);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [isRunning, isPaused]);
+
+  const startRun = () => {
+    if (!navigator.geolocation) {
+      setGpsError('GPS not available on this device');
+      return;
+    }
+    setGpsError(null);
+    setDistance(0);
+    setElapsed(0);
+    setGpsRoute([]);
+    lastPosRef.current = null;
+    pausedAtRef.current = 0;
+    startTimeRef.current = Date.now();
+    setIsRunning(true);
+    setIsPaused(false);
+    setView('active');
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        setGpsAccuracy(Math.round(accuracy));
+        const point = { lat: latitude, lng: longitude, ts: Date.now() };
+
+        // Filter out wildly inaccurate readings
+        if (accuracy > 50) return;
+
+        setGpsRoute(prev => {
+          const updated = [...prev, point];
+          // Calculate distance from last valid point
+          if (lastPosRef.current) {
+            const d = haversineDistance(
+              lastPosRef.current.lat, lastPosRef.current.lng,
+              latitude, longitude
+            );
+            // Ignore micro-movements (GPS jitter) and impossible jumps
+            if (d > 3 && d < 500) {
+              setDistance(prev => prev + d);
+              lastPosRef.current = { lat: latitude, lng: longitude };
+            }
+          } else {
+            lastPosRef.current = { lat: latitude, lng: longitude };
+          }
+          return updated;
+        });
+      },
+      (err) => {
+        setGpsError(err.code === 1 ? 'Location permission denied' :
+                    err.code === 2 ? 'GPS unavailable' : 'GPS timeout — keep app open');
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 }
+    );
+  };
+
+  const pauseRun = () => {
+    setIsPaused(true);
+    pausedAtRef.current = elapsed;
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+  };
+
+  const resumeRun = () => {
+    setIsPaused(false);
+    startTimeRef.current = Date.now();
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        setGpsAccuracy(Math.round(accuracy));
+        if (accuracy > 50) return;
+        const point = { lat: latitude, lng: longitude, ts: Date.now() };
+        setGpsRoute(prev => {
+          const updated = [...prev, point];
+          if (lastPosRef.current) {
+            const d = haversineDistance(lastPosRef.current.lat, lastPosRef.current.lng, latitude, longitude);
+            if (d > 3 && d < 500) {
+              setDistance(prev => prev + d);
+              lastPosRef.current = { lat: latitude, lng: longitude };
+            }
+          } else {
+            lastPosRef.current = { lat: latitude, lng: longitude };
+          }
+          return updated;
+        });
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 }
+    );
+  };
+
+  const finishRun = async () => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    const dist = Math.round(distance);
+    const dur = elapsed;
+    const pace = dist > 0 ? Math.round((dur / (dist / 1000))) : 0;
+    const cal = estimateCalories(dist, dur);
+
+    // Save to server
+    if (api && dist > 10) {
+      try {
+        await api.saveRun({
+          startedAt: new Date(startTimeRef.current).toISOString(),
+          endedAt: new Date().toISOString(),
+          distanceM: dist,
+          durationSec: dur,
+          avgPaceSec: pace,
+          calories: cal,
+          route: gpsRoute.length > 0 ? gpsRoute : null,
+          status: 'completed'
+        });
+        // Refresh stats
+        const newStats = await api.getRunStats().catch(() => null);
+        if (newStats) setRunStats(newStats);
+        const newRuns = await api.getRuns(10).catch(() => ({ runs: [] }));
+        if (newRuns && newRuns.runs) setRuns(newRuns.runs);
+      } catch (e) {
+        console.warn('Failed to save run:', e);
+      }
+    }
+
+    setIsRunning(false);
+    setIsPaused(false);
+    setView('dashboard');
+  };
+
+  const discardRun = () => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    if (timerRef.current) clearInterval(timerRef.current);
+    setIsRunning(false);
+    setIsPaused(false);
+    setDistance(0);
+    setElapsed(0);
+    setGpsRoute([]);
+    setView('dashboard');
+  };
+
+  const currentPace = distance > 100 && elapsed > 0
+    ? Math.round(elapsed / (distance / 1000))
+    : 0;
+
+  // ---- ACTIVE RUN VIEW ----
+  if (view === 'active') {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "fixed inset-0 z-50 flex flex-col",
+      style: { background: 'var(--c-bg)', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }
+    },
+      // Top status bar
+      /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center justify-between px-5 pt-3 pb-2"
+      },
+        /*#__PURE__*/React.createElement("button", {
+          onClick: discardRun,
+          className: "text-sm font-bold rounded-full px-3 py-1",
+          style: { color: 'var(--c-wrong)', background: 'rgba(229,115,115,0.12)' }
+        }, "Discard"),
+        /*#__PURE__*/React.createElement("div", {
+          className: "flex items-center gap-1.5 text-xs font-semibold",
+          style: { color: gpsAccuracy && gpsAccuracy < 20 ? 'var(--c-correct)' : 'var(--c-text-sub)' }
+        }, /*#__PURE__*/React.createElement(GpsIcon, { size: 14 }),
+          gpsAccuracy ? `${gpsAccuracy}m` : 'Connecting...'
+        ),
+        /*#__PURE__*/React.createElement("div", {
+          className: "text-xs font-semibold px-3 py-1 rounded-full",
+          style: { background: isPaused ? 'rgba(255,171,145,0.2)' : 'rgba(168,230,207,0.2)',
+                   color: isPaused ? '#FFAB91' : '#7DD8A0' }
+        }, isPaused ? 'PAUSED' : 'RUNNING')
+      ),
+
+      // Big metrics
+      /*#__PURE__*/React.createElement("div", {
+        className: "flex-1 flex flex-col items-center justify-center px-6 gap-2"
+      },
+        // Duration (hero)
+        /*#__PURE__*/React.createElement("div", {
+          className: "font-display text-center",
+          style: { fontSize: 'clamp(56px, 16vw, 80px)', lineHeight: 1, color: 'var(--c-text)', letterSpacing: '-0.02em' }
+        }, formatDuration(elapsed)),
+
+        // Distance
+        /*#__PURE__*/React.createElement("div", {
+          className: "text-center mt-4"
+        },
+          /*#__PURE__*/React.createElement("div", {
+            className: "font-display",
+            style: { fontSize: 'clamp(28px, 8vw, 40px)', color: 'var(--c-accent)', lineHeight: 1.1 }
+          }, formatDistanceMiles(Math.round(distance))),
+          /*#__PURE__*/React.createElement("div", {
+            className: "text-xs font-semibold uppercase tracking-widest mt-1",
+            style: { color: 'var(--c-text-sub)' }
+          }, "distance")
+        ),
+
+        // Pace + Calories row
+        /*#__PURE__*/React.createElement("div", {
+          className: "flex gap-8 mt-6"
+        },
+          /*#__PURE__*/React.createElement("div", { className: "text-center" },
+            /*#__PURE__*/React.createElement("div", {
+              className: "font-display text-2xl", style: { color: 'var(--c-text)' }
+            }, formatPace(currentPace)),
+            /*#__PURE__*/React.createElement("div", {
+              className: "text-[10px] font-semibold uppercase tracking-widest mt-0.5",
+              style: { color: 'var(--c-text-sub)' }
+            }, "pace /km")
+          ),
+          /*#__PURE__*/React.createElement("div", { className: "text-center" },
+            /*#__PURE__*/React.createElement("div", {
+              className: "font-display text-2xl", style: { color: 'var(--c-text)' }
+            }, estimateCalories(Math.round(distance), elapsed)),
+            /*#__PURE__*/React.createElement("div", {
+              className: "text-[10px] font-semibold uppercase tracking-widest mt-0.5",
+              style: { color: 'var(--c-text-sub)' }
+            }, "cal")
+          )
+        ),
+
+        // GPS error
+        gpsError && /*#__PURE__*/React.createElement("div", {
+          className: "text-xs font-semibold mt-4 px-4 py-2 rounded-xl text-center",
+          style: { color: '#E06060', background: 'rgba(229,115,115,0.1)' }
+        }, gpsError)
+      ),
+
+      // Bottom controls
+      /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center justify-center gap-6 pb-8 pt-4"
+      },
+        isPaused ? /*#__PURE__*/React.createElement(React.Fragment, null,
+          /*#__PURE__*/React.createElement("button", {
+            onClick: finishRun,
+            className: "w-16 h-16 rounded-full flex items-center justify-center active:scale-90 transition-transform",
+            style: { background: 'rgba(229,115,115,0.15)', color: '#E06060' }
+          }, /*#__PURE__*/React.createElement(StopSquareIcon, { size: 28 })),
+          /*#__PURE__*/React.createElement("button", {
+            onClick: resumeRun,
+            className: "w-20 h-20 rounded-full flex items-center justify-center active:scale-90 transition-transform",
+            style: { background: 'var(--c-accent)', color: '#FFFFFF', boxShadow: '0 4px 20px rgba(65,64,255,0.35)' }
+          }, /*#__PURE__*/React.createElement(PlayIcon, { size: 32 }))
+        ) : /*#__PURE__*/React.createElement("button", {
+          onClick: pauseRun,
+          className: "w-20 h-20 rounded-full flex items-center justify-center active:scale-90 transition-transform",
+          style: { background: 'var(--c-accent)', color: '#FFFFFF', boxShadow: '0 4px 20px rgba(65,64,255,0.35)' }
+        }, /*#__PURE__*/React.createElement(PauseIcon, { size: 32 }))
+      )
+    );
+  }
+
+  // ---- DASHBOARD / HISTORY / LEADERBOARD ----
+  const StatCard = ({ label, value, sub, icon, tint }) => /*#__PURE__*/React.createElement(FrostedCard, {
+    className: "p-4 flex-1 min-w-[140px]"
+  },
+    /*#__PURE__*/React.createElement("div", { className: "flex items-center gap-2 mb-2" },
+      icon && /*#__PURE__*/React.createElement("div", {
+        className: "w-8 h-8 rounded-lg flex items-center justify-center",
+        style: { background: tint || 'rgba(168,230,207,0.2)' }
+      }, icon),
+      /*#__PURE__*/React.createElement("span", {
+        className: "text-[10px] font-bold uppercase tracking-widest",
+        style: { color: 'var(--c-text-sub)' }
+      }, label)
+    ),
+    /*#__PURE__*/React.createElement("div", {
+      className: "font-display text-2xl", style: { color: 'var(--c-text)' }
+    }, value),
+    sub && /*#__PURE__*/React.createElement("div", {
+      className: "text-xs mt-0.5", style: { color: 'var(--c-text-sub)' }
+    }, sub)
+  );
+
+  const RunRow = ({ run }) => /*#__PURE__*/React.createElement(FrostedCard, {
+    className: "p-4 mb-2 anim-fade-in"
+  }, /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-between" },
+    /*#__PURE__*/React.createElement("div", null,
+      /*#__PURE__*/React.createElement("div", {
+        className: "font-semibold text-sm", style: { color: 'var(--c-text)' }
+      }, formatDistanceMiles(run.distanceM)),
+      /*#__PURE__*/React.createElement("div", {
+        className: "text-xs", style: { color: 'var(--c-text-sub)' }
+      }, formatDateShort(run.startedAt), " \xB7 ", formatDuration(run.durationSec))
+    ),
+    /*#__PURE__*/React.createElement("div", { className: "text-right" },
+      /*#__PURE__*/React.createElement("div", {
+        className: "font-semibold text-sm", style: { color: 'var(--c-accent)' }
+      }, formatPace(run.avgPaceSec), " /km"),
+      /*#__PURE__*/React.createElement("div", {
+        className: "text-xs", style: { color: 'var(--c-text-sub)' }
+      }, run.calories || estimateCalories(run.distanceM, run.durationSec), " cal")
+    )
+  ));
+
+  const s = runStats || {};
+
+  return /*#__PURE__*/React.createElement("div", {
+    className: "px-4 pt-6 pb-nav max-w-[480px] mx-auto scroll-momentum"
+  },
+    // Header
+    /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-center gap-2 mb-1"
+    },
+      /*#__PURE__*/React.createElement(RunShoeIcon, { size: 28 }),
+      /*#__PURE__*/React.createElement("h1", {
+        className: "font-display font-semibold text-2xl",
+        style: { color: 'var(--c-text)' }
+      }, "Run Club")
+    ),
+    /*#__PURE__*/React.createElement("p", {
+      className: "text-xs text-center mb-5",
+      style: { color: 'var(--c-text-sub)' }
+    }, "Doodles runners \xB7 track your miles"),
+
+    // Sub-nav pills
+    /*#__PURE__*/React.createElement("div", {
+      className: "flex gap-2 mb-5 justify-center flex-wrap"
+    },
+      /*#__PURE__*/React.createElement(Pill, { active: view === 'dashboard', onClick: () => setView('dashboard') }, "Dashboard"),
+      /*#__PURE__*/React.createElement(Pill, { active: view === 'history', onClick: () => setView('history') }, "History"),
+      /*#__PURE__*/React.createElement(Pill, { active: view === 'leaderboard', onClick: () => setView('leaderboard') }, "Leaderboard")
+    ),
+
+    // === START RUN BUTTON ===
+    (view === 'dashboard') && /*#__PURE__*/React.createElement("div", { className: "mb-6" },
+      /*#__PURE__*/React.createElement("button", {
+        onClick: startRun,
+        className: "w-full py-4 rounded-2xl font-display font-semibold text-lg active:scale-95 transition-all",
+        style: {
+          background: 'linear-gradient(135deg, var(--c-accent) 0%, #7B7BFF 100%)',
+          color: '#FFFFFF',
+          boxShadow: '0 6px 24px rgba(65,64,255,0.3)',
+          border: 'none'
+        }
+      }, /*#__PURE__*/React.createElement("div", { className: "flex items-center justify-center gap-3" },
+        /*#__PURE__*/React.createElement(GpsIcon, { size: 22 }),
+        "Start Run"
+      ))
+    ),
+
+    // === DASHBOARD ===
+    view === 'dashboard' && /*#__PURE__*/React.createElement(React.Fragment, null,
+      // Stats grid
+      /*#__PURE__*/React.createElement("div", { className: "grid grid-cols-2 gap-3 mb-4" },
+        /*#__PURE__*/React.createElement(StatCard, {
+          label: "This Week",
+          value: formatDistanceMiles(s.weekDistanceM || 0),
+          sub: `${s.weekRuns || 0} runs`,
+          icon: /*#__PURE__*/React.createElement(RouteIcon, { size: 18, color: '#A8E6CF' }),
+          tint: 'rgba(168,230,207,0.2)'
+        }),
+        /*#__PURE__*/React.createElement(StatCard, {
+          label: "Total Miles",
+          value: formatDistanceMiles(s.totalDistanceM || 0),
+          sub: `${s.totalRuns || 0} runs`,
+          icon: /*#__PURE__*/React.createElement(RunShoeIcon, { size: 18 }),
+          tint: 'rgba(197,179,230,0.2)'
+        }),
+        /*#__PURE__*/React.createElement(StatCard, {
+          label: "Streak",
+          value: `${s.streakDays || 0}d`,
+          sub: 'consecutive days',
+          icon: /*#__PURE__*/React.createElement(FireIcon, { size: 18 }),
+          tint: 'rgba(255,171,145,0.2)'
+        }),
+        /*#__PURE__*/React.createElement(StatCard, {
+          label: "Best Pace",
+          value: formatPace(s.bestPaceSec || 0),
+          sub: '/km',
+          icon: /*#__PURE__*/React.createElement(GpsIcon, { size: 18 }),
+          tint: 'rgba(144,202,249,0.2)'
+        })
+      ),
+
+      // Recent runs
+      runs.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
+        /*#__PURE__*/React.createElement(SectionHeader, { text: "Recent Runs" }),
+        runs.slice(0, 5).map(r => /*#__PURE__*/React.createElement(RunRow, { key: r.id, run: r })),
+        runs.length > 5 && /*#__PURE__*/React.createElement("button", {
+          onClick: () => setView('history'),
+          className: "text-sm font-semibold mt-2 mb-4",
+          style: { color: 'var(--c-accent)' }
+        }, "View all runs →")
+      ),
+
+      // Empty state
+      runs.length === 0 && !loading && /*#__PURE__*/React.createElement(FrostedCard, {
+        className: "p-8 text-center anim-pop-in"
+      },
+        /*#__PURE__*/React.createElement("div", {
+          className: "font-display text-lg mb-2", style: { color: 'var(--c-text)' }
+        }, "No runs yet"),
+        /*#__PURE__*/React.createElement("p", {
+          className: "text-sm", style: { color: 'var(--c-text-sub)' }
+        }, "Tap Start Run to track your first run with GPS!")
+      )
+    ),
+
+    // === HISTORY ===
+    view === 'history' && /*#__PURE__*/React.createElement(React.Fragment, null,
+      /*#__PURE__*/React.createElement(SectionHeader, { text: "Run History" }),
+      runs.map(r => /*#__PURE__*/React.createElement(RunRow, { key: r.id, run: r })),
+      runs.length === 0 && !loading && /*#__PURE__*/React.createElement(FrostedCard, {
+        className: "p-8 text-center"
+      }, /*#__PURE__*/React.createElement(EmptyState, {
+        title: "No runs yet",
+        subtitle: "Complete your first run to see it here!"
+      }))
+    ),
+
+    // === LEADERBOARD ===
+    view === 'leaderboard' && /*#__PURE__*/React.createElement(React.Fragment, null,
+      /*#__PURE__*/React.createElement("div", { className: "flex gap-2 mb-4 justify-center" },
+        /*#__PURE__*/React.createElement(Pill, { active: lbScope === 'weekly', onClick: () => setLbScope('weekly') }, "This Week"),
+        /*#__PURE__*/React.createElement(Pill, { active: lbScope === 'alltime', onClick: () => setLbScope('alltime') }, "All Time")
+      ),
+      lbRows.length > 0 ? lbRows.map((r, i) => /*#__PURE__*/React.createElement(FrostedCard, {
+        key: i,
+        className: "p-3 mb-2 flex items-center gap-3 anim-fade-in"
+      },
+        /*#__PURE__*/React.createElement("div", {
+          className: "w-8 h-8 rounded-full flex items-center justify-center font-display font-bold text-sm",
+          style: {
+            background: i === 0 ? 'rgba(255,224,130,0.3)' : i === 1 ? 'rgba(224,224,232,0.3)' : i === 2 ? 'rgba(255,171,145,0.3)' : 'var(--c-stat-bg)',
+            color: i < 3 ? 'var(--c-text)' : 'var(--c-text-sub)'
+          }
+        }, r.rank),
+        /*#__PURE__*/React.createElement("div", {
+          className: "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+          style: { background: r.avatarColor || '#C5B3E6', color: '#FFF' }
+        }, (r.username || '?')[0].toUpperCase()),
+        /*#__PURE__*/React.createElement("div", { className: "flex-1 min-w-0" },
+          /*#__PURE__*/React.createElement("div", {
+            className: "font-semibold text-sm truncate", style: { color: 'var(--c-text)' }
+          }, r.username),
+          /*#__PURE__*/React.createElement("div", {
+            className: "text-xs", style: { color: 'var(--c-text-sub)' }
+          }, r.runs, " run", r.runs !== 1 ? 's' : '')
+        ),
+        /*#__PURE__*/React.createElement("div", {
+          className: "font-display font-semibold text-sm",
+          style: { color: 'var(--c-accent)' }
+        }, formatDistanceMiles(r.distanceM))
+      )) : !loading && /*#__PURE__*/React.createElement(FrostedCard, {
+        className: "p-8 text-center"
+      }, /*#__PURE__*/React.createElement(EmptyState, {
+        title: "No runners yet",
+        subtitle: "Be the first to log a run this week!"
+      }))
+    ),
+
+    // Loading
+    loading && /*#__PURE__*/React.createElement("div", {
+      className: "flex justify-center py-12"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "w-6 h-6 rounded-full border-2 animate-spin",
+      style: { borderColor: 'var(--c-border)', borderTopColor: 'var(--c-accent)' }
+    }))
+  );
+};
+
+/* ==========================================================================
    BOTTOM NAV
    ========================================================================== */
 
@@ -8258,6 +8878,12 @@ const BottomNav = ({
     icon: a => /*#__PURE__*/React.createElement(StarNavIcon, {
       size: 24,
       fill: a ? '#A8E6CF' : 'var(--c-stat-bg)'
+    })
+  }, {
+    id: 'run',
+    label: 'Run',
+    icon: a => /*#__PURE__*/React.createElement(RunShoeIcon, {
+      size: 24
     })
   }, {
     id: 'board',
@@ -8284,7 +8910,7 @@ const BottomNav = ({
   }, /*#__PURE__*/React.createElement("div", {
     className: "nav-indicator",
     style: {
-      left: `calc(${idx * 33.333}% + 6px)`
+      left: `calc(${idx * 25}% + 6px)`
     }
   }), items.map(it => {
     const active = tab === it.id;
@@ -9029,6 +9655,8 @@ function DoodleOrNot() {
     onDismissChallenge: () => setChallengeSeed(null),
     onOpenLeagues: () => setLeaguesOpen(true),
     onPlay: m => setMode(m)
+  }), tab === 'run' && /*#__PURE__*/React.createElement(RunClubScreen, {
+    profile: profile
   }), tab === 'board' && /*#__PURE__*/React.createElement(LeaderboardScreen, {
     profile: profile,
     weekPts: stats.weekPts
@@ -9499,7 +10127,7 @@ const FontLoader = () => /*#__PURE__*/React.createElement("style", null, `
     .nav-indicator {
       position: absolute;
       top: 6px; bottom: 6px;
-      width: calc(33.333% - 6px);
+      width: calc(25% - 6px);
       background: linear-gradient(135deg, rgba(65,64,255,0.12), rgba(197,179,230,0.18));
       border: 1px solid rgba(65,64,255,0.15);
       border-radius: 14px;
