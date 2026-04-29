@@ -6,17 +6,358 @@ const { todayISO, weekStartISO } = require('../util');
 const router = express.Router();
 
 // Validation limits
-const MAX_DISTANCE_M = 200_000;   // 200 km max per run
-const MAX_DURATION_SEC = 86400;   // 24h max
-const MAX_ROUTE_POINTS = 10_000;  // GPS points cap
+const MAX_DISTANCE_M = 200_000;
+const MAX_DURATION_SEC = 86400;
+const MAX_ROUTE_POINTS = 10_000;
 const MAX_CALORIES = 20_000;
+const ADMIN_USERNAME = 'degos';
+
+// ============================================================
+// RUN CLUB ACCESS — request / approve / deny
+// ============================================================
+
+// GET /api/runs/access/status — check current user's access status
+router.get('/access/status', requireAuth, async (req, res) => {
+  try {
+    // Admin always has access
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
+    if (user && user.username === ADMIN_USERNAME) {
+      return res.json({ status: 'approved', isAdmin: true });
+    }
+
+    const access = await prisma.runClubAccess.findUnique({ where: { userId: req.userId } });
+    if (!access) return res.json({ status: 'none' });
+    res.json({ status: access.status, requestedAt: access.requestedAt, reviewNote: access.reviewNote });
+  } catch (err) {
+    console.error('GET /access/status error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// POST /api/runs/access/request — request access to Run Club
+router.post('/access/request', requireAuth, async (req, res) => {
+  try {
+    const { socialProof, message } = req.body || {};
+    const existing = await prisma.runClubAccess.findUnique({ where: { userId: req.userId } });
+    if (existing) {
+      return res.json({ status: existing.status, message: 'Already requested' });
+    }
+
+    const access = await prisma.runClubAccess.create({
+      data: {
+        userId: req.userId,
+        socialProof: typeof socialProof === 'string' ? socialProof.slice(0, 200) : null,
+        message: typeof message === 'string' ? message.slice(0, 500) : null
+      }
+    });
+    res.json({ status: access.status });
+  } catch (err) {
+    console.error('POST /access/request error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// GET /api/runs/access/pending — admin: list all pending requests
+router.get('/access/pending', requireAuth, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
+    if (!user || user.username !== ADMIN_USERNAME) return res.status(403).json({ error: 'admin_only' });
+
+    const requests = await prisma.runClubAccess.findMany({
+      where: { status: 'pending' },
+      orderBy: { requestedAt: 'asc' },
+      include: { user: { select: { username: true, avatarColor: true, avatarData: true, createdAt: true } } }
+    });
+    res.json({ requests });
+  } catch (err) {
+    console.error('GET /access/pending error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// GET /api/runs/access/all — admin: list all requests (any status)
+router.get('/access/all', requireAuth, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
+    if (!user || user.username !== ADMIN_USERNAME) return res.status(403).json({ error: 'admin_only' });
+
+    const requests = await prisma.runClubAccess.findMany({
+      orderBy: { requestedAt: 'desc' },
+      include: { user: { select: { username: true, avatarColor: true, avatarData: true } } }
+    });
+    res.json({ requests });
+  } catch (err) {
+    console.error('GET /access/all error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// POST /api/runs/access/:id/review — admin: approve or deny
+router.post('/access/:id/review', requireAuth, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
+    if (!user || user.username !== ADMIN_USERNAME) return res.status(403).json({ error: 'admin_only' });
+
+    const { decision, reviewNote } = req.body || {};
+    if (!['approved', 'denied'].includes(decision)) return res.status(400).json({ error: 'bad_decision' });
+
+    const updated = await prisma.runClubAccess.update({
+      where: { id: req.params.id },
+      data: {
+        status: decision,
+        reviewNote: typeof reviewNote === 'string' ? reviewNote.slice(0, 300) : null,
+        reviewedAt: new Date()
+      }
+    });
+    res.json({ ok: true, status: updated.status });
+  } catch (err) {
+    console.error('POST /access/:id/review error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ============================================================
+// RUN ACHIEVEMENTS
+// ============================================================
+
+const RUN_ACHIEVEMENTS = [
+  { id: 'first_run', name: 'First Steps', desc: 'Complete your first run', check: (s) => s.totalRuns >= 1 },
+  { id: 'ran_5k', name: '5K Runner', desc: 'Complete a 5K run', checkRun: (r) => r.distanceM >= 5000 },
+  { id: 'ran_10k', name: '10K Club', desc: 'Complete a 10K run', checkRun: (r) => r.distanceM >= 10000 },
+  { id: 'half_marathon', name: 'Half Marathon', desc: 'Complete a half marathon (21.1km)', checkRun: (r) => r.distanceM >= 21097 },
+  { id: 'marathon', name: 'Marathoner', desc: 'Complete a marathon (42.2km)', checkRun: (r) => r.distanceM >= 42195 },
+  { id: 'total_50mi', name: '50 Mile Club', desc: 'Run 50 miles total', check: (s) => s.totalDistanceM >= 80467 },
+  { id: 'total_100mi', name: 'Century Runner', desc: 'Run 100 miles total', check: (s) => s.totalDistanceM >= 160934 },
+  { id: 'total_500mi', name: 'Ultra Legend', desc: 'Run 500 miles total', check: (s) => s.totalDistanceM >= 804672 },
+  { id: 'streak_7', name: 'Week Warrior', desc: '7-day running streak', check: (s) => s.streakDays >= 7 },
+  { id: 'streak_30', name: 'Iron Will', desc: '30-day running streak', check: (s) => s.streakDays >= 30 },
+  { id: 'speed_demon', name: 'Speed Demon', desc: 'Run a km under 4:30 pace', check: (s) => s.bestPaceSec > 0 && s.bestPaceSec < 270 },
+  { id: 'ten_runs', name: 'Getting Serious', desc: 'Complete 10 runs', check: (s) => s.totalRuns >= 10 },
+  { id: 'fifty_runs', name: 'Dedicated', desc: 'Complete 50 runs', check: (s) => s.totalRuns >= 50 },
+  { id: 'early_bird', name: 'Early Bird', desc: 'Start a run before 7 AM', checkRun: (r) => new Date(r.startedAt).getHours() < 7 },
+  { id: 'night_owl', name: 'Night Owl', desc: 'Start a run after 9 PM', checkRun: (r) => new Date(r.startedAt).getHours() >= 21 },
+];
+
+async function checkAndUnlockAchievements(userId, runStats, run) {
+  const existing = await prisma.runAchievement.findMany({
+    where: { userId },
+    select: { achievementId: true }
+  });
+  const unlocked = new Set(existing.map(a => a.achievementId));
+  const newUnlocks = [];
+
+  for (const ach of RUN_ACHIEVEMENTS) {
+    if (unlocked.has(ach.id)) continue;
+    let earned = false;
+    if (ach.check && runStats) earned = ach.check(runStats);
+    if (ach.checkRun && run) earned = earned || ach.checkRun(run);
+    if (earned) newUnlocks.push(ach.id);
+  }
+
+  if (newUnlocks.length > 0) {
+    await prisma.runAchievement.createMany({
+      data: newUnlocks.map(id => ({ userId, achievementId: id })),
+      skipDuplicates: true
+    });
+  }
+  return newUnlocks;
+}
+
+// GET /api/runs/achievements — user's run achievements
+router.get('/achievements', requireAuth, async (req, res) => {
+  try {
+    const unlocked = await prisma.runAchievement.findMany({
+      where: { userId: req.userId },
+      select: { achievementId: true, unlockedAt: true }
+    });
+    const unlockedMap = {};
+    for (const u of unlocked) unlockedMap[u.achievementId] = u.unlockedAt;
+
+    res.json({
+      achievements: RUN_ACHIEVEMENTS.map(a => ({
+        id: a.id, name: a.name, desc: a.desc,
+        unlocked: !!unlockedMap[a.id],
+        unlockedAt: unlockedMap[a.id] || null
+      }))
+    });
+  } catch (err) {
+    console.error('GET /achievements error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ============================================================
+// AI COACH — post-run analysis
+// ============================================================
+
+function generateCoachTips(run, stats) {
+  const tips = [];
+  const distKm = run.distanceM / 1000;
+  const paceMin = run.avgPaceSec / 60;
+  const durMin = run.durationSec / 60;
+
+  // Pace analysis
+  if (run.avgPaceSec > 0 && run.avgPaceSec < 300) {
+    tips.push({ type: 'pace', icon: 'zap', text: `Great pace! ${Math.floor(paceMin)}:${String(Math.floor(run.avgPaceSec % 60)).padStart(2, '0')}/km is fast. Make sure to balance speed days with easy recovery runs.` });
+  } else if (run.avgPaceSec >= 300 && run.avgPaceSec < 420) {
+    tips.push({ type: 'pace', icon: 'check', text: `Solid pace at ${Math.floor(paceMin)}:${String(Math.floor(run.avgPaceSec % 60)).padStart(2, '0')}/km. This is a great tempo effort.` });
+  } else if (run.avgPaceSec >= 420) {
+    tips.push({ type: 'pace', icon: 'heart', text: `Easy pace run — perfect for building endurance. These runs should make up 80% of your training.` });
+  }
+
+  // Distance milestones
+  if (distKm >= 5 && distKm < 10) {
+    tips.push({ type: 'distance', icon: 'star', text: `Nice ${distKm.toFixed(1)}km run! You're building a solid aerobic base.` });
+  } else if (distKm >= 10) {
+    tips.push({ type: 'distance', icon: 'trophy', text: `${distKm.toFixed(1)}km — impressive distance! Remember to refuel with carbs and protein within 30 minutes.` });
+  }
+
+  // Recovery
+  if (durMin > 45) {
+    tips.push({ type: 'recovery', icon: 'moon', text: 'After a long effort, take a rest day or do light cross-training tomorrow. Hydrate well!' });
+  }
+
+  // Streak encouragement
+  if (stats) {
+    if (stats.streakDays >= 3 && stats.streakDays < 7) {
+      tips.push({ type: 'streak', icon: 'fire', text: `${stats.streakDays}-day streak! Keep it up — you're building a habit. Remember rest days are important too.` });
+    } else if (stats.streakDays >= 7) {
+      tips.push({ type: 'streak', icon: 'fire', text: `Amazing ${stats.streakDays}-day streak! Consider one easy/rest day per week to prevent overtraining.` });
+    }
+
+    // Weekly volume
+    const weekKm = stats.weekDistanceM / 1000;
+    if (weekKm > 30) {
+      tips.push({ type: 'volume', icon: 'alert', text: `${weekKm.toFixed(0)}km this week — high volume! Increase weekly mileage by no more than 10% to avoid injury.` });
+    }
+
+    // Progress
+    if (stats.totalRuns > 1 && stats.bestPaceSec > 0 && run.avgPaceSec <= stats.bestPaceSec) {
+      tips.push({ type: 'pr', icon: 'zap', text: 'New personal best pace! You\'re getting faster. Keep mixing speed work with easy runs.' });
+    }
+  }
+
+  // General tips rotation based on run count
+  const generalTips = [
+    { type: 'tip', icon: 'bulb', text: 'Try the 80/20 rule: 80% easy runs, 20% hard efforts. It builds endurance without burnout.' },
+    { type: 'tip', icon: 'bulb', text: 'Cadence matters! Aim for 170-180 steps per minute to reduce impact and improve efficiency.' },
+    { type: 'tip', icon: 'bulb', text: 'Stay hydrated: drink ~500ml of water in the hour before running, especially in warm weather.' },
+    { type: 'tip', icon: 'bulb', text: 'Warm up with 5 minutes of brisk walking before starting your run to prevent injuries.' },
+    { type: 'tip', icon: 'bulb', text: 'Post-run stretching for 5-10 minutes reduces soreness and improves flexibility.' },
+    { type: 'tip', icon: 'bulb', text: 'Hill training once a week builds strength and speed. Find a hill and do 4-6 repeats.' },
+    { type: 'tip', icon: 'bulb', text: 'Your running form: lean slightly forward, land midfoot, keep arms at 90 degrees.' },
+  ];
+  const runIdx = stats ? (stats.totalRuns || 0) : 0;
+  tips.push(generalTips[runIdx % generalTips.length]);
+
+  return tips.slice(0, 3); // max 3 tips per run
+}
+
+// GET /api/runs/coach/:runId — AI coach tips for a specific run
+router.get('/coach/:runId', requireAuth, async (req, res) => {
+  try {
+    const run = await prisma.run.findFirst({
+      where: { id: req.params.runId, userId: req.userId },
+      select: { distanceM: true, durationSec: true, avgPaceSec: true, startedAt: true, calories: true }
+    });
+    if (!run) return res.status(404).json({ error: 'not_found' });
+
+    const stats = await prisma.runStats.findUnique({ where: { userId: req.userId } });
+    const tips = generateCoachTips(run, stats);
+    res.json({ tips });
+  } catch (err) {
+    console.error('GET /coach error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ============================================================
+// COMMUNITY STATS + WEEKLY CHALLENGE
+// ============================================================
+
+// GET /api/runs/community/stats — aggregate stats for all runners
+router.get('/community/stats', optionalAuth, async (req, res) => {
+  try {
+    const agg = await prisma.runStats.aggregate({
+      _sum: { totalDistanceM: true, totalRuns: true },
+      _count: { userId: true }
+    });
+    const ws = weekStartISO();
+    const weekAgg = await prisma.runStats.aggregate({
+      where: { weekStart: ws },
+      _sum: { weekDistanceM: true, weekRuns: true }
+    });
+
+    // Get active weekly challenge
+    const challenge = await prisma.weeklyChallenge.findUnique({ where: { weekStart: ws } });
+
+    res.json({
+      totalRunners: agg._count.userId || 0,
+      totalDistanceM: agg._sum.totalDistanceM || 0,
+      totalRuns: agg._sum.totalRuns || 0,
+      weekDistanceM: weekAgg._sum.weekDistanceM || 0,
+      weekRuns: weekAgg._sum.weekRuns || 0,
+      challenge: challenge ? {
+        title: challenge.title,
+        description: challenge.description,
+        goalM: challenge.goalM,
+        currentM: weekAgg._sum.weekDistanceM || 0
+      } : null
+    });
+  } catch (err) {
+    console.error('GET /community/stats error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// POST /api/runs/community/challenge — admin: create weekly challenge
+router.post('/community/challenge', requireAuth, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
+    if (!user || user.username !== ADMIN_USERNAME) return res.status(403).json({ error: 'admin_only' });
+
+    const { title, description, goalKm } = req.body || {};
+    if (!title || !goalKm) return res.status(400).json({ error: 'missing_fields' });
+
+    const ws = weekStartISO();
+    const challenge = await prisma.weeklyChallenge.upsert({
+      where: { weekStart: ws },
+      update: { title, description: description || '', goalM: Math.round(goalKm * 1000) },
+      create: { weekStart: ws, title, description: description || '', goalM: Math.round(goalKm * 1000) }
+    });
+    res.json({ ok: true, challenge });
+  } catch (err) {
+    console.error('POST /community/challenge error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ============================================================
+// CORE RUN CRUD
+// ============================================================
+
+// Middleware: check Run Club access (used on run-saving endpoints)
+async function requireRunAccess(req, res, next) {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
+    if (user && user.username === ADMIN_USERNAME) return next();
+
+    const access = await prisma.runClubAccess.findUnique({ where: { userId: req.userId } });
+    if (!access || access.status !== 'approved') {
+      return res.status(403).json({ error: 'run_club_access_required' });
+    }
+    next();
+  } catch (err) {
+    console.error('requireRunAccess error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+}
 
 // POST /api/runs  — save a completed run
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireRunAccess, async (req, res) => {
   try {
-    const { startedAt, endedAt, distanceM, durationSec, avgPaceSec, calories, route, status } = req.body || {};
+    const { startedAt, endedAt, distanceM, durationSec, avgPaceSec, calories, route, status, splits } = req.body || {};
 
-    // Validate required fields
     const start = new Date(startedAt);
     const end = endedAt ? new Date(endedAt) : new Date();
     if (isNaN(start.getTime())) return res.status(400).json({ error: 'bad_start' });
@@ -24,11 +365,10 @@ router.post('/', requireAuth, async (req, res) => {
 
     const dist = Math.max(0, Math.min(parseInt(distanceM, 10) || 0, MAX_DISTANCE_M));
     const dur = Math.max(0, Math.min(parseInt(durationSec, 10) || 0, MAX_DURATION_SEC));
-    const pace = Math.max(0, Math.min(parseInt(avgPaceSec, 10) || 0, 3600)); // max 60min/km
+    const pace = Math.max(0, Math.min(parseInt(avgPaceSec, 10) || 0, 3600));
     const cal = Math.max(0, Math.min(parseInt(calories, 10) || 0, MAX_CALORIES));
     const runStatus = status === 'abandoned' ? 'abandoned' : 'completed';
 
-    // Validate & cap route
     let cleanRoute = null;
     if (Array.isArray(route)) {
       cleanRoute = route.slice(0, MAX_ROUTE_POINTS).map(p => ({
@@ -52,36 +392,31 @@ router.post('/', requireAuth, async (req, res) => {
       }
     });
 
+    let newAchievements = [];
+
     // Update RunStats
     if (runStatus === 'completed' && dist > 0) {
       const ws = weekStartISO();
       const today = todayISO();
-
       const existing = await prisma.runStats.findUnique({ where: { userId: req.userId } });
 
+      let updatedStats;
       if (!existing) {
-        await prisma.runStats.create({
+        updatedStats = await prisma.runStats.create({
           data: {
             userId: req.userId,
-            totalRuns: 1,
-            totalDistanceM: dist,
-            totalDurationSec: dur,
+            totalRuns: 1, totalDistanceM: dist, totalDurationSec: dur,
             longestRunM: dist,
             bestPaceSec: pace > 0 ? pace : 0,
-            weekDistanceM: dist,
-            weekRuns: 1,
-            weekStart: ws,
-            streakDays: 1,
-            lastRunDay: today
+            weekDistanceM: dist, weekRuns: 1, weekStart: ws,
+            streakDays: 1, lastRunDay: today
           }
         });
       } else {
-        // Reset week if new week
         const sameWeek = existing.weekStart === ws;
         const weekDist = sameWeek ? existing.weekDistanceM + dist : dist;
         const weekRuns = sameWeek ? existing.weekRuns + 1 : 1;
 
-        // Streak: consecutive days
         let streak = existing.streakDays;
         if (existing.lastRunDay) {
           const lastDate = new Date(existing.lastRunDay + 'T00:00:00Z');
@@ -89,10 +424,9 @@ router.post('/', requireAuth, async (req, res) => {
           const diffDays = Math.round((todayDate - lastDate) / 86400000);
           if (diffDays === 1) streak += 1;
           else if (diffDays > 1) streak = 1;
-          // diffDays === 0: same day, keep streak
         }
 
-        await prisma.runStats.update({
+        updatedStats = await prisma.runStats.update({
           where: { userId: req.userId },
           data: {
             totalRuns: existing.totalRuns + 1,
@@ -100,17 +434,26 @@ router.post('/', requireAuth, async (req, res) => {
             totalDurationSec: existing.totalDurationSec + dur,
             longestRunM: Math.max(existing.longestRunM, dist),
             bestPaceSec: pace > 0 && (existing.bestPaceSec === 0 || pace < existing.bestPaceSec) ? pace : existing.bestPaceSec,
-            weekDistanceM: weekDist,
-            weekRuns: weekRuns,
-            weekStart: ws,
-            streakDays: streak,
-            lastRunDay: today
+            weekDistanceM: weekDist, weekRuns, weekStart: ws,
+            streakDays: streak, lastRunDay: today
           }
         });
       }
+
+      // Check achievements
+      newAchievements = await checkAndUnlockAchievements(req.userId, updatedStats, run);
     }
 
-    res.json({ ok: true, run: { id: run.id, distanceM: dist, durationSec: dur, avgPaceSec: pace } });
+    // Generate AI coach tips
+    const stats = await prisma.runStats.findUnique({ where: { userId: req.userId } });
+    const coachTips = generateCoachTips(run, stats);
+
+    res.json({
+      ok: true,
+      run: { id: run.id, distanceM: dist, durationSec: dur, avgPaceSec: pace },
+      newAchievements,
+      coachTips
+    });
   } catch (err) {
     console.error('POST /api/runs error:', err);
     res.status(500).json({ error: 'server_error' });
@@ -129,18 +472,11 @@ router.get('/', requireAuth, async (req, res) => {
       take: limit,
       skip: offset,
       select: {
-        id: true,
-        startedAt: true,
-        distanceM: true,
-        durationSec: true,
-        avgPaceSec: true,
-        calories: true,
-        status: true
+        id: true, startedAt: true, distanceM: true,
+        durationSec: true, avgPaceSec: true, calories: true, status: true
       }
     });
-
     const total = await prisma.run.count({ where: { userId: req.userId, status: 'completed' } });
-
     res.json({ runs, total, limit, offset });
   } catch (err) {
     console.error('GET /api/runs error:', err);
@@ -148,21 +484,7 @@ router.get('/', requireAuth, async (req, res) => {
   }
 });
 
-// GET /api/runs/:id  — single run with full route
-router.get('/:id', requireAuth, async (req, res) => {
-  try {
-    const run = await prisma.run.findFirst({
-      where: { id: req.params.id, userId: req.userId }
-    });
-    if (!run) return res.status(404).json({ error: 'not_found' });
-    res.json(run);
-  } catch (err) {
-    console.error('GET /api/runs/:id error:', err);
-    res.status(500).json({ error: 'server_error' });
-  }
-});
-
-// GET /api/runs/me/stats  — user's run stats
+// GET /api/runs/me/stats
 router.get('/me/stats', requireAuth, async (req, res) => {
   try {
     const ws = weekStartISO();
@@ -176,7 +498,6 @@ router.get('/me/stats', requireAuth, async (req, res) => {
       });
     }
 
-    // Reset week stats if stale
     if (stats.weekStart !== ws) {
       stats = await prisma.runStats.update({
         where: { userId: req.userId },
@@ -195,7 +516,7 @@ router.get('/me/stats', requireAuth, async (req, res) => {
       streakDays: stats.streakDays
     });
   } catch (err) {
-    console.error('GET /api/runs/me/stats error:', err);
+    console.error('GET /runs/me/stats error:', err);
     res.status(500).json({ error: 'server_error' });
   }
 });
@@ -213,48 +534,51 @@ router.get('/club/leaderboard', optionalAuth, async (req, res) => {
         orderBy: { weekDistanceM: 'desc' },
         take: limit,
         select: {
-          userId: true,
-          weekDistanceM: true,
-          weekRuns: true,
+          userId: true, weekDistanceM: true, weekRuns: true,
           user: { select: { username: true, avatarColor: true, avatarData: true } }
         }
       });
       return res.json({
         scope, rows: rows.map((r, i) => ({
-          rank: i + 1,
-          username: r.user.username,
-          avatarColor: r.user.avatarColor,
-          avatarData: r.user.avatarData || null,
-          distanceM: r.weekDistanceM,
-          runs: r.weekRuns
+          rank: i + 1, username: r.user.username,
+          avatarColor: r.user.avatarColor, avatarData: r.user.avatarData || null,
+          distanceM: r.weekDistanceM, runs: r.weekRuns
         }))
       });
     }
 
-    // alltime
     const rows = await prisma.runStats.findMany({
       where: { totalDistanceM: { gt: 0 } },
       orderBy: { totalDistanceM: 'desc' },
       take: limit,
       select: {
-        userId: true,
-        totalDistanceM: true,
-        totalRuns: true,
+        userId: true, totalDistanceM: true, totalRuns: true,
         user: { select: { username: true, avatarColor: true, avatarData: true } }
       }
     });
     res.json({
       scope, rows: rows.map((r, i) => ({
-        rank: i + 1,
-        username: r.user.username,
-        avatarColor: r.user.avatarColor,
-        avatarData: r.user.avatarData || null,
-        distanceM: r.totalDistanceM,
-        runs: r.totalRuns
+        rank: i + 1, username: r.user.username,
+        avatarColor: r.user.avatarColor, avatarData: r.user.avatarData || null,
+        distanceM: r.totalDistanceM, runs: r.totalRuns
       }))
     });
   } catch (err) {
-    console.error('GET /api/runs/club/leaderboard error:', err);
+    console.error('GET /club/leaderboard error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// GET /api/runs/:id — single run with full route
+router.get('/:id', requireAuth, async (req, res) => {
+  try {
+    const run = await prisma.run.findFirst({
+      where: { id: req.params.id, userId: req.userId }
+    });
+    if (!run) return res.status(404).json({ error: 'not_found' });
+    res.json(run);
+  } catch (err) {
+    console.error('GET /runs/:id error:', err);
     res.status(500).json({ error: 'server_error' });
   }
 });

@@ -31,8 +31,10 @@ model User {
   preferences  Preferences?
   scores       Score[]
   createdLeagues League[] @relation("LeagueCreator")
-  runs           Run[]
-  runStats       RunStats?
+  runs             Run[]
+  runStats         RunStats?
+  runClubAccess    RunClubAccess?
+  runAchievements  RunAchievement[]
 
   @@index([username])
 }
@@ -196,4 +198,39 @@ model RunStats {
   streakDays       Int      @default(0)
   lastRunDay       String?                 // ISO date
   updatedAt        DateTime @updatedAt
+}
+
+model RunClubAccess {
+  id            String    @id @default(cuid())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String    @unique          // one request per user
+  status        String    @default("pending") // pending | approved | denied
+  socialProof   String?                    // OpenSea/Twitter/Discord handle
+  message       String?                    // optional message from user
+  reviewNote    String?                    // admin note on review
+  requestedAt   DateTime  @default(now())
+  reviewedAt    DateTime?
+
+  @@index([status])
+}
+
+model RunAchievement {
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  achievementId String                     // e.g. 'first_run', 'ran_5k', etc.
+  unlockedAt    DateTime @default(now())
+
+  @@id([userId, achievementId])
+}
+
+model WeeklyChallenge {
+  id            String   @id @default(cuid())
+  weekStart     String                     // ISO date of Monday
+  title         String
+  description   String
+  goalM         Int                        // target meters for the community
+  currentM      Int      @default(0)       // community progress
+  createdAt     DateTime @default(now())
+
+  @@unique([weekStart])
 }

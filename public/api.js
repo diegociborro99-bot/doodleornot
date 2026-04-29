@@ -70,11 +70,23 @@
     todayPowerups: () => req('/api/powerups/today'),
 
     // ----- runs (Doodles Run Club) -----
-    saveRun:       (data) => req('/api/runs', { method: 'POST', body: data }),
-    getRuns:       (limit = 20, offset = 0) => req(`/api/runs?limit=${limit}&offset=${offset}`),
-    getRun:        (id) => req('/api/runs/' + encodeURIComponent(id)),
-    getRunStats:   () => req('/api/runs/me/stats'),
-    runLeaderboard:(scope = 'weekly', limit = 20) => req(`/api/runs/club/leaderboard?scope=${scope}&limit=${limit}`),
+    saveRun:          (data) => req('/api/runs', { method: 'POST', body: data }),
+    getRuns:          (limit = 20, offset = 0) => req(`/api/runs?limit=${limit}&offset=${offset}`),
+    getRun:           (id) => req('/api/runs/' + encodeURIComponent(id)),
+    getRunStats:      () => req('/api/runs/me/stats'),
+    runLeaderboard:   (scope = 'weekly', limit = 20) => req(`/api/runs/club/leaderboard?scope=${scope}&limit=${limit}`),
+    // access control
+    runAccessStatus:  () => req('/api/runs/access/status'),
+    requestRunAccess: (data) => req('/api/runs/access/request', { method: 'POST', body: data }),
+    pendingAccess:    () => req('/api/runs/access/pending'),
+    allAccess:        () => req('/api/runs/access/all'),
+    reviewAccess:     (id, decision, reviewNote) => req(`/api/runs/access/${encodeURIComponent(id)}/review`, { method: 'POST', body: { decision, reviewNote } }),
+    // achievements & coach
+    runAchievements:  () => req('/api/runs/achievements'),
+    runCoachTips:     (runId) => req(`/api/runs/coach/${encodeURIComponent(runId)}`),
+    // community
+    communityStats:   () => req('/api/runs/community/stats'),
+    createChallenge:  (data) => req('/api/runs/community/challenge', { method: 'POST', body: data }),
 
     // ----- connectivity -----
     health: () => req('/healthz'),
