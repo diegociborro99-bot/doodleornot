@@ -1,7 +1,7 @@
 /* Doodle or Not — Service Worker
    Strategy: network-first for HTML/JS (always fresh), cache-first for assets (images/fonts).
    Bumping VERSION forces a full cache refresh on next visit. */
-const VERSION = 'don-v6-2026-04-17';
+const VERSION = 'don-v7-2026-04-30';
 
 const CORE = [
   './',
