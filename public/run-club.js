@@ -10,6 +10,25 @@
   var useMemo = React.useMemo;
   var useCallback = React.useCallback;
 
+  // Leaflet dynamic loader
+  var leafletReady = null;
+  var loadLeaflet = function() {
+    if (leafletReady) return leafletReady;
+    if (window.L) { leafletReady = Promise.resolve(); return leafletReady; }
+    leafletReady = new Promise(function(resolve) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+      var script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = function() { resolve(); };
+      script.onerror = function() { resolve(); };
+      document.head.appendChild(script);
+    });
+    return leafletReady;
+  };
+
   /* Local Pill component (no dependency on app.js) */
   var RCPill = function(props) {
     var active = props.active;
@@ -400,6 +419,9 @@ const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
   }
   .rc-nav-pill { transition: all 0.3s cubic-bezier(.22,1,.36,1); position: relative; overflow: hidden; }
   .rc-nav-pill:active { transform: scale(0.95); }
+  .rc-current-pos { animation: rcPulse 2s ease-in-out infinite; }
+  .leaflet-container { background: #1a1030 !important; }
+  .leaflet-control-attribution { display: none !important; }
   @media (prefers-reduced-motion: reduce) {
     .rc-slide-up, .rc-pop-in, .rc-shine, .rc-fade-in, .rc-float, .rc-shimmer { animation: none !important; }
   }
@@ -482,47 +504,114 @@ var reverseGeocode = function(lat, lng) {
     .catch(function() { return null; });
 };
 
-/* ---------- RouteMapPreview Component ---------- */
-const RouteMapPreview = ({ route, distanceLabel }) => {
-  if (!route || route.length < 2) return null;
-  var lats = route.map(function(p) { return p.lat; });
-  var lngs = route.map(function(p) { return p.lng; });
-  var minLat = Math.min.apply(null, lats); var maxLat = Math.max.apply(null, lats);
-  var minLng = Math.min.apply(null, lngs); var maxLng = Math.max.apply(null, lngs);
-  var latRange = maxLat - minLat || 0.001;
-  var lngRange = maxLng - minLng || 0.001;
-  var padding = 24;
-  var svgW = 400; var svgH = 200;
-  var innerW = svgW - padding * 2; var innerH = svgH - padding * 2;
-  var scale = Math.min(innerW / lngRange, innerH / latRange);
-  var offsetX = (svgW - lngRange * scale) / 2;
-  var offsetY = (svgH - latRange * scale) / 2;
-  var points = route.map(function(p) {
-    var x = (p.lng - minLng) * scale + offsetX;
-    var y = svgH - ((p.lat - minLat) * scale + offsetY);
-    return x.toFixed(1) + ',' + y.toFixed(1);
-  }).join(' ');
-  var startPt = route[0]; var endPt = route[route.length - 1];
-  var sx = (startPt.lng - minLng) * scale + offsetX;
-  var sy = svgH - ((startPt.lat - minLat) * scale + offsetY);
-  var ex = (endPt.lng - minLng) * scale + offsetX;
-  var ey = svgH - ((endPt.lat - minLat) * scale + offsetY);
+/* ---------- LeafletMap Component (replaces RouteMapPreview) ---------- */
+var LeafletMap = function(props) {
+  var route = props.route;
+  var live = props.live;
+  var mapH = props.height || 220;
+  var containerRef = useRef(null);
+  var mapRef = useRef(null);
+  var polylineRef = useRef(null);
+  var startMarkerRef = useRef(null);
+  var endMarkerRef = useRef(null);
 
-  return /*#__PURE__*/React.createElement("div", { className: "rc-pop-in", style: { width: '100%', marginBottom: 16, position: 'relative' } },
-    /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 " + svgW + " " + svgH, width: "100%", height: 200,
-      style: { background: 'rgba(26,16,48,0.7)', borderRadius: 16, display: 'block' }
-    },
-      /*#__PURE__*/React.createElement("defs", null,
-        /*#__PURE__*/React.createElement("linearGradient", { id: "routeGrad", x1: "0", y1: "0", x2: "1", y2: "0" },
-          /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: "#7DD8A0" }),
-          /*#__PURE__*/React.createElement("stop", { offset: "50%", stopColor: "#A882FF" }),
-          /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: "#FF96C8" }))),
-      /*#__PURE__*/React.createElement("polyline", { points: points, fill: "none", stroke: "url(#routeGrad)", strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round", opacity: 0.9 }),
-      /*#__PURE__*/React.createElement("circle", { cx: sx, cy: sy, r: 5, fill: "#7DD8A0", stroke: "#FFF", strokeWidth: 1.5 }),
-      /*#__PURE__*/React.createElement("circle", { cx: ex, cy: ey, r: 5, fill: "#FF6B6B", stroke: "#FFF", strokeWidth: 1.5 })
-    ),
-    distanceLabel && /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', bottom: 10, right: 14, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.04em' } }, distanceLabel)
-  );
+  // Initialize map
+  useEffect(function() {
+    if (!containerRef.current) return;
+    var cancelled = false;
+    loadLeaflet().then(function() {
+      if (cancelled || !containerRef.current || !window.L) return;
+      var L = window.L;
+      var map = L.map(containerRef.current, {
+        zoomControl: false,
+        attributionControl: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        touchZoom: true,
+        tap: true
+      });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd'
+      }).addTo(map);
+
+      if (route && route.length >= 2) {
+        var latlngs = route.map(function(p) { return [p.lat, p.lng]; });
+        polylineRef.current = L.polyline(latlngs, {
+          color: '#A882FF', weight: 4, opacity: 0.9,
+          lineCap: 'round', lineJoin: 'round'
+        }).addTo(map);
+        startMarkerRef.current = L.circleMarker(latlngs[0], {
+          radius: 7, fillColor: '#7DD8A0', fillOpacity: 1, color: '#FFF', weight: 2
+        }).addTo(map);
+        endMarkerRef.current = L.circleMarker(latlngs[latlngs.length - 1], {
+          radius: 7, fillColor: '#FF6B6B', fillOpacity: 1, color: '#FFF', weight: 2
+        }).addTo(map);
+        map.fitBounds(polylineRef.current.getBounds(), { padding: [30, 30] });
+      } else if (route && route.length === 1) {
+        map.setView([route[0].lat, route[0].lng], 16);
+        startMarkerRef.current = L.circleMarker([route[0].lat, route[0].lng], {
+          radius: 7, fillColor: '#7DD8A0', fillOpacity: 1, color: '#FFF', weight: 2
+        }).addTo(map);
+      } else {
+        map.setView([40.4168, -3.7038], 14);
+      }
+      mapRef.current = map;
+      setTimeout(function() { map.invalidateSize(); }, 100);
+    });
+    return function() {
+      cancelled = true;
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
+      polylineRef.current = null;
+      startMarkerRef.current = null;
+      endMarkerRef.current = null;
+    };
+  }, []);
+
+  // Update route when live
+  useEffect(function() {
+    if (!mapRef.current || !window.L || !route || route.length < 1) return;
+    var L = window.L;
+    var latlngs = route.map(function(p) { return [p.lat, p.lng]; });
+
+    if (polylineRef.current) {
+      polylineRef.current.setLatLngs(latlngs);
+    } else if (latlngs.length >= 2) {
+      polylineRef.current = L.polyline(latlngs, {
+        color: '#A882FF', weight: 4, opacity: 0.9,
+        lineCap: 'round', lineJoin: 'round'
+      }).addTo(mapRef.current);
+    }
+
+    if (!startMarkerRef.current && latlngs.length >= 1) {
+      startMarkerRef.current = L.circleMarker(latlngs[0], {
+        radius: 7, fillColor: '#7DD8A0', fillOpacity: 1, color: '#FFF', weight: 2
+      }).addTo(mapRef.current);
+    }
+
+    var last = latlngs[latlngs.length - 1];
+    if (endMarkerRef.current) {
+      endMarkerRef.current.setLatLng(last);
+    } else if (latlngs.length >= 2) {
+      endMarkerRef.current = L.circleMarker(last, {
+        radius: 7, fillColor: '#FF6B6B', fillOpacity: 1, color: '#FFF', weight: 2
+      }).addTo(mapRef.current);
+    }
+
+    if (live && latlngs.length > 0) {
+      mapRef.current.panTo(last, { animate: true, duration: 0.5 });
+    }
+  }, [route, live]);
+
+  return /*#__PURE__*/React.createElement("div", {
+    ref: containerRef,
+    className: "rc-pop-in",
+    style: {
+      width: '100%', height: mapH, borderRadius: 16, overflow: 'hidden',
+      marginBottom: 16, border: '1px solid rgba(168,130,255,0.2)',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+    }
+  });
 };
 
 /* ==========================================================================
@@ -885,7 +974,7 @@ const RunClubScreen = ({ profile }) => {
         ),
 
         // Route map
-        rdRoute && rdRoute.length >= 2 && /*#__PURE__*/React.createElement(RouteMapPreview, { route: rdRoute, distanceLabel: formatDistanceMiles(rdDist) + ' mi' }),
+        rdRoute && rdRoute.length >= 2 && /*#__PURE__*/React.createElement(LeafletMap, { route: rdRoute, live: false, height: 200 }),
 
         // Stat cards
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 } },
@@ -933,7 +1022,7 @@ const RunClubScreen = ({ profile }) => {
         ),
 
         // Route map
-        gpsRoute.length >= 2 && /*#__PURE__*/React.createElement(RouteMapPreview, { route: gpsRoute, distanceLabel: formatDistanceMiles(dist) + ' mi' }),
+        gpsRoute.length >= 2 && /*#__PURE__*/React.createElement(LeafletMap, { route: gpsRoute, live: false, height: 200 }),
 
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 } },
           [['Time', formatDuration(dur), '#7DD8A0'], ['Pace/km', formatPace(pace), '#A882FF'], ['Cal', estimateCalories(dist), '#FFB74D']].map(function(pair, i) {
@@ -1076,6 +1165,11 @@ const RunClubScreen = ({ profile }) => {
                    background: isPaused ? 'rgba(255,171,145,0.12)' : 'rgba(168,230,207,0.12)',
                    color: isPaused ? '#FFAB91' : '#7DD8A0' }
         }, isPaused ? 'PAUSED' : isGoalMode ? targetLabel : 'FREE RUN')
+      ),
+
+      // Live route map
+      /*#__PURE__*/React.createElement("div", { style: { padding: '0 16px', marginBottom: 8 } },
+        /*#__PURE__*/React.createElement(LeafletMap, { route: gpsRoute, live: true, height: 180 })
       ),
 
       // Main metrics — centered
