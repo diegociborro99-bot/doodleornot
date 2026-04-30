@@ -40,7 +40,12 @@ router.post('/access/request', requireAuth, async (req, res) => {
     const { socialProof, message } = req.body || {};
     const existing = await prisma.runClubAccess.findUnique({ where: { userId: req.userId } });
     if (existing) {
-      return res.json({ status: existing.status, message: 'Already requested' });
+      // Allow re-apply after denial — delete old record and create fresh
+      if (existing.status === 'denied') {
+        await prisma.runClubAccess.delete({ where: { userId: req.userId } });
+      } else {
+        return res.json({ status: existing.status, message: 'Already requested' });
+      }
     }
 
     const access = await prisma.runClubAccess.create({

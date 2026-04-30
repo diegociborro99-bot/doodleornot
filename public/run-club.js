@@ -783,6 +783,8 @@ const RunClubScreen = ({ profile }) => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [allRequests, setAllRequests] = useState([]);
   const [reviewNote, setReviewNote] = useState('');
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestError, setRequestError] = useState(null);
 
   // Achievements + community + coach
   const [achievements, setAchievements] = useState([]);
@@ -808,6 +810,7 @@ const RunClubScreen = ({ profile }) => {
   const [gpsRoute, setGpsRoute] = useState([]);
   const [gpsError, setGpsError] = useState(null);
   const [gpsAccuracy, setGpsAccuracy] = useState(null);
+  const [currentSpeed, setCurrentSpeed] = useState(0); // m/s
   const [splits, setSplits] = useState([]);
   const watchIdRef = useRef(null);
   const startTimeRef = useRef(null);
@@ -815,6 +818,8 @@ const RunClubScreen = ({ profile }) => {
   const timerRef = useRef(null);
   const lastPosRef = useRef(null);
   const lastSplitTimeRef = useRef(0);
+  // GPS smoothing buffer for Kalman-like filtering
+  const gpsBufRef = useRef([]);
 
   // Post-run zone
   const [runZone, setRunZone] = useState(null);
@@ -879,11 +884,19 @@ const RunClubScreen = ({ profile }) => {
   }, [view, isAdmin]);
 
   const handleRequestAccess = async () => {
-    if (!api) return;
+    if (!api || requestLoading) return;
+    if (!requestSocial.trim()) { setRequestError('Please enter your social handle'); return; }
+    setRequestLoading(true);
+    setRequestError(null);
     try {
       const res = await api.requestRunAccess({ socialProof: requestSocial, message: requestMsg });
       setAccessStatus(res.status || 'pending');
-    } catch (e) { console.warn('Request access failed:', e); }
+      setRequestLoading(false);
+    } catch (e) {
+      console.warn('Request access failed:', e);
+      setRequestError('Could not submit request. Check your connection and try again.');
+      setRequestLoading(false);
+    }
   };
 
   const handleReview = async (id, decision) => {
@@ -926,17 +939,61 @@ const RunClubScreen = ({ profile }) => {
   }, [distance, runMode, goalReached]);
 
   const startGpsWatch = () => {
+    gpsBufRef.current = [];
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
+        const { latitude, longitude, accuracy, speed: nativeSpeed } = pos.coords;
+        var now = Date.now();
         setGpsAccuracy(Math.round(accuracy));
-        if (accuracy > 50) return;
-        setGpsRoute(prev => [...prev, { lat: latitude, lng: longitude, ts: Date.now() }]);
-        lastMovementRef.current = Date.now();
+
+        // Adaptive accuracy threshold: tighter when moving, looser when starting
+        var accThreshold = lastPosRef.current ? 35 : 60;
+        if (accuracy > accThreshold) return;
+
+        // GPS smoothing: weighted average of last 3 readings (more recent = higher weight)
+        var buf = gpsBufRef.current;
+        buf.push({ lat: latitude, lng: longitude, ts: now, acc: accuracy });
+        if (buf.length > 4) buf.shift();
+
+        var smoothLat = latitude, smoothLng = longitude;
+        if (buf.length >= 3) {
+          var totalW = 0;
+          var wLat = 0, wLng = 0;
+          for (var bi = 0; bi < buf.length; bi++) {
+            // Weight: more recent + more accurate = higher weight
+            var recency = 1 + bi * 0.5;
+            var accWeight = 1 / Math.max(1, buf[bi].acc);
+            var w = recency * accWeight;
+            wLat += buf[bi].lat * w;
+            wLng += buf[bi].lng * w;
+            totalW += w;
+          }
+          smoothLat = wLat / totalW;
+          smoothLng = wLng / totalW;
+        }
+
+        setGpsRoute(prev => [...prev, { lat: smoothLat, lng: smoothLng, ts: now }]);
+        lastMovementRef.current = now;
         if (autoPaused) setAutoPaused(false);
+
         if (lastPosRef.current) {
-          const d = haversineDistance(lastPosRef.current.lat, lastPosRef.current.lng, latitude, longitude);
-          if (d > 3 && d < 500) {
+          var d = haversineDistance(lastPosRef.current.lat, lastPosRef.current.lng, smoothLat, smoothLng);
+          var dt = (now - lastPosRef.current.ts) / 1000; // seconds since last point
+
+          // Calculate speed: prefer native GPS speed if available, otherwise derive
+          var spd = 0;
+          if (nativeSpeed != null && nativeSpeed >= 0) {
+            spd = nativeSpeed;
+          } else if (dt > 0) {
+            spd = d / dt;
+          }
+          setCurrentSpeed(Math.round(spd * 10) / 10);
+
+          // Drift elimination: ignore tiny movements that are GPS noise
+          // Use accuracy-adaptive min distance: at least max(2, accuracy * 0.3)
+          var minDist = Math.max(2, accuracy * 0.3);
+          // Speed sanity check: >15 m/s (54 km/h) is likely GPS teleport for a runner
+          if (d > minDist && d < 300 && spd < 15) {
             setDistance(prev => {
               const newDist = prev + d;
               const currentKm = Math.floor(newDist / 1000);
@@ -949,12 +1006,23 @@ const RunClubScreen = ({ profile }) => {
               }
               return newDist;
             });
-            lastPosRef.current = { lat: latitude, lng: longitude };
+            lastPosRef.current = { lat: smoothLat, lng: smoothLng, ts: now };
           }
-        } else { lastPosRef.current = { lat: latitude, lng: longitude }; }
+        } else {
+          lastPosRef.current = { lat: smoothLat, lng: smoothLng, ts: now };
+        }
       },
-      (err) => { setGpsError(err.code === 1 ? 'Location permission denied' : err.code === 2 ? 'GPS unavailable' : 'GPS timeout'); },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 2000 }
+      (err) => {
+        var msg = err.code === 1 ? 'Location permission denied — enable in Settings'
+          : err.code === 2 ? 'GPS signal unavailable — try outdoors'
+          : 'GPS timeout — trying again...';
+        setGpsError(msg);
+        // Auto-retry on timeout
+        if (err.code === 3 && watchIdRef.current === null) {
+          setTimeout(function() { startGpsWatch(); }, 3000);
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 1000 }
     );
   };
 
@@ -1156,12 +1224,16 @@ const RunClubScreen = ({ profile }) => {
             style: { width: '100%', padding: '10px 14px', borderRadius: 12, fontSize: 14, border: '1px solid var(--c-border)',
                      background: 'var(--c-input-bg)', color: 'var(--c-text)', marginBottom: 16, boxSizing: 'border-box', outline: 'none' }
           }),
+          requestError && /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: '#FF8A8A', marginBottom: 12, padding: '8px 12px', borderRadius: 10, background: 'rgba(255,138,138,0.1)' } }, requestError),
           /*#__PURE__*/React.createElement("button", {
-            onClick: handleRequestAccess, disabled: !requestSocial.trim(),
+            onClick: handleRequestAccess, disabled: !requestSocial.trim() || requestLoading,
             style: { width: '100%', padding: '14px', borderRadius: 16, fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer',
-                     background: requestSocial.trim() ? 'linear-gradient(135deg, #A882FF 0%, #FF96C8 100%)' : 'var(--c-border)', color: '#FFF', transition: 'all 0.3s',
-                     boxShadow: requestSocial.trim() ? '0 4px 20px rgba(168,130,255,0.3)' : 'none' }
-          }, "Submit Request")
+                     background: requestSocial.trim() && !requestLoading ? 'linear-gradient(135deg, #A882FF 0%, #FF96C8 100%)' : 'var(--c-border)', color: '#FFF', transition: 'all 0.3s',
+                     boxShadow: requestSocial.trim() && !requestLoading ? '0 4px 20px rgba(168,130,255,0.3)' : 'none',
+                     opacity: requestLoading ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }
+          },
+            requestLoading && /*#__PURE__*/React.createElement("div", { style: { width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#FFF', animation: 'rcSpin 0.8s linear infinite' } }),
+            requestLoading ? "Sending..." : "Submit Request")
         ),
 
         // STATUS: pending — waiting screen
@@ -1176,14 +1248,20 @@ const RunClubScreen = ({ profile }) => {
             "You'll get access as soon as it's approved. Check back soon!")
         ),
 
-        // STATUS: denied
+        // STATUS: denied — with re-apply option
         accessStatus === 'denied' && /*#__PURE__*/React.createElement("div", { style: { background: "rgba(255,255,255,0.8)", backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: "1px solid rgba(255,138,138,0.2)", borderRadius: 24, padding: 20, width: '100%', maxWidth: 360, textAlign: 'center', boxShadow: '0 8px 32px rgba(255,138,138,0.08)' }, className: "rc-pop-in" },
           /*#__PURE__*/React.createElement("div", { style: { width: 56, height: 56, borderRadius: '50%', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                      background: 'rgba(255,138,138,0.12)' } },
             /*#__PURE__*/React.createElement(LockIcon, { size: 28 })),
-          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 18, fontWeight: 600, color: 'var(--c-wrong)', marginBottom: 8 } }, "Access Denied"),
-          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', lineHeight: 1.6 } },
-            "Your request was not approved. Contact an admin if you believe this is an error.")
+          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 18, fontWeight: 600, color: '#FF8A8A', marginBottom: 8 } }, "Access Denied"),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', lineHeight: 1.6, marginBottom: 16 } },
+            "Your request was not approved. You can try applying again with more details."),
+          /*#__PURE__*/React.createElement("button", {
+            onClick: function() { setAccessStatus('none'); setRequestSocial(''); setRequestMsg(''); setRequestError(null); },
+            style: { padding: '12px 28px', borderRadius: 16, fontSize: 15, fontWeight: 700, border: 'none', cursor: 'pointer',
+                     background: 'linear-gradient(135deg, #A882FF 0%, #FF96C8 100%)', color: '#FFF',
+                     boxShadow: '0 4px 20px rgba(168,130,255,0.3)', transition: 'all 0.3s' }
+          }, "Re-Apply")
         ),
 
         // Admin shortcut (even on access gate screen)
@@ -1510,12 +1588,15 @@ const RunClubScreen = ({ profile }) => {
                 /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 6, color: 'var(--c-text-sub)' } }, "Miles"))
             ),
 
-        // Pace + Cal
-        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 32, marginTop: 24 } },
+        // Pace + Speed + Cal
+        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 24, marginTop: 24, justifyContent: 'center' } },
           /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
             /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: paceZone.color, transition: 'color 0.5s ease' } }, formatPace(currentPace)),
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: paceZone.color, transition: 'color 0.5s ease' } },
               paceZone.label ? paceZone.label + ' /km' : 'Pace /km')),
+          /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: 'var(--c-text)' } }, (currentSpeed * 3.6).toFixed(1)),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: 'var(--c-text-sub)' } }, "km/h")),
           /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
             /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: 'var(--c-text)' } }, estimateCalories(Math.round(distance))),
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: 'var(--c-text-sub)' } }, "Cal")),
