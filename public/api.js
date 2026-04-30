@@ -59,6 +59,7 @@
     // ----- leagues -----
     createLeague: (name) => req('/api/leagues', { method: 'POST', body: { name } }),
     joinLeague:   (code) => req('/api/leagues/' + encodeURIComponent(code) + '/join', { method: 'POST' }),
+    leaveLeague:  (code) => req('/api/leagues/' + encodeURIComponent(code) + '/leave', { method: 'POST' }),
     getLeague:    (code) => req('/api/leagues/' + encodeURIComponent(code)),
     myLeagues:    () => req('/api/leagues'),
 

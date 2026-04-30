@@ -59,7 +59,7 @@ router.get('/:code', requireAuth, async (req, res) => {
           include: {
             user: {
               select: {
-                id: true, username: true, avatarColor: true,
+                id: true, username: true, avatarColor: true, avatarData: true,
                 stats: { select: { weekPoints: true, weekStart: true, totalPoints: true } }
               }
             }
@@ -69,15 +69,39 @@ router.get('/:code', requireAuth, async (req, res) => {
     });
     if (!league) return res.status(404).json({ error: 'not_found' });
     const ws = weekStartISO();
+    // Sort by weekPoints desc, then totalPoints desc, then username — without the
+    // secondary keys, every member shows up tied at 0 on Monday morning and the order
+    // silently reshuffles on every refresh (Postgres does not guarantee row order).
     const members = league.members.map(m => ({
       username: m.user.username,
       avatarColor: m.user.avatarColor,
+      avatarData: m.user.avatarData || null,
       weekPoints: m.user.stats && m.user.stats.weekStart === ws ? m.user.stats.weekPoints : 0,
       totalPoints: m.user.stats ? m.user.stats.totalPoints : 0
-    })).sort((a, b) => b.weekPoints - a.weekPoints);
+    })).sort((a, b) =>
+      (b.weekPoints - a.weekPoints) ||
+      (b.totalPoints - a.totalPoints) ||
+      a.username.localeCompare(b.username)
+    );
     res.json({ code: league.code, name: league.name, members });
   } catch (err) {
     console.error('GET /:code error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// POST /api/leagues/:code/leave — leave a league
+router.post('/:code/leave', requireAuth, async (req, res) => {
+  try {
+    const code = (req.params.code || '').toUpperCase();
+    const league = await prisma.league.findUnique({ where: { code } });
+    if (!league) return res.status(404).json({ error: 'not_found' });
+    await prisma.leagueMember.deleteMany({
+      where: { leagueId: league.id, userId: req.userId }
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('POST /:code/leave error:', err);
     res.status(500).json({ error: 'server_error' });
   }
 });

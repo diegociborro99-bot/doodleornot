@@ -7635,24 +7635,32 @@ const LeaderboardScreen = ({
 
   useEffect(() => {
     if (!api) { setLoading(false); return; }
+    let cancelled = false;
     setLoading(true);
     api.leaderboard(tab === 'last' ? 'lastweekly' : 'weekly', 50)
       .then(data => {
+        if (cancelled) return;
         if (data && Array.isArray(data.rows)) setServerRows(data.rows);
         else setServerRows([]);
-        if (data && data.weekNumber) setWeekNum(data.weekNumber);
+        // Use a non-falsy check so weekNumber === 0 doesn't get silently dropped.
+        if (data && data.weekNumber != null) setWeekNum(data.weekNumber);
       })
-      .catch(() => setServerRows([]))
-      .finally(() => setLoading(false));
+      .catch(() => { if (!cancelled) setServerRows([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [tab, fetchKey]);
 
-  // Build board from server data only (no mock data)
+  // Build board from server data only (no mock data).
+  // Username comparisons are case-insensitive — server stores whatever the user signed up
+  // with, but profile.name is always lowercased. Without this, "you" never matched and the
+  // user got duplicated as a phantom row appended at the bottom.
+  const myKey = (profile && profile.name || '').toLowerCase();
   const baseBoard = (serverRows || []).map(r => ({
     name: r.username,
     color: r.avatarColor || '#C5B3E6',
     avatar: r.avatarData || null,
     pts: r.points,
-    me: r.username === profile.name
+    me: typeof r.username === 'string' && r.username.toLowerCase() === myKey
   }));
   // Always ensure current user is on the board (only for current week)
   const alreadyOnBoard = baseBoard.some(r => r.me);
