@@ -8,6 +8,7 @@ const CORE = [
   './index.html',
   './tailwind.css',
   './app.js',
+  './run-club.js',
   './api.js',
   './doodles-dataset.js',
   './manifest.json',
