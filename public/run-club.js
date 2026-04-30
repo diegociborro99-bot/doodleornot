@@ -1653,71 +1653,118 @@ const RunClubScreen = ({ profile }) => {
   if (view === 'admin' && isAdmin) {
     var pendingCount = pendingRequests.length;
     var reviewedList = allRequests.filter(function(r) { return r.status !== 'pending'; });
+    var approvedCount = allRequests.filter(function(r) { return r.status === 'approved'; }).length;
+    var deniedCount = allRequests.filter(function(r) { return r.status === 'denied'; }).length;
+    var totalMembers = approvedCount + 1; // +1 for admin
 
     return /*#__PURE__*/React.createElement("div", { className: "rc-pastel-bg", style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
-        // Header
-        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 } },
+
+        // Header with back button
+        /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { marginBottom: 20 } },
           /*#__PURE__*/React.createElement("button", { onClick: () => setView('dashboard'),
-            style: { fontSize: 14, fontWeight: 600, color: '#A882FF', background: 'none', border: 'none', cursor: 'pointer' }
-          }, "← Back"),
-          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 6 } },
-            /*#__PURE__*/React.createElement(GearIcon, { size: 18 }),
-            /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, "Admin Inbox")),
-          pendingCount > 0 && /*#__PURE__*/React.createElement("span", {
-            style: { fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: 'rgba(255,138,138,0.15)', color: '#FF8A8A' }
-          }, pendingCount)
+            style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, color: '#A882FF', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 16 }
+          }, /*#__PURE__*/React.createElement(ArrowLeftIcon, { size: 16 }), "Dashboard"),
+
+          /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 4 } },
+              /*#__PURE__*/React.createElement(GearIcon, { size: 22 }),
+              /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 26, background: 'linear-gradient(135deg, #A882FF, #FF96C8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } }, "Run Club Admin")),
+            /*#__PURE__*/React.createElement("p", { style: { fontSize: 13, color: 'var(--c-text-sub)', marginTop: 4 } }, "Pre-reveal access management"))
+        ),
+
+        // Stats row
+        /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 24 } },
+          /*#__PURE__*/React.createElement("div", { className: "rc-pop-in", style: { background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 16, padding: '14px 10px', textAlign: 'center', borderTop: '3px solid #7DD8A0' } },
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 24, color: '#7DD8A0' } }, totalMembers),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: 'var(--c-text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 } }, "Members")),
+          /*#__PURE__*/React.createElement("div", { className: "rc-pop-in", style: { background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 16, padding: '14px 10px', textAlign: 'center', borderTop: '3px solid #FFB74D' } },
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 24, color: '#FFB74D' } }, pendingCount),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: 'var(--c-text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 } }, "Pending")),
+          /*#__PURE__*/React.createElement("div", { className: "rc-pop-in", style: { background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 16, padding: '14px 10px', textAlign: 'center', borderTop: '3px solid #FF8A8A' } },
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 24, color: '#FF8A8A' } }, deniedCount),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: 'var(--c-text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 } }, "Denied"))
         ),
 
         // Pending requests section
-        pendingCount > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
-          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 } },
-            /*#__PURE__*/React.createElement(InboxIcon, { size: 16 }), "Pending Requests"),
-          pendingRequests.map(function(r) {
-            return /*#__PURE__*/React.createElement("div", { key: r.id, style: { background: "rgba(255,255,255,0.8)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 20, padding: 18, marginBottom: 12, boxShadow: '0 4px 16px rgba(0,0,0,0.04)', border: '1px solid rgba(168,130,255,0.1)' }, className: "rc-pop-in" },
-              /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 } },
-                /*#__PURE__*/React.createElement("div", { style: { width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         fontSize: 14, fontWeight: 700, background: r.user.avatarColor || '#C5B3E6', color: '#FFF' } },
-                  (r.user.username || '?')[0].toUpperCase()),
-                /*#__PURE__*/React.createElement("div", null,
-                  /*#__PURE__*/React.createElement("div", { style: { fontSize: 15, fontWeight: 600, color: 'var(--c-text)' } }, r.user.username),
-                  r.socialProof && /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)' } }, r.socialProof))
-              ),
-              r.message && /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, color: 'var(--c-text-sub)', padding: '8px 12px', borderRadius: 10,
-                         background: 'var(--c-input-bg)', marginBottom: 12, fontStyle: 'italic' } }, '"' + r.message + '"'),
-              /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 8 } },
-                /*#__PURE__*/React.createElement("button", { onClick: function() { handleReview(r.id, 'approved'); },
-                  style: { flex: 1, padding: '10px', borderRadius: 12, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
-                           background: 'rgba(168,230,207,0.15)', color: '#7DD8A0' }
-                }, "Approve"),
-                /*#__PURE__*/React.createElement("button", { onClick: function() { handleReview(r.id, 'denied'); },
-                  style: { flex: 1, padding: '10px', borderRadius: 12, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer',
-                           background: 'rgba(255,138,138,0.1)', color: '#FF8A8A' }
-                }, "Deny"))
-            );
-          })
+        /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 } },
+          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 15, fontWeight: 700, color: 'var(--c-text)', display: 'flex', alignItems: 'center', gap: 8 } },
+            /*#__PURE__*/React.createElement(InboxIcon, { size: 18 }), "Pending Requests"),
+          pendingCount > 0 && /*#__PURE__*/React.createElement("span", {
+            style: { fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 12, background: 'linear-gradient(135deg, #FFB74D, #FF96C8)', color: '#FFF', animation: 'rcBreathe 3s ease-in-out infinite' }
+          }, pendingCount + ' waiting')
         ),
 
-        pendingCount === 0 && /*#__PURE__*/React.createElement("div", { style: { background: "rgba(255,255,255,0.8)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 24, textAlign: 'center', padding: 32, marginBottom: 20, border: '1px solid rgba(125,216,160,0.15)' } },
-          /*#__PURE__*/React.createElement(CheckCircleIcon, { size: 28 }),
-          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', marginTop: 8 } }, "No pending requests. All caught up!")),
+        pendingCount > 0 && pendingRequests.map(function(r) {
+          return /*#__PURE__*/React.createElement("div", { key: r.id, className: "rc-pop-in",
+            style: { background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                     borderRadius: 20, padding: 20, marginBottom: 14, boxShadow: '0 4px 20px rgba(168,130,255,0.08)',
+                     border: '1px solid rgba(168,130,255,0.12)', borderLeft: '4px solid #FFB74D' } },
+            // User info row
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 } },
+              /*#__PURE__*/React.createElement("div", { style: { width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                       fontSize: 16, fontWeight: 700, background: r.user.avatarColor || '#C5B3E6', color: '#FFF', boxShadow: '0 3px 10px rgba(0,0,0,0.1)',
+                       border: '2px solid rgba(255,255,255,0.6)' } },
+                (r.user.username || '?')[0].toUpperCase()),
+              /*#__PURE__*/React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 16, fontWeight: 700, color: 'var(--c-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, r.user.username),
+                r.socialProof && /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: '#A882FF', fontWeight: 500, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, r.socialProof),
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, color: 'var(--c-text-sub)', marginTop: 2 } }, r.user.createdAt ? 'Joined ' + formatDateShort(r.user.createdAt) : ''))
+            ),
+            // Message
+            r.message && /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, color: 'var(--c-text-sub)', padding: '10px 14px', borderRadius: 12,
+                       background: 'rgba(168,130,255,0.06)', marginBottom: 14, fontStyle: 'italic', lineHeight: 1.5, borderLeft: '2px solid rgba(168,130,255,0.2)' } }, '"' + r.message + '"'),
+            // Action buttons
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 10 } },
+              /*#__PURE__*/React.createElement("button", { onClick: function() { handleReview(r.id, 'approved'); },
+                style: { flex: 1, padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer',
+                         background: 'linear-gradient(135deg, #7DD8A0, #66BB6A)', color: '#FFF',
+                         boxShadow: '0 3px 12px rgba(125,216,160,0.25)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }
+              }, /*#__PURE__*/React.createElement(CheckCircleIcon, { size: 16 }), "Approve"),
+              /*#__PURE__*/React.createElement("button", { onClick: function() { handleReview(r.id, 'denied'); },
+                style: { flex: 1, padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer',
+                         background: 'rgba(255,138,138,0.12)', color: '#FF8A8A', transition: 'all 0.2s' }
+              }, "Deny"))
+          );
+        }),
 
-        // Previously reviewed
+        pendingCount === 0 && /*#__PURE__*/React.createElement("div", { className: "rc-pop-in",
+          style: { background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                   borderRadius: 24, textAlign: 'center', padding: '36px 24px', marginBottom: 24, border: '1px dashed rgba(125,216,160,0.3)' } },
+          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 12, display: 'flex', justifyContent: 'center' } },
+            /*#__PURE__*/React.createElement(CheckCircleIcon, { size: 36 })),
+          /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 18, color: 'var(--c-text)', marginBottom: 6 } }, "All Clear"),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 13, color: 'var(--c-text-sub)', lineHeight: 1.6 } },
+            "No pending requests. When someone applies to join Run Club, they'll appear here for your review.")),
+
+        // Members list (approved)
         reviewedList.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
-          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)', marginBottom: 12, marginTop: 8 } }, "Previously Reviewed"),
-          reviewedList.slice(0, 20).map(function(r) {
-            return /*#__PURE__*/React.createElement("div", { key: r.id, style: { background: "rgba(255,255,255,0.7)", backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', borderRadius: 16, marginBottom: 8, padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid rgba(0,0,0,0.04)' } },
-              /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8 } },
-                /*#__PURE__*/React.createElement("div", { style: { width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         fontSize: 11, fontWeight: 700, background: r.user ? (r.user.avatarColor || '#C5B3E6') : '#888', color: '#FFF' } },
+          /*#__PURE__*/React.createElement("h2", { style: { fontSize: 15, fontWeight: 700, color: 'var(--c-text)', marginBottom: 14, marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 } },
+            /*#__PURE__*/React.createElement(RunnerIcon, { size: 18 }), "All Reviewed (" + reviewedList.length + ")"),
+          /*#__PURE__*/React.createElement("div", { className: "rc-stagger" },
+          reviewedList.slice(0, 30).map(function(r) {
+            var isApproved = r.status === 'approved';
+            return /*#__PURE__*/React.createElement("div", { key: r.id,
+              style: { background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                       borderRadius: 16, marginBottom: 8, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                       border: '1px solid rgba(0,0,0,0.04)',
+                       borderLeft: '3px solid ' + (isApproved ? '#7DD8A0' : '#FF8A8A') }, className: "rc-pop-in" },
+              /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+                /*#__PURE__*/React.createElement("div", { style: { width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                         fontSize: 12, fontWeight: 700, background: r.user ? (r.user.avatarColor || '#C5B3E6') : '#888', color: '#FFF' } },
                   r.user ? (r.user.username || '?')[0].toUpperCase() : '?'),
-                /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 500, color: 'var(--c-text)' } }, r.user ? r.user.username : 'Unknown')),
-              /*#__PURE__*/React.createElement("span", { style: { fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 8,
-                       background: r.status === 'approved' ? 'rgba(168,230,207,0.15)' : 'rgba(255,138,138,0.1)',
-                       color: r.status === 'approved' ? '#7DD8A0' : '#FF8A8A' } }, r.status === 'approved' ? 'Approved' : 'Denied'));
-          })
-        )
+                /*#__PURE__*/React.createElement("div", null,
+                  /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)' } }, r.user ? r.user.username : 'Unknown'),
+                  r.socialProof && /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, color: 'var(--c-text-sub)', marginTop: 1 } }, r.socialProof))),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, padding: '4px 12px', borderRadius: 10,
+                       background: isApproved ? 'rgba(125,216,160,0.15)' : 'rgba(255,138,138,0.1)',
+                       color: isApproved ? '#7DD8A0' : '#FF8A8A', textTransform: 'uppercase', letterSpacing: '0.05em' } }, isApproved ? 'Member' : 'Denied'));
+          }))
+        ),
+
+        // Footer
+        /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center', padding: '24px 0 8px', opacity: 0.4, fontSize: 11, fontWeight: 500, color: 'var(--c-text-sub)', letterSpacing: '0.05em' } }, "coded by Degos")
       )
     );
   }
@@ -1878,25 +1925,54 @@ const RunClubScreen = ({ profile }) => {
 
       // === ACHIEVEMENTS ===
       view === 'achievements' && /*#__PURE__*/React.createElement(React.Fragment, null,
-        /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 20, padding: '16px 0' } },
+        /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 24, padding: '16px 0' } },
           /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 8, display: 'flex', justifyContent: 'center' } }, /*#__PURE__*/React.createElement(MedalIcon, { size: 40 })),
-          /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 28, background: 'linear-gradient(135deg, #FFB74D, #FF96C8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } }, unlockedCount + ' / ' + achievements.length),
-          /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, color: 'var(--c-text-sub)', fontWeight: 600, marginTop: 4 } }, "badges earned")),
+          /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 32, background: 'linear-gradient(135deg, #FFB74D, #FF96C8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } }, unlockedCount + ' / ' + achievements.length),
+          /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, color: 'var(--c-text-sub)', fontWeight: 600, marginTop: 4 } }, "badges earned"),
+          // Progress bar
+          /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 200, margin: '12px auto 0', height: 6, borderRadius: 3, background: 'rgba(0,0,0,0.06)', overflow: 'hidden' } },
+            /*#__PURE__*/React.createElement("div", { style: { height: '100%', borderRadius: 3, transition: 'width 0.6s ease-out',
+              width: (achievements.length > 0 ? (unlockedCount / achievements.length) * 100 : 0) + '%',
+              background: 'linear-gradient(90deg, #A882FF, #FF96C8, #7DD8A0)' } }))),
+
+        // Unlocked badges first, then locked
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 } },
-          achievements.map(function(a, i) {
+          // Sort: unlocked first
+          [].concat(achievements).sort(function(a, b) { return (b.unlocked ? 1 : 0) - (a.unlocked ? 1 : 0); }).map(function(a, i) {
             return /*#__PURE__*/React.createElement("div", { key: a.id, className: "rc-pop-in",
-              style: { textAlign: 'center', padding: '18px 12px', opacity: a.unlocked ? 1 : 0.45, position: 'relative',
-                       background: a.unlocked ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)',
+              style: { textAlign: 'center', padding: '18px 12px', position: 'relative', overflow: 'hidden',
+                       background: a.unlocked ? 'rgba(255,255,255,0.85)' : 'rgba(240,238,245,0.5)',
                        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                       borderRadius: 20, border: a.unlocked ? '1px solid rgba(168,130,255,0.2)' : '1px solid rgba(0,0,0,0.06)',
-                       boxShadow: a.unlocked ? '0 4px 16px rgba(168,130,255,0.1)' : 'none',
+                       borderRadius: 20,
+                       border: a.unlocked ? '2px solid rgba(168,130,255,0.25)' : '1px dashed rgba(0,0,0,0.1)',
+                       boxShadow: a.unlocked ? '0 6px 20px rgba(168,130,255,0.15)' : 'inset 0 2px 8px rgba(0,0,0,0.03)',
                        transition: 'transform 0.2s ease, box-shadow 0.2s ease' } },
-              /*#__PURE__*/React.createElement("div", { className: a.unlocked ? 'rc-shine' : '', style: { marginBottom: 10, display: 'flex', justifyContent: 'center' } },
-                getAchievementMedal(a.id, a.unlocked)),
+
+              // Medal with lock overlay for locked
+              /*#__PURE__*/React.createElement("div", { className: a.unlocked ? 'rc-shine' : '',
+                style: { marginBottom: 10, display: 'flex', justifyContent: 'center', position: 'relative',
+                         filter: a.unlocked ? 'none' : 'grayscale(1) opacity(0.35)' } },
+                getAchievementMedal(a.id, a.unlocked),
+                // Lock icon overlay on locked badges
+                !a.unlocked && /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', bottom: -2, right: 'calc(50% - 20px)',
+                  width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' } },
+                  /*#__PURE__*/React.createElement(LockIcon, { size: 10 }))),
+
+              // Shimmer on unlocked only
               a.unlocked && /*#__PURE__*/React.createElement("div", { className: "rc-shimmer", style: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 20, pointerEvents: 'none' } }),
-              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: 'var(--c-text)', marginBottom: 4 } }, a.name),
-              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, color: 'var(--c-text-sub)', lineHeight: 1.5 } }, a.desc),
-              a.unlocked && /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: '#7DD8A0', marginTop: 8, padding: '3px 10px', borderRadius: 10, background: 'rgba(125,216,160,0.12)', display: 'inline-block' } }, formatDateShort(a.unlockedAt)));
+
+              // Name — dimmed for locked
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: a.unlocked ? 'var(--c-text)' : 'rgba(0,0,0,0.3)', marginBottom: 4 } }, a.name),
+
+              // Description — hidden for locked, replaced with "???"
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, color: a.unlocked ? 'var(--c-text-sub)' : 'rgba(0,0,0,0.2)', lineHeight: 1.5, fontStyle: a.unlocked ? 'normal' : 'italic' } },
+                a.unlocked ? a.desc : '???'),
+
+              // Unlocked date or LOCKED label
+              a.unlocked
+                ? /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: '#7DD8A0', marginTop: 8, padding: '3px 10px', borderRadius: 10, background: 'rgba(125,216,160,0.12)', display: 'inline-block' } }, formatDateShort(a.unlockedAt))
+                : /*#__PURE__*/React.createElement("div", { style: { fontSize: 8, fontWeight: 700, color: 'rgba(0,0,0,0.2)', marginTop: 8, padding: '3px 10px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', display: 'inline-block', letterSpacing: '0.15em', textTransform: 'uppercase' } }, "locked"));
           })
         )
       ),
