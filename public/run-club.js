@@ -346,7 +346,145 @@ const ACHIEVEMENT_MEDALS = {
     /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#1A237E' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
     /*#__PURE__*/React.createElement(MoonMedalPath, { x: 18, y: 9, sc: 1.1, fill: unlocked ? '#FFF' : '#666' }),
     /*#__PURE__*/React.createElement("text", { x: 24, y: 29, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#9FA8DA' : '#666' }, "NIGHT"),
-    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#3F51B5' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 }))
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#3F51B5' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  ran_1mi: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#4DD0C8' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? '#26A69A' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 12, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "1"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#B2DFDB' : '#666' }, "MILE"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#4DD0C8' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  three_runs: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FF7043' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? '#E64A19' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 20, textAnchor: "middle", fontSize: 14, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "3"),
+    /*#__PURE__*/React.createElement("circle", { cx: 18, cy: 27, r: 1.5, fill: unlocked ? '#FFCCBC' : '#666' }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 27, r: 1.5, fill: unlocked ? '#FFCCBC' : '#666' }),
+    /*#__PURE__*/React.createElement("circle", { cx: 30, cy: 27, r: 1.5, fill: unlocked ? '#FFCCBC' : '#666' }),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF7043' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  five_runs: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#EC407A' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? '#C2185B' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("line", { x1: 24, y1: 12, x2: 24, y2: 8, stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("line", { x1: 24, y1: 12, x2: 28, y2: 9, stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("line", { x1: 24, y1: 12, x2: 20, y2: 9, stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("line", { x1: 24, y1: 12, x2: 29, y2: 12, stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("line", { x1: 24, y1: 12, x2: 19, y2: 12, stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 24, textAnchor: "middle", fontSize: 10, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "5"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#EC407A' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  twenty_five_runs: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#B0BEC5' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? '#90A4AE' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 11, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "25"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 6, fill: unlocked ? '#ECEFF1' : '#666' }, "RUNS"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#B0BEC5' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  hundred_runs: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null,
+      /*#__PURE__*/React.createElement("linearGradient", { id: "g_hundred_runs", x1: "0", y1: "0", x2: "1", y2: "1" },
+        /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#FFD54F' : '#3A3550' }),
+        /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#FF8F00' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("rect", { x: 6, y: 4, width: 36, height: 30, rx: 6, fill: "url(#g_hundred_runs)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 10, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "100"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#FFF8E1' : '#666' }, "RUNS"),
+    /*#__PURE__*/React.createElement("polygon", { points: "16,36 24,44 32,36 29,36 24,41 19,36", fill: unlocked ? '#FFD54F' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  total_10mi: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("polygon", { points: "24,4 36,10 36,26 24,32 12,26 12,10", fill: unlocked ? '#A8E6CF' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("polygon", { points: "24,8 33,13 33,24 24,29 15,24 15,13", fill: unlocked ? '#66BB6A' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 10, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "10"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 25, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#E8F5E9' : '#666' }, "MI"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#A8E6CF' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  total_25mi: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("rect", { x: 10, y: 6, width: 28, height: 28, rx: 2, fill: unlocked ? '#CFD8DC' : '#3A3550', opacity: unlocked ? 1 : 0.4, transform: "rotate(45 24 20)" }),
+    /*#__PURE__*/React.createElement("rect", { x: 14, y: 10, width: 20, height: 20, rx: 1, fill: unlocked ? '#90A4AE' : '#2A2740', opacity: unlocked ? 1 : 0.5, transform: "rotate(45 24 20)" }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 9, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "25"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 26, textAnchor: "middle", fontSize: 6, fill: unlocked ? '#ECEFF1' : '#666' }, "MI"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,38 24,44 30,38 28,38 24,42 20,38", fill: unlocked ? '#CFD8DC' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  total_250mi: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("polygon", { points: "24,2 27,10 36,10 29,16 31,24 24,19 17,24 19,16 12,10 21,10", fill: unlocked ? '#FFD54F' : '#3A3550', opacity: unlocked ? 0.6 : 0.2 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 18, r: 12, fill: unlocked ? '#FFC107' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 18, r: 9, fill: unlocked ? '#FFB300' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 8, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "250"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 25, textAnchor: "middle", fontSize: 5, fill: unlocked ? '#FFF8E1' : '#666' }, "MI"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,34 24,40 30,34 28,34 24,38 20,34", fill: unlocked ? '#FFC107' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  total_1000mi: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null,
+      /*#__PURE__*/React.createElement("linearGradient", { id: "g_total_1000mi", x1: "0", y1: "0", x2: "1", y2: "1" },
+        /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#A882FF' : '#3A3550' }),
+        /*#__PURE__*/React.createElement("stop", { offset: "50%", stopColor: unlocked ? '#FF96C8' : '#3A3550' }),
+        /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#7DD8A0' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g_total_1000mi)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 12, fill: unlocked ? 'rgba(255,255,255,0.2)' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 22, textAnchor: "middle", fontSize: 12, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "1K"),
+    /*#__PURE__*/React.createElement("polygon", { points: "14,36 24,44 34,36 31,36 24,42 17,36", fill: unlocked ? '#A882FF' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  streak_3: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#A5D6A7' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("g", { transform: "translate(19,6) scale(0.5)" },
+      /*#__PURE__*/React.createElement("path", { d: "M6 1c0 2-2 3-2 5a3 3 0 006 0c0-2-2-3-2-5", fill: "none", stroke: unlocked ? '#2E7D32' : '#666', strokeWidth: 2, strokeLinecap: "round" })),
+    /*#__PURE__*/React.createElement("g", { transform: "translate(22,8) scale(0.5)" },
+      /*#__PURE__*/React.createElement("path", { d: "M6 1c0 2-2 3-2 5a3 3 0 006 0c0-2-2-3-2-5", fill: "none", stroke: unlocked ? '#388E3C' : '#666', strokeWidth: 2, strokeLinecap: "round" })),
+    /*#__PURE__*/React.createElement("g", { transform: "translate(25,6) scale(0.5)" },
+      /*#__PURE__*/React.createElement("path", { d: "M6 1c0 2-2 3-2 5a3 3 0 006 0c0-2-2-3-2-5", fill: "none", stroke: unlocked ? '#2E7D32' : '#666', strokeWidth: 2, strokeLinecap: "round" })),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 24, textAnchor: "middle", fontSize: 10, fontWeight: "bold", fill: unlocked ? '#1B5E20' : '#666' }, "3"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#A5D6A7' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  streak_14: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#7E57C2' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("rect", { x: 17, y: 8, width: 6, height: 6, rx: 1, fill: "none", stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1 }),
+    /*#__PURE__*/React.createElement("rect", { x: 25, y: 8, width: 6, height: 6, rx: 1, fill: "none", stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 22, textAnchor: "middle", fontSize: 9, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "14"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 29, textAnchor: "middle", fontSize: 5, fill: unlocked ? '#D1C4E9' : '#666' }, "DAYS"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#7E57C2' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  streak_100: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null,
+      /*#__PURE__*/React.createElement("linearGradient", { id: "g_streak_100", x1: "0", y1: "0", x2: "1", y2: "1" },
+        /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#EF5350' : '#3A3550' }),
+        /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#FFD54F' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g_streak_100)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,8 20,4 24,7 28,4 30,8", fill: unlocked ? '#FFD54F' : '#666', opacity: unlocked ? 0.9 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 22, textAnchor: "middle", fontSize: 10, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "100"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#EF5350' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  long_run_15k: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#00897B' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("path", { d: "M14 24 Q18 12 24 20 Q30 28 34 16", fill: "none", stroke: unlocked ? '#B2DFDB' : '#666', strokeWidth: 2, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 15, textAnchor: "middle", fontSize: 8, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "15K"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#00897B' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  sub_5_pace: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#2979FF' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("polygon", { points: "26,6 22,16 28,16 22,28", fill: "none", stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#BBDEFB' : '#666' }, "SUB"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 7, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "5:00"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#2979FF' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  weekend_warrior: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null,
+      /*#__PURE__*/React.createElement("linearGradient", { id: "g_weekend_warrior", x1: "0", y1: "0", x2: "0", y2: "1" },
+        /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#FF7043' : '#3A3550' }),
+        /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#EC407A' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g_weekend_warrior)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 16, textAnchor: "middle", fontSize: 6, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "SAT"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 26, textAnchor: "middle", fontSize: 6, fontWeight: "bold", fill: unlocked ? '#FFCCBC' : '#666' }, "SUN"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF7043' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  lunch_run: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FFEE58' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 18, r: 9, fill: unlocked ? '#FDD835' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("line", { x1: 24, y1: 18, x2: 24, y2: 12, stroke: unlocked ? '#5D4037' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("line", { x1: 24, y1: 18, x2: 28, y2: 18, stroke: unlocked ? '#5D4037' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 18, r: 1, fill: unlocked ? '#5D4037' : '#666' }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 33, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#5D4037' : '#666' }, "NOON"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FFEE58' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 }))
 };
 
 const getAchievementMedal = (id, unlocked) => {
@@ -1060,7 +1198,7 @@ const RunClubScreen = ({ profile }) => {
 
   /* ========== RUN MODE PICKER ========== */
   if (view === 'start') {
-    return /*#__PURE__*/React.createElement("div", { style: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', background: 'linear-gradient(180deg, #1a1030 0%, #0d0d2b 50%, #1a1030 100%)' } },
+    return /*#__PURE__*/React.createElement("div", { className: "rc-pastel-bg", style: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 480, margin: '0 auto', padding: '16px 20px calc(100px + env(safe-area-inset-bottom)) 20px', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
         /*#__PURE__*/React.createElement("button", { onClick: () => setView('dashboard'),
@@ -1075,35 +1213,35 @@ const RunClubScreen = ({ profile }) => {
           onClick: () => startRun('free'),
           className: "rc-pop-in",
           style: { width: '100%', maxWidth: 320, padding: 20, borderRadius: 20, textAlign: 'left', cursor: 'pointer', marginBottom: 16,
-                   background: 'rgba(168,130,255,0.1)', border: '1px solid rgba(168,130,255,0.25)', transition: 'all 0.3s', boxShadow: '0 4px 20px rgba(168,130,255,0.08)' }
+                   background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(168,130,255,0.2)', transition: 'all 0.3s', boxShadow: '0 4px 20px rgba(168,130,255,0.08)' }
         },
           /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 14 } },
             /*#__PURE__*/React.createElement("div", { style: { width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
                      background: 'linear-gradient(135deg, rgba(168,130,255,0.2), rgba(255,150,200,0.15))' } }, /*#__PURE__*/React.createElement(RunnerIcon, { size: 24 })),
             /*#__PURE__*/React.createElement("div", null,
-              /*#__PURE__*/React.createElement("div", { style: { fontSize: 17, fontWeight: 700, color: '#E8E0F0' } }, "Free Run"),
-              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: '#B0A8CC', marginTop: 3 } }, "Run as far as you want"))
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 17, fontWeight: 700, color: 'var(--c-text)' } }, "Free Run"),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)', marginTop: 3 } }, "Run as far as you want"))
           )
         ),
 
         // Goal Run
         /*#__PURE__*/React.createElement("div", { className: "rc-pop-in",
           style: { width: '100%', maxWidth: 320, padding: 20, borderRadius: 20, animationDelay: '0.1s',
-                   background: 'rgba(125,216,160,0.08)', border: '1px solid rgba(125,216,160,0.2)', boxShadow: '0 4px 20px rgba(125,216,160,0.06)' } },
+                   background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(125,216,160,0.2)', boxShadow: '0 4px 20px rgba(125,216,160,0.06)' } },
           /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 } },
             /*#__PURE__*/React.createElement("div", { style: { width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
                      background: 'linear-gradient(135deg, rgba(125,216,160,0.2), rgba(100,181,246,0.15))' } }, /*#__PURE__*/React.createElement(TargetIcon, { size: 24 })),
             /*#__PURE__*/React.createElement("div", null,
-              /*#__PURE__*/React.createElement("div", { style: { fontSize: 17, fontWeight: 700, color: '#E8E0F0' } }, "Goal Run"),
-              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: '#B0A8CC', marginTop: 3 } }, "Set a distance target"))
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 17, fontWeight: 700, color: 'var(--c-text)' } }, "Goal Run"),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)', marginTop: 3 } }, "Set a distance target"))
           ),
           // Unit toggle
           /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 8, marginBottom: 12 } },
             ['mi', 'km'].map(function(u) {
               return /*#__PURE__*/React.createElement("button", { key: u, onClick: () => setGoalUnit(u),
                 style: { flex: 1, padding: '8px 0', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-                         background: goalUnit === u ? 'rgba(123,123,255,0.15)' : 'transparent',
-                         color: goalUnit === u ? '#7B7BFF' : '#9B95B0', border: '1px solid ' + (goalUnit === u ? 'rgba(123,123,255,0.3)' : 'rgba(155,149,176,0.15)') }
+                         background: goalUnit === u ? 'rgba(123,123,255,0.15)' : 'rgba(255,255,255,0.5)',
+                         color: goalUnit === u ? '#7B7BFF' : 'var(--c-text-sub)', border: '1px solid ' + (goalUnit === u ? 'rgba(123,123,255,0.3)' : 'rgba(0,0,0,0.08)') }
               }, u.toUpperCase());
             })
           ),
@@ -1112,8 +1250,8 @@ const RunClubScreen = ({ profile }) => {
             (goalUnit === 'mi' ? ['1','2','3','5','10'] : ['1','3','5','10','21']).map(function(v) {
               return /*#__PURE__*/React.createElement("button", { key: v, onClick: () => setGoalTarget(v),
                 style: { padding: '6px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-                         background: goalTarget === v ? 'rgba(168,230,207,0.15)' : 'transparent',
-                         color: goalTarget === v ? '#A8E6CF' : '#9B95B0', border: '1px solid ' + (goalTarget === v ? 'rgba(168,230,207,0.3)' : 'transparent') }
+                         background: goalTarget === v ? 'rgba(168,230,207,0.2)' : 'rgba(255,255,255,0.5)',
+                         color: goalTarget === v ? '#2E7D32' : 'var(--c-text-sub)', border: '1px solid ' + (goalTarget === v ? 'rgba(168,230,207,0.4)' : 'rgba(0,0,0,0.06)') }
               }, v);
             })
           ),
@@ -1122,9 +1260,9 @@ const RunClubScreen = ({ profile }) => {
             /*#__PURE__*/React.createElement("input", {
               type: "number", inputMode: "decimal", value: goalTarget, onChange: e => setGoalTarget(e.target.value),
               style: { flex: 1, padding: '8px 12px', borderRadius: 10, fontSize: 14, fontWeight: 600, textAlign: 'center',
-                       background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(155,149,176,0.15)', color: '#E8E0F0', outline: 'none' }
+                       background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(0,0,0,0.08)', color: 'var(--c-text)', outline: 'none' }
             }),
-            /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: '#9B95B0' } }, goalUnit)
+            /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)' } }, goalUnit)
           ),
           /*#__PURE__*/React.createElement("button", {
             onClick: () => { var t = parseFloat(goalTarget); if (t > 0) startRun({ unit: goalUnit, target: t }); },
@@ -1142,19 +1280,19 @@ const RunClubScreen = ({ profile }) => {
     var isGoalMode = runMode && runMode !== 'free';
     var targetLabel = isGoalMode ? runMode.target + ' ' + runMode.unit : null;
 
-    return /*#__PURE__*/React.createElement("div", { style: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', background: 'linear-gradient(180deg, #1a1030 0%, #0d0d2b 40%, #1a0a20 70%, #1a1030 100%)' } },
+    return /*#__PURE__*/React.createElement("div", { style: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', background: 'linear-gradient(180deg, #E8E0F5 0%, #FFE8EC 40%, #D6F0FF 70%, #FFF5D6 100%)' } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       // Top bar
       /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 8px',
                    paddingTop: 'max(16px, env(safe-area-inset-top))' } },
         /*#__PURE__*/React.createElement("button", { onClick: discardRun,
-          style: { fontSize: 12, fontWeight: 700, borderRadius: 20, padding: '6px 12px', background: 'rgba(255,138,138,0.1)', color: '#FF8A8A', border: 'none', cursor: 'pointer' }
+          style: { fontSize: 12, fontWeight: 700, borderRadius: 20, padding: '6px 12px', background: 'rgba(255,138,138,0.15)', color: '#FF8A8A', border: 'none', cursor: 'pointer' }
         }, "Discard"),
         /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-                     color: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#9B95B0' } },
+                     color: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : 'var(--c-text-sub)' } },
           /*#__PURE__*/React.createElement("div", { style: { position: 'relative' } },
             /*#__PURE__*/React.createElement("div", { style: { width: 8, height: 8, borderRadius: '50%',
-                       background: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#9B95B0', animation: 'rcPulse 2s ease-in-out infinite' } }),
+                       background: gpsAccuracy && gpsAccuracy < 20 ? '#7DD8A0' : '#B0A8CC', animation: 'rcPulse 2s ease-in-out infinite' } }),
             gpsAccuracy && gpsAccuracy < 20 && /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', inset: 0, width: 8, height: 8, borderRadius: '50%',
                        background: '#7DD8A0', animation: 'rcDotPing 2s ease-out infinite' } })
           ),
@@ -1162,8 +1300,8 @@ const RunClubScreen = ({ profile }) => {
         ),
         /*#__PURE__*/React.createElement("div", {
           style: { fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', padding: '4px 10px', borderRadius: 20,
-                   background: isPaused ? 'rgba(255,171,145,0.12)' : 'rgba(168,230,207,0.12)',
-                   color: isPaused ? '#FFAB91' : '#7DD8A0' }
+                   background: isPaused ? 'rgba(255,171,145,0.2)' : 'rgba(168,230,207,0.2)',
+                   color: isPaused ? '#E64A19' : '#2E7D32' }
         }, isPaused ? 'PAUSED' : isGoalMode ? targetLabel : 'FREE RUN')
       ),
 
@@ -1181,52 +1319,52 @@ const RunClubScreen = ({ profile }) => {
                   label: formatDistanceMiles(Math.round(distance)), sublabel: "miles" })),
               goalReached && /*#__PURE__*/React.createElement("div", { className: "rc-pop-in",
                 style: { fontSize: 13, fontWeight: 700, padding: '6px 16px', borderRadius: 20, marginBottom: 12,
-                         background: 'rgba(168,230,207,0.12)', color: '#A8E6CF' }
+                         background: 'rgba(168,230,207,0.2)', color: '#2E7D32' }
               }, "Goal reached! Keep going or finish"),
               /*#__PURE__*/React.createElement("div", { className: "font-display",
-                style: { fontSize: 'clamp(36px, 10vw, 48px)', lineHeight: 1, color: '#E8E0F0' }
+                style: { fontSize: 'clamp(36px, 10vw, 48px)', lineHeight: 1, color: 'var(--c-text)' }
               }, formatDuration(elapsed)),
-              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 4, color: '#9B95B0' } }, "Duration")
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 4, color: 'var(--c-text-sub)' } }, "Duration")
             )
           : /*#__PURE__*/React.createElement(React.Fragment, null,
-              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#9B95B0', marginBottom: 4 } }, "Duration"),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--c-text-sub)', marginBottom: 4 } }, "Duration"),
               /*#__PURE__*/React.createElement("div", { className: "font-display",
-                style: { fontSize: 'clamp(52px, 14vw, 72px)', lineHeight: 1, color: '#E8E0F0' }
+                style: { fontSize: 'clamp(52px, 14vw, 72px)', lineHeight: 1, color: 'var(--c-text)' }
               }, formatDuration(elapsed)),
               /*#__PURE__*/React.createElement("div", { style: { marginTop: 24, textAlign: 'center' } },
                 /*#__PURE__*/React.createElement("div", { className: "font-display",
                   style: { fontSize: 'clamp(36px, 10vw, 52px)', lineHeight: 1, background: 'linear-gradient(135deg, #A882FF, #FF96C8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
                 }, formatDistanceMiles(Math.round(distance))),
-                /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 6, color: '#9B95B0' } }, "Miles"))
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 6, color: 'var(--c-text-sub)' } }, "Miles"))
             ),
 
         // Pace + Cal
         /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 32, marginTop: 24 } },
           /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
-            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: '#E8E0F0' } }, formatPace(currentPace)),
-            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: '#9B95B0' } }, "Pace /km")),
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: 'var(--c-text)' } }, formatPace(currentPace)),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: 'var(--c-text-sub)' } }, "Pace /km")),
           /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
-            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: '#E8E0F0' } }, estimateCalories(Math.round(distance))),
-            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: '#9B95B0' } }, "Cal")),
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: 'var(--c-text)' } }, estimateCalories(Math.round(distance))),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: 'var(--c-text-sub)' } }, "Cal")),
           splits.length > 0 && /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
-            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: '#A8E6CF' } }, formatPace(splits[splits.length - 1].timeSec)),
-            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: '#9B95B0' } }, "Last km"))
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: '#2E7D32' } }, formatPace(splits[splits.length - 1].timeSec)),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: 'var(--c-text-sub)' } }, "Last km"))
         ),
 
         // Progress bar
         /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 280, marginTop: 24 } },
-          /*#__PURE__*/React.createElement("div", { style: { width: '100%', height: 5, borderRadius: 3, overflow: 'hidden', background: 'rgba(123,123,255,0.08)' } },
+          /*#__PURE__*/React.createElement("div", { style: { width: '100%', height: 5, borderRadius: 3, overflow: 'hidden', background: 'rgba(168,130,255,0.15)' } },
             /*#__PURE__*/React.createElement("div", { style: {
               height: '100%', borderRadius: 3, transition: 'width 1s ease-out',
               width: (isGoalMode ? goalProgress * 100 : Math.min(100, (distance / 10000) * 100)) + '%',
               background: 'linear-gradient(90deg, #A882FF, #FF96C8, #7DD8A0)', boxShadow: '0 0 12px rgba(168,130,255,0.5)'
             } })),
-          isGoalMode && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 9, fontWeight: 600, color: '#9B95B0' } },
+          isGoalMode && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 9, fontWeight: 600, color: 'var(--c-text-sub)' } },
             /*#__PURE__*/React.createElement("span", null, "0"), /*#__PURE__*/React.createElement("span", null, targetLabel))
         ),
 
         gpsError && /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, fontWeight: 600, marginTop: 16, padding: '8px 16px', borderRadius: 12,
-                   color: '#FF8A8A', background: 'rgba(255,138,138,0.06)' } }, gpsError)
+                   color: '#FF8A8A', background: 'rgba(255,138,138,0.12)' } }, gpsError)
       ),
 
       // Controls

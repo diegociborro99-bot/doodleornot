@@ -136,6 +136,22 @@ const RUN_ACHIEVEMENTS = [
   { id: 'fifty_runs', name: 'Dedicated', desc: 'Complete 50 runs', check: (s) => s.totalRuns >= 50 },
   { id: 'early_bird', name: 'Early Bird', desc: 'Start a run before 7 AM', checkRun: (r) => new Date(r.startedAt).getHours() < 7 },
   { id: 'night_owl', name: 'Night Owl', desc: 'Start a run after 9 PM', checkRun: (r) => new Date(r.startedAt).getHours() >= 21 },
+  { id: 'ran_1mi', name: 'First Mile', desc: 'Run at least 1 mile in a single run', checkRun: (r) => r.distanceM >= 1609 },
+  { id: 'three_runs', name: 'Hat Trick', desc: 'Complete 3 runs', check: (s) => s.totalRuns >= 3 },
+  { id: 'five_runs', name: 'High Five', desc: 'Complete 5 runs', check: (s) => s.totalRuns >= 5 },
+  { id: 'twenty_five_runs', name: 'Quarter Century', desc: 'Complete 25 runs', check: (s) => s.totalRuns >= 25 },
+  { id: 'hundred_runs', name: 'Centurion', desc: 'Complete 100 runs', check: (s) => s.totalRuns >= 100 },
+  { id: 'total_10mi', name: 'Double Digits', desc: 'Run 10 miles total', check: (s) => s.totalDistanceM >= 16093 },
+  { id: 'total_25mi', name: 'Silver Soles', desc: 'Run 25 miles total', check: (s) => s.totalDistanceM >= 40233 },
+  { id: 'total_250mi', name: 'Gold Standard', desc: 'Run 250 miles total', check: (s) => s.totalDistanceM >= 402336 },
+  { id: 'total_1000mi', name: 'Thousand Miler', desc: 'Run 1000 miles total', check: (s) => s.totalDistanceM >= 1609344 },
+  { id: 'streak_3', name: 'Momentum', desc: '3-day running streak', check: (s) => s.streakDays >= 3 },
+  { id: 'streak_14', name: 'Fortnight Force', desc: '14-day running streak', check: (s) => s.streakDays >= 14 },
+  { id: 'streak_100', name: 'Legendary', desc: '100-day running streak', check: (s) => s.streakDays >= 100 },
+  { id: 'long_run_15k', name: 'Long Hauler', desc: 'Complete a 15km run', checkRun: (r) => r.distanceM >= 15000 },
+  { id: 'sub_5_pace', name: 'Sub Five', desc: 'Average pace under 5:00/km', check: (s) => s.bestPaceSec > 0 && s.bestPaceSec < 300 },
+  { id: 'weekend_warrior', name: 'Weekend Warrior', desc: 'Run on a Saturday or Sunday', checkRun: (r) => { var d = new Date(r.startedAt).getDay(); return d === 0 || d === 6; } },
+  { id: 'lunch_run', name: 'Lunch Laps', desc: 'Start a run between 11am and 1pm', checkRun: (r) => { var h = new Date(r.startedAt).getHours(); return h >= 11 && h < 13; } },
 ];
 
 async function checkAndUnlockAchievements(userId, runStats, run) {
