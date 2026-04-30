@@ -565,6 +565,10 @@ const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
   @keyframes rcCountRing { 0% { stroke-dashoffset: 283; } 100% { stroke-dashoffset: 0; } }
   @keyframes rcGoExplode { 0% { transform: scale(0.2); opacity: 0; } 40% { transform: scale(1.3); opacity: 1; } 60% { transform: scale(0.95); } 100% { transform: scale(1); opacity: 1; } }
   @keyframes rcGoRays { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.8); opacity: 0; } }
+  @keyframes rcToastIn { 0% { transform: translateY(80px) scale(0.8); opacity: 0; } 60% { transform: translateY(-8px) scale(1.05); opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+  @keyframes rcToastOut { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
+  @keyframes rcMedalBounce { 0% { transform: scale(0); } 50% { transform: scale(1.3); } 70% { transform: scale(0.9); } 100% { transform: scale(1); } }
+  @keyframes rcAutoPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
   @media (prefers-reduced-motion: reduce) {
     .rc-slide-up, .rc-pop-in, .rc-shine, .rc-fade-in, .rc-float, .rc-shimmer { animation: none !important; }
   }
@@ -815,6 +819,14 @@ const RunClubScreen = ({ profile }) => {
   // Post-run zone
   const [runZone, setRunZone] = useState(null);
 
+  // Auto-pause
+  const [autoPaused, setAutoPaused] = useState(false);
+  const lastMovementRef = useRef(null);
+  const autoPauseTimerRef = useRef(null);
+
+  // Achievement unlock toasts
+  const [unlockToasts, setUnlockToasts] = useState([]);
+
   // Run detail view
   const [selectedRun, setSelectedRun] = useState(null);
   const [selectedRunData, setSelectedRunData] = useState(null);
@@ -894,6 +906,18 @@ const RunClubScreen = ({ profile }) => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isRunning, isPaused]);
 
+  // Auto-pause: if no GPS movement for 20s, show auto-pause indicator
+  useEffect(() => {
+    if (!isRunning || isPaused) return;
+    lastMovementRef.current = Date.now();
+    autoPauseTimerRef.current = setInterval(function() {
+      if (lastMovementRef.current && Date.now() - lastMovementRef.current > 20000) {
+        setAutoPaused(true);
+      }
+    }, 5000);
+    return function() { if (autoPauseTimerRef.current) clearInterval(autoPauseTimerRef.current); };
+  }, [isRunning, isPaused]);
+
   // Goal reached
   useEffect(() => {
     if (!runMode || runMode === 'free' || goalReached) return;
@@ -908,6 +932,8 @@ const RunClubScreen = ({ profile }) => {
         setGpsAccuracy(Math.round(accuracy));
         if (accuracy > 50) return;
         setGpsRoute(prev => [...prev, { lat: latitude, lng: longitude, ts: Date.now() }]);
+        lastMovementRef.current = Date.now();
+        if (autoPaused) setAutoPaused(false);
         if (lastPosRef.current) {
           const d = haversineDistance(lastPosRef.current.lat, lastPosRef.current.lng, latitude, longitude);
           if (d > 3 && d < 500) {
@@ -919,6 +945,7 @@ const RunClubScreen = ({ profile }) => {
                 const splitTime = Math.floor((Date.now() - startTimeRef.current) / 1000) + pausedAtRef.current;
                 setSplits(s => [...s, { km: currentKm, timeSec: splitTime - lastSplitTimeRef.current }]);
                 lastSplitTimeRef.current = splitTime;
+                playSplitChime();
               }
               return newDist;
             });
@@ -943,6 +970,24 @@ const RunClubScreen = ({ profile }) => {
       }).toDestination();
       synth.triggerAttackRelease(isGo ? 'C5' : 'G4', isGo ? '8n' : '16n');
       setTimeout(function() { synth.dispose(); }, 1000);
+    } catch (e) {}
+  };
+
+  // Km split chime — ascending two-note jingle
+  var playSplitChime = function() {
+    try {
+      var Tone = window.Tone;
+      if (!Tone) return;
+      if (Tone.context.state !== 'running') Tone.start();
+      var synth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.3 } }).toDestination();
+      synth.triggerAttackRelease('E5', '16n');
+      setTimeout(function() {
+        var s2 = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.4 } }).toDestination();
+        s2.triggerAttackRelease('A5', '8n');
+        setTimeout(function() { s2.dispose(); }, 1000);
+      }, 150);
+      setTimeout(function() { synth.dispose(); }, 1000);
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     } catch (e) {}
   };
 
@@ -1010,7 +1055,17 @@ const RunClubScreen = ({ profile }) => {
         ]);
         if (newStats) setRunStats(newStats);
         if (newRuns && newRuns.runs) setRuns(newRuns.runs);
-        if (achv && achv.achievements) setAchievements(achv.achievements);
+        if (achv && achv.achievements) {
+          // Detect newly unlocked achievements
+          var oldUnlocked = achievements.filter(function(a) { return a.unlocked; }).map(function(a) { return a.id; });
+          var newlyUnlocked = achv.achievements.filter(function(a) { return a.unlocked && oldUnlocked.indexOf(a.id) === -1; });
+          if (newlyUnlocked.length > 0) {
+            setUnlockToasts(newlyUnlocked.map(function(a) { return { id: a.id, name: a.name, desc: a.desc }; }));
+            // Auto-dismiss toasts after 5 seconds
+            setTimeout(function() { setUnlockToasts([]); }, 5000);
+          }
+          setAchievements(achv.achievements);
+        }
       } catch (e) { console.warn('Failed to save run:', e); }
     }
     setIsRunning(false); setIsPaused(false);
@@ -1045,6 +1100,17 @@ const RunClubScreen = ({ profile }) => {
 
   const currentPace = distance > 100 && elapsed > 0 ? Math.round(elapsed / (distance / 1000)) : 0;
   const goalProgress = runMode && runMode !== 'free' ? Math.min(1, distance / (runMode.unit === 'mi' ? runMode.target * 1609.344 : runMode.target * 1000)) : 0;
+
+  // Pace zone: color + label based on min/km
+  var paceZone = { color: 'var(--c-text)', label: '' };
+  if (currentPace > 0) {
+    if (currentPace < 300) { paceZone = { color: '#7DD8A0', label: 'Sprint' }; }
+    else if (currentPace < 360) { paceZone = { color: '#7DD8A0', label: 'Fast' }; }
+    else if (currentPace < 420) { paceZone = { color: '#64B5F6', label: 'Tempo' }; }
+    else if (currentPace < 480) { paceZone = { color: '#FFB74D', label: 'Easy' }; }
+    else if (currentPace < 540) { paceZone = { color: '#FF96C8', label: 'Jog' }; }
+    else { paceZone = { color: '#FF8A8A', label: 'Walk' }; }
+  }
 
   /* ========== ACCESS LOADING ========== */
   if (accessLoading) {
@@ -1447,8 +1513,9 @@ const RunClubScreen = ({ profile }) => {
         // Pace + Cal
         /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 32, marginTop: 24 } },
           /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
-            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: 'var(--c-text)' } }, formatPace(currentPace)),
-            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: 'var(--c-text-sub)' } }, "Pace /km")),
+            /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: paceZone.color, transition: 'color 0.5s ease' } }, formatPace(currentPace)),
+            /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: paceZone.color, transition: 'color 0.5s ease' } },
+              paceZone.label ? paceZone.label + ' /km' : 'Pace /km')),
           /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center' } },
             /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 20, color: 'var(--c-text)' } }, estimateCalories(Math.round(distance))),
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 2, color: 'var(--c-text-sub)' } }, "Cal")),
@@ -1470,7 +1537,14 @@ const RunClubScreen = ({ profile }) => {
         ),
 
         gpsError && /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, fontWeight: 600, marginTop: 16, padding: '8px 16px', borderRadius: 12,
-                   color: '#FF8A8A', background: 'rgba(255,138,138,0.12)' } }, gpsError)
+                   color: '#FF8A8A', background: 'rgba(255,138,138,0.12)' } }, gpsError),
+
+        // Auto-pause indicator
+        autoPaused && !isPaused && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16,
+                   padding: '10px 20px', borderRadius: 16, background: 'rgba(255,183,77,0.12)', border: '1px solid rgba(255,183,77,0.2)',
+                   animation: 'rcAutoPulse 2s ease-in-out infinite' } },
+          /*#__PURE__*/React.createElement(PauseIcon, { size: 14 }),
+          /*#__PURE__*/React.createElement("span", { style: { fontSize: 12, fontWeight: 700, color: '#E09530' } }, "Waiting for movement..."))
       ),
 
       // Controls
@@ -1753,7 +1827,25 @@ const RunClubScreen = ({ profile }) => {
         /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)' } }, "Loading...")),
 
       // Footer
-      /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center', padding: '24px 0 8px', opacity: 0.4, fontSize: 11, fontWeight: 500, color: 'var(--c-text-sub)', letterSpacing: '0.05em' } }, "coded by Degos")
+      /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center', padding: '24px 0 8px', opacity: 0.4, fontSize: 11, fontWeight: 500, color: 'var(--c-text-sub)', letterSpacing: '0.05em' } }, "coded by Degos"),
+
+      // Achievement unlock toasts (floating overlay)
+      unlockToasts.length > 0 && /*#__PURE__*/React.createElement("div", { style: { position: 'fixed', bottom: 100, left: 0, right: 0, zIndex: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, pointerEvents: 'none' } },
+        unlockToasts.map(function(toast, i) {
+          return /*#__PURE__*/React.createElement("div", { key: toast.id,
+            style: { display: 'flex', alignItems: 'center', gap: 14, padding: '14px 22px', borderRadius: 20,
+                     background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                     border: '1px solid rgba(168,130,255,0.25)', boxShadow: '0 8px 32px rgba(168,130,255,0.2), 0 0 0 1px rgba(255,255,255,0.5)',
+                     animation: 'rcToastIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards',
+                     animationDelay: (i * 0.15) + 's', opacity: 0, pointerEvents: 'auto' } },
+            /*#__PURE__*/React.createElement("div", { style: { animation: 'rcMedalBounce 0.6s cubic-bezier(0.22,1,0.36,1) forwards', animationDelay: (i * 0.15 + 0.3) + 's', transform: 'scale(0)' } },
+              getAchievementMedal(toast.id, true)),
+            /*#__PURE__*/React.createElement("div", null,
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#A882FF', marginBottom: 2 } }, "Badge Unlocked!"),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 700, color: 'var(--c-text)' } }, toast.name),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 1 } }, toast.desc)));
+        })
+      )
     )
   );
 };
