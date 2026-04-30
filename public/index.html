@@ -34,8 +34,28 @@
   });
   window.addEventListener('load', function(){
     navigator.serviceWorker.register('./sw.js').then(function(reg){
-      // Check for SW updates every 30 min (don't rely on browser's 24h cycle)
-      setInterval(function(){ try { reg.update(); } catch(e){} }, 30 * 60 * 1000);
+      // Check immediately on load
+      reg.update().catch(function(){});
+      // Check every 5 minutes (not 30 — catch deploys faster)
+      setInterval(function(){ try { reg.update(); } catch(e){} }, 5 * 60 * 1000);
+      // Check when tab becomes visible (user returns from another tab/app)
+      document.addEventListener('visibilitychange', function(){
+        if (document.visibilityState === 'visible') {
+          try { reg.update(); } catch(e){}
+        }
+      });
+      // When an update is found, tell the waiting SW to activate immediately
+      reg.addEventListener('updatefound', function(){
+        var newSW = reg.installing;
+        if (newSW) {
+          newSW.addEventListener('statechange', function(){
+            if (newSW.state === 'installed' && reg.waiting) {
+              // New SW is waiting — tell it to skip waiting and take over
+              reg.waiting.postMessage('skipWaiting');
+            }
+          });
+        }
+      });
     }).catch(function(){});
   });
 })();

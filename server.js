@@ -69,7 +69,12 @@ app.use(express.static(PUBLIC_DIR, {
   etag: true, lastModified: true,
   setHeaders(res, filePath) {
     // Critical app files: always revalidate so deploys take effect immediately
-    if (filePath.endsWith('index.html') || filePath.endsWith('sw.js') || filePath.endsWith('app.js') || filePath.endsWith('api.js') || filePath.endsWith('run-club.js')) {
+    // sw.js: no-store prevents ANY caching — browser always fetches fresh copy
+    if (filePath.endsWith('sw.js')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    }
+    // Other critical app files: revalidate so deploys take effect immediately
+    else if (filePath.endsWith('index.html') || filePath.endsWith('app.js') || filePath.endsWith('api.js') || filePath.endsWith('run-club.js')) {
       res.setHeader('Cache-Control', 'no-cache');
     }
     // Static assets (images, icons, fonts, CSS): cache 24h

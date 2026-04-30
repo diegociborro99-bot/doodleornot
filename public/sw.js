@@ -50,6 +50,18 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+// Allow clients to trigger skipWaiting manually (e.g. from update prompt)
+self.addEventListener('message', (e) => {
+  if (e.data === 'skipWaiting') self.skipWaiting();
+});
+
+// Enable navigation preload if supported (faster network-first for navigations)
+self.addEventListener('activate', (e2) => {
+  if (self.registration.navigationPreload) {
+    e2.waitUntil(self.registration.navigationPreload.enable());
+  }
+});
+
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
