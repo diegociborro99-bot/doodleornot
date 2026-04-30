@@ -32,9 +32,9 @@
   };
 
 /* ==========================================================================
-   DOODLES RUN CLUB — v4 Complete Rewrite
+   DOODLES RUN CLUB — v5 Complete Rewrite
    Solid backgrounds, mobile+PC optimized, access gate, admin inbox,
-   custom achievement medals, all in English
+   custom achievement medals, all in English, no emojis
    ========================================================================== */
 
 /* ---------- SVG Icons ---------- */
@@ -119,6 +119,100 @@ const InboxIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
 }, /*#__PURE__*/React.createElement("path", { d: "M22 12h-6l-2 3H10l-2-3H2" }),
   /*#__PURE__*/React.createElement("path", { d: "M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" }));
 
+/* ---------- NEW SVG Icons (replacing emojis) ---------- */
+
+const HouseIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M3 12l9-9 9 9" }),
+  /*#__PURE__*/React.createElement("path", { d: "M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10" }));
+
+const ListIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" }));
+
+const TrophyIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M6 9H4a2 2 0 01-2-2V5a1 1 0 011-1h3" }),
+  /*#__PURE__*/React.createElement("path", { d: "M18 9h2a2 2 0 002-2V5a1 1 0 00-1-1h-3" }),
+  /*#__PURE__*/React.createElement("path", { d: "M6 4h12v6a6 6 0 01-12 0V4z" }),
+  /*#__PURE__*/React.createElement("path", { d: "M9 20h6M12 16v4" }));
+
+const MedalIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 14, r: 6 }),
+  /*#__PURE__*/React.createElement("path", { d: "M8 8L6 2h4l2 3 2-3h4l-2 6" }));
+
+const GearIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 12, r: 3 }),
+  /*#__PURE__*/React.createElement("path", { d: "M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" }));
+
+const RunnerIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("circle", { cx: 14, cy: 4, r: 2 }),
+  /*#__PURE__*/React.createElement("path", { d: "M7 22l3-7 3 2v5" }),
+  /*#__PURE__*/React.createElement("path", { d: "M10 15l-2-3 5-3 3 4h3" }));
+
+const BoltIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("polygon", { points: "13 2 3 14 12 14 11 22 21 10 12 10 13 2" }));
+
+const ChartBarIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M12 20V10M18 20V4M6 20v-4" }));
+
+const CelebrationIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M4 20l4-16 6 6-6 6 8 4" }),
+  /*#__PURE__*/React.createElement("path", { d: "M15 4l1 1M18 7l1 1M20 3l1 1" }),
+  /*#__PURE__*/React.createElement("circle", { cx: 17, cy: 3, r: 1, fill: "currentColor", stroke: "none" }),
+  /*#__PURE__*/React.createElement("circle", { cx: 21, cy: 7, r: 1, fill: "currentColor", stroke: "none" }));
+
+const FlexIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M7 10c0-3 2-5 5-5s5 2 5 5c0 2-1 3-3 4" }),
+  /*#__PURE__*/React.createElement("path", { d: "M12 14v4M9 18h6" }),
+  /*#__PURE__*/React.createElement("path", { d: "M4 14c0-2 1-3 3-4M20 14c0-2-1-3-3-4" }));
+
+const SparkleIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z" }));
+
+const ArrowLeftIcon = ({ size = 20 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M19 12H5M12 19l-7-7 7-7" }));
+
+const MapPinIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" }),
+  /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 10, r: 3 }));
+
+const MoonIcon = ({ size = 16 }) => /*#__PURE__*/React.createElement("svg", {
+  viewBox: "0 0 24 24", width: size, height: size, fill: "none",
+  stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round"
+}, /*#__PURE__*/React.createElement("path", { d: "M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" }));
+
+/* ---------- Small Fire SVG path for medal usage ---------- */
+const FireMedalPath = ({ x, y, sc, fill }) => /*#__PURE__*/React.createElement("g", { transform: "translate(" + x + "," + y + ") scale(" + sc + ")" },
+  /*#__PURE__*/React.createElement("path", { d: "M6 1c0 2-2 3-2 5a3 3 0 006 0c0-2-2-3-2-5", fill: "none", stroke: fill || "#FFF", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" }),
+  /*#__PURE__*/React.createElement("circle", { cx: 6, cy: 8, r: 1, fill: fill || "#FFF" }));
+
+const MoonMedalPath = ({ x, y, sc, fill }) => /*#__PURE__*/React.createElement("g", { transform: "translate(" + x + "," + y + ") scale(" + sc + ")" },
+  /*#__PURE__*/React.createElement("path", { d: "M10.5 6.4A4.5 4.5 0 115.6 1.5 3.5 3.5 0 0010.5 6.4z", fill: "none", stroke: fill || "#FFF", strokeWidth: 1.2, strokeLinecap: "round", strokeLinejoin: "round" }));
+
 /* ---------- Custom Achievement Medal SVGs ---------- */
 const ACHIEVEMENT_MEDALS = {
   first_run: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
@@ -183,7 +277,7 @@ const ACHIEVEMENT_MEDALS = {
 
   streak_7: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
     /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FF7043' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
-    /*#__PURE__*/React.createElement("text", { x: 24, y: 16, textAnchor: "middle", fontSize: 12, fill: unlocked ? '#FFF' : '#666' }, "🔥"),
+    /*#__PURE__*/React.createElement(FireMedalPath, { x: 18, y: 8, sc: 1, fill: unlocked ? '#FFF' : '#666' }),
     /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 7, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "7 DAYS"),
     /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF7043' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
 
@@ -193,13 +287,15 @@ const ACHIEVEMENT_MEDALS = {
         /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#FF5722' : '#3A3550' }),
         /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#FF9800' : '#2A2740' }))),
     /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g30)", opacity: unlocked ? 1 : 0.4 }),
-    /*#__PURE__*/React.createElement("text", { x: 24, y: 16, textAnchor: "middle", fontSize: 11, fill: unlocked ? '#FFF' : '#666' }, "🔥"),
+    /*#__PURE__*/React.createElement(FireMedalPath, { x: 18, y: 8, sc: 1, fill: unlocked ? '#FFF' : '#666' }),
     /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 6, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "30 DAYS"),
     /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF5722' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
 
   speed_demon: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
     /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#40C4FF' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
-    /*#__PURE__*/React.createElement("text", { x: 24, y: 16, textAnchor: "middle", fontSize: 13, fill: unlocked ? '#FFF' : '#666' }, "⚡"),
+    /*#__PURE__*/React.createElement(BoltIcon, { size: 14 }),
+    /*#__PURE__*/React.createElement("g", { transform: "translate(17,10) scale(0.6)" },
+      /*#__PURE__*/React.createElement("polygon", { points: "13 2 3 14 12 14 11 22 21 10 12 10 13 2", fill: "none", stroke: unlocked ? '#FFF' : '#666', strokeWidth: 2.5, strokeLinecap: "round", strokeLinejoin: "round" })),
     /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "SPEED"),
     /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#40C4FF' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
 
@@ -221,13 +317,15 @@ const ACHIEVEMENT_MEDALS = {
 
   early_bird: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
     /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FFF9C4' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
-    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 14, fill: unlocked ? '#F57F17' : '#666' }, "☀"),
+    /*#__PURE__*/React.createElement("g", { transform: "translate(16,10) scale(0.7)" },
+      /*#__PURE__*/React.createElement("circle", { cx: 12, cy: 7, r: 5, fill: "none", stroke: unlocked ? '#F57F17' : '#666', strokeWidth: 2 }),
+      /*#__PURE__*/React.createElement("path", { d: "M12 2v-2M17 7h2M7 7H5M15.5 3.5l1.5-1.5M8.5 3.5L7 2", fill: "none", stroke: unlocked ? '#F57F17' : '#666', strokeWidth: 1.5, strokeLinecap: "round" })),
     /*#__PURE__*/React.createElement("text", { x: 24, y: 29, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#F57F17' : '#666' }, "EARLY"),
     /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FFF176' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
 
   night_owl: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
     /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#1A237E' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
-    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 14, fill: unlocked ? '#FFF' : '#666' }, "🌙"),
+    /*#__PURE__*/React.createElement(MoonMedalPath, { x: 18, y: 9, sc: 1.1, fill: unlocked ? '#FFF' : '#666' }),
     /*#__PURE__*/React.createElement("text", { x: 24, y: 29, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#9FA8DA' : '#666' }, "NIGHT"),
     /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#3F51B5' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 }))
 };
@@ -353,11 +451,78 @@ const formatDuration = (totalSec) => {
   return m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0');
 };
 const formatDateShort = (iso) => { const d = new Date(iso); const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return mo[d.getMonth()] + ' ' + d.getDate(); };
+const formatDateFull = (iso) => {
+  var d = new Date(iso);
+  var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var h = d.getHours(); var m = d.getMinutes();
+  var ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  return mo[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' at ' + h + ':' + m.toString().padStart(2, '0') + ' ' + ampm;
+};
 const estimateCalories = (distanceM) => Math.round((distanceM / 1000) * 60);
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371000; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+/* ---------- Reverse Geocode Helper ---------- */
+var reverseGeocode = function(lat, lng) {
+  return fetch('https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json&zoom=14')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.address) {
+        var a = data.address;
+        var parts = [];
+        if (a.neighbourhood || a.suburb || a.quarter) parts.push(a.neighbourhood || a.suburb || a.quarter);
+        if (a.city || a.town || a.village) parts.push(a.city || a.town || a.village);
+        return parts.join(', ') || data.display_name || null;
+      }
+      return null;
+    })
+    .catch(function() { return null; });
+};
+
+/* ---------- RouteMapPreview Component ---------- */
+const RouteMapPreview = ({ route, distanceLabel }) => {
+  if (!route || route.length < 2) return null;
+  var lats = route.map(function(p) { return p.lat; });
+  var lngs = route.map(function(p) { return p.lng; });
+  var minLat = Math.min.apply(null, lats); var maxLat = Math.max.apply(null, lats);
+  var minLng = Math.min.apply(null, lngs); var maxLng = Math.max.apply(null, lngs);
+  var latRange = maxLat - minLat || 0.001;
+  var lngRange = maxLng - minLng || 0.001;
+  var padding = 24;
+  var svgW = 400; var svgH = 200;
+  var innerW = svgW - padding * 2; var innerH = svgH - padding * 2;
+  var scale = Math.min(innerW / lngRange, innerH / latRange);
+  var offsetX = (svgW - lngRange * scale) / 2;
+  var offsetY = (svgH - latRange * scale) / 2;
+  var points = route.map(function(p) {
+    var x = (p.lng - minLng) * scale + offsetX;
+    var y = svgH - ((p.lat - minLat) * scale + offsetY);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  var startPt = route[0]; var endPt = route[route.length - 1];
+  var sx = (startPt.lng - minLng) * scale + offsetX;
+  var sy = svgH - ((startPt.lat - minLat) * scale + offsetY);
+  var ex = (endPt.lng - minLng) * scale + offsetX;
+  var ey = svgH - ((endPt.lat - minLat) * scale + offsetY);
+
+  return /*#__PURE__*/React.createElement("div", { className: "rc-pop-in", style: { width: '100%', marginBottom: 16, position: 'relative' } },
+    /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 " + svgW + " " + svgH, width: "100%", height: 200,
+      style: { background: 'rgba(26,16,48,0.7)', borderRadius: 16, display: 'block' }
+    },
+      /*#__PURE__*/React.createElement("defs", null,
+        /*#__PURE__*/React.createElement("linearGradient", { id: "routeGrad", x1: "0", y1: "0", x2: "1", y2: "0" },
+          /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: "#7DD8A0" }),
+          /*#__PURE__*/React.createElement("stop", { offset: "50%", stopColor: "#A882FF" }),
+          /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: "#FF96C8" }))),
+      /*#__PURE__*/React.createElement("polyline", { points: points, fill: "none", stroke: "url(#routeGrad)", strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round", opacity: 0.9 }),
+      /*#__PURE__*/React.createElement("circle", { cx: sx, cy: sy, r: 5, fill: "#7DD8A0", stroke: "#FFF", strokeWidth: 1.5 }),
+      /*#__PURE__*/React.createElement("circle", { cx: ex, cy: ey, r: 5, fill: "#FF6B6B", stroke: "#FFF", strokeWidth: 1.5 })
+    ),
+    distanceLabel && /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', bottom: 10, right: 14, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.04em' } }, distanceLabel)
+  );
 };
 
 /* ==========================================================================
@@ -410,6 +575,14 @@ const RunClubScreen = ({ profile }) => {
   const timerRef = useRef(null);
   const lastPosRef = useRef(null);
   const lastSplitTimeRef = useRef(0);
+
+  // Post-run zone
+  const [runZone, setRunZone] = useState(null);
+
+  // Run detail view
+  const [selectedRun, setSelectedRun] = useState(null);
+  const [selectedRunData, setSelectedRunData] = useState(null);
+  const [selectedRunZone, setSelectedRunZone] = useState(null);
 
   // Check access
   useEffect(() => {
@@ -528,6 +701,7 @@ const RunClubScreen = ({ profile }) => {
     lastPosRef.current = null; pausedAtRef.current = 0; lastSplitTimeRef.current = 0;
     startTimeRef.current = Date.now();
     setIsRunning(true); setIsPaused(false); setView('active');
+    setRunZone(null);
     startGpsWatch();
   };
 
@@ -540,6 +714,15 @@ const RunClubScreen = ({ profile }) => {
     const dist = Math.round(distance); const dur = elapsed;
     const pace = dist > 0 ? Math.round((dur / (dist / 1000))) : 0;
     const cal = estimateCalories(dist);
+
+    // Reverse geocode start position
+    if (gpsRoute.length > 0) {
+      var firstPt = gpsRoute[0];
+      reverseGeocode(firstPt.lat, firstPt.lng).then(function(zone) {
+        if (zone) setRunZone(zone);
+      });
+    }
+
     if (api && dist > 10) {
       try {
         const result = await api.saveRun({
@@ -567,6 +750,25 @@ const RunClubScreen = ({ profile }) => {
     setGpsRoute([]); setSplits([]); setRunMode(null); setView('dashboard');
   };
 
+  // Open run detail
+  var openRunDetail = function(run) {
+    setSelectedRun(run);
+    setSelectedRunData(null);
+    setSelectedRunZone(null);
+    if (api && api.getRun) {
+      api.getRun(run.id).then(function(data) {
+        setSelectedRunData(data);
+        if (data && data.route && data.route.length > 0) {
+          reverseGeocode(data.route[0].lat, data.route[0].lng).then(function(zone) {
+            if (zone) setSelectedRunZone(zone);
+          });
+        }
+      }).catch(function() { setSelectedRunData(run); });
+    } else {
+      setSelectedRunData(run);
+    }
+  };
+
   const currentPace = distance > 100 && elapsed > 0 ? Math.round(elapsed / (distance / 1000)) : 0;
   const goalProgress = runMode && runMode !== 'free' ? Math.min(1, distance / (runMode.unit === 'mi' ? runMode.target * 1609.344 : runMode.target * 1000)) : 0;
 
@@ -576,7 +778,7 @@ const RunClubScreen = ({ profile }) => {
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 480, margin: '0 auto', padding: '16px 20px calc(100px + env(safe-area-inset-bottom)) 20px', minHeight: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 } },
         /*#__PURE__*/React.createElement("div", { style: { width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(168,130,255,0.15)', borderTopColor: '#A882FF', animation: 'rcSpin 0.8s linear infinite' } }),
-        /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text-sub)' } }, "Loading Run Club...")));
+        /*#__PURE__*/React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text-sub)' } }, "Loading Doodles Run Club...")));
   }
 
   /* ========== ACCESS GATE — Apply to Join ========== */
@@ -591,10 +793,10 @@ const RunClubScreen = ({ profile }) => {
             className: "rc-float",
             style: { width: 88, height: 88, borderRadius: '50%', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                      background: 'linear-gradient(135deg, rgba(168,130,255,0.2), rgba(255,150,200,0.2))', border: '2px solid rgba(168,130,255,0.25)', boxShadow: '0 8px 32px rgba(168,130,255,0.15)' }
-          }, /*#__PURE__*/React.createElement("span", { style: { fontSize: 40 } }, "👟")),
+          }, /*#__PURE__*/React.createElement(RunShoeIcon, { size: 40 })),
           /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 32, marginBottom: 8, background: 'linear-gradient(135deg, #A882FF 0%, #FF96C8 50%, #7DD8A0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } }, "Doodles Run Club"),
           /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, lineHeight: 1.7, color: 'var(--c-text-sub)', maxWidth: 320, margin: '0 auto' } },
-            "An exclusive running community for Doodles holders. Track your runs, compete on leaderboards, and earn achievements. ✨")
+            "An exclusive running community for Doodles holders. Track your runs, compete on leaderboards, and earn achievements.")
         ),
 
         // STATUS: none — show application form
@@ -619,7 +821,7 @@ const RunClubScreen = ({ profile }) => {
             style: { width: '100%', padding: '14px', borderRadius: 16, fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer',
                      background: requestSocial.trim() ? 'linear-gradient(135deg, #A882FF 0%, #FF96C8 100%)' : 'var(--c-border)', color: '#FFF', transition: 'all 0.3s',
                      boxShadow: requestSocial.trim() ? '0 4px 20px rgba(168,130,255,0.3)' : 'none' }
-          }, "Submit Request ✨")
+          }, "Submit Request")
         ),
 
         // STATUS: pending — waiting screen
@@ -654,6 +856,59 @@ const RunClubScreen = ({ profile }) => {
     );
   }
 
+  /* ========== RUN DETAIL VIEW ========== */
+  if (selectedRun) {
+    var rd = selectedRunData || selectedRun;
+    var rdDist = rd.distanceM || 0;
+    var rdDur = rd.durationSec || 0;
+    var rdPace = rd.avgPaceSec || 0;
+    var rdCal = rd.calories || estimateCalories(rdDist);
+    var rdRoute = rd.route || null;
+    var rdSplits = rd.splits || [];
+
+    return /*#__PURE__*/React.createElement("div", { className: "rc-pastel-bg", style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
+      /*#__PURE__*/React.createElement(RunClubStyles, null),
+      /*#__PURE__*/React.createElement("div", { style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
+        // Back button
+        /*#__PURE__*/React.createElement("button", { onClick: function() { setSelectedRun(null); setSelectedRunData(null); setSelectedRunZone(null); },
+          style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, color: '#A882FF', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 20 }
+        }, /*#__PURE__*/React.createElement(ArrowLeftIcon, { size: 18 }), "Back"),
+
+        // Date & time
+        /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 20 } },
+          /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 36, background: 'linear-gradient(135deg, #A882FF, #FF96C8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } },
+            formatDistanceMiles(rdDist) + ' mi'),
+          /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)', marginTop: 6 } }, rd.startedAt ? formatDateFull(rd.startedAt) : ''),
+          selectedRunZone && /*#__PURE__*/React.createElement("div", { style: { display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '4px 14px', borderRadius: 20, background: 'rgba(168,130,255,0.1)', border: '1px solid rgba(168,130,255,0.15)' } },
+            /*#__PURE__*/React.createElement(MapPinIcon, { size: 12 }),
+            /*#__PURE__*/React.createElement("span", { style: { fontSize: 12, fontWeight: 600, color: '#A882FF' } }, selectedRunZone))
+        ),
+
+        // Route map
+        rdRoute && rdRoute.length >= 2 && /*#__PURE__*/React.createElement(RouteMapPreview, { route: rdRoute, distanceLabel: formatDistanceMiles(rdDist) + ' mi' }),
+
+        // Stat cards
+        /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 } },
+          [['Duration', formatDuration(rdDur), '#7DD8A0'], ['Pace/km', formatPace(rdPace), '#A882FF'], ['Calories', rdCal, '#FFB74D'], ['Distance', formatDistance(rdDist), '#64B5F6']].map(function(pair, i) {
+            return /*#__PURE__*/React.createElement("div", { key: i, style: { background: "rgba(255,255,255,0.8)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 20, textAlign: 'center', padding: 16, borderTop: '3px solid ' + pair[2], boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }, className: "rc-pop-in" },
+              /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, pair[1]),
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 6, color: pair[2] } }, pair[0]));
+          })
+        ),
+
+        // Splits
+        rdSplits.length > 0 && /*#__PURE__*/React.createElement("div", { style: { background: "rgba(255,255,255,0.8)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 20, padding: 18, marginBottom: 16, boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }, className: "rc-slide-up" },
+          /*#__PURE__*/React.createElement("h3", { style: { fontSize: 14, fontWeight: 600, color: 'var(--c-text)', marginBottom: 12 } }, "Km Splits"),
+          rdSplits.map(function(s, i) {
+            return /*#__PURE__*/React.createElement("div", { key: i, style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: i < rdSplits.length - 1 ? '1px solid var(--c-border)' : 'none' } },
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, color: 'var(--c-text-sub)' } }, "Km " + s.km),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text)' } }, formatPace(s.timeSec)));
+          })
+        )
+      )
+    );
+  }
+
   /* ========== POST-RUN SUMMARY ========== */
   if (showPostRun) {
     const dist = Math.round(distance); const dur = elapsed;
@@ -663,15 +918,23 @@ const RunClubScreen = ({ profile }) => {
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
         /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 28 } },
-          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { fontSize: 48, marginBottom: 8 } }, "🎉"),
+          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 8, display: 'flex', justifyContent: 'center' } }, /*#__PURE__*/React.createElement(CelebrationIcon, { size: 48 })),
           hitGoal && /*#__PURE__*/React.createElement("div", {
-            style: { display: 'inline-block', fontSize: 14, fontWeight: 700, padding: '8px 20px', borderRadius: 24,
+            style: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, padding: '8px 20px', borderRadius: 24,
                      background: 'linear-gradient(135deg, rgba(125,216,160,0.2), rgba(168,130,255,0.15))', color: '#7DD8A0', marginBottom: 12, border: '1px solid rgba(125,216,160,0.2)' }
-          }, "🎯 Goal Reached!"),
+          }, /*#__PURE__*/React.createElement(TargetIcon, { size: 16 }), " Goal Reached!"),
           /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 48, background: 'linear-gradient(135deg, #A882FF, #FF96C8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } },
             formatDistanceMiles(dist) + ' mi'),
-          /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)', marginTop: 4 } }, "Great run! Keep it up! 💪")
+          runZone && /*#__PURE__*/React.createElement("div", { style: { display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '4px 14px', borderRadius: 20, background: 'rgba(168,130,255,0.1)', border: '1px solid rgba(168,130,255,0.15)' } },
+            /*#__PURE__*/React.createElement(MapPinIcon, { size: 12 }),
+            /*#__PURE__*/React.createElement("span", { style: { fontSize: 12, fontWeight: 600, color: '#A882FF' } }, runZone)),
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)', marginTop: 8 } },
+            /*#__PURE__*/React.createElement(FlexIcon, { size: 14 }), "Great run! Keep it up!")
         ),
+
+        // Route map
+        gpsRoute.length >= 2 && /*#__PURE__*/React.createElement(RouteMapPreview, { route: gpsRoute, distanceLabel: formatDistanceMiles(dist) + ' mi' }),
+
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 } },
           [['Time', formatDuration(dur), '#7DD8A0'], ['Pace/km', formatPace(pace), '#A882FF'], ['Cal', estimateCalories(dist), '#FFB74D']].map(function(pair, i) {
             return /*#__PURE__*/React.createElement("div", { key: i, style: { background: "rgba(255,255,255,0.8)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 20, textAlign: 'center', padding: 14, borderTop: '3px solid ' + pair[2], boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }, className: "rc-pop-in" },
@@ -697,11 +960,11 @@ const RunClubScreen = ({ profile }) => {
           })
         ),
         /*#__PURE__*/React.createElement("button", {
-          onClick: () => { setShowPostRun(false); setDistance(0); setElapsed(0); setSplits([]); setCoachTips([]); setRunMode(null); setGoalReached(false); setView('dashboard'); },
+          onClick: () => { setShowPostRun(false); setDistance(0); setElapsed(0); setSplits([]); setCoachTips([]); setRunMode(null); setGoalReached(false); setRunZone(null); setView('dashboard'); },
           style: { width: '100%', padding: 16, borderRadius: 20, fontSize: 17, fontWeight: 700, border: 'none', cursor: 'pointer',
                    background: 'linear-gradient(135deg, #A882FF 0%, #FF96C8 100%)', color: '#FFF',
                    boxShadow: '0 4px 20px rgba(168,130,255,0.3)', transition: 'transform 0.2s ease' }
-        }, "Done ✨")
+        }, "Done")
       )
     );
   }
@@ -715,7 +978,7 @@ const RunClubScreen = ({ profile }) => {
           style: { position: 'absolute', top: 20, left: 20, fontSize: 14, fontWeight: 600, color: '#A882FF', background: 'none', border: 'none', cursor: 'pointer' }
         }, "← Cancel"),
 
-        /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { fontSize: 40, marginBottom: 12 } }, "🏃‍♂️"),
+        /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 12, display: 'flex', justifyContent: 'center' } }, /*#__PURE__*/React.createElement(RunnerIcon, { size: 40 })),
         /*#__PURE__*/React.createElement("h1", { className: "font-display rc-slide-up", style: { fontSize: 26, background: 'linear-gradient(135deg, #A882FF, #FF96C8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 32 } }, "Choose Your Run"),
 
         // Free Run
@@ -727,7 +990,7 @@ const RunClubScreen = ({ profile }) => {
         },
           /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 14 } },
             /*#__PURE__*/React.createElement("div", { style: { width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'linear-gradient(135deg, rgba(168,130,255,0.2), rgba(255,150,200,0.15))', fontSize: 24 } }, "🏃"),
+                     background: 'linear-gradient(135deg, rgba(168,130,255,0.2), rgba(255,150,200,0.15))' } }, /*#__PURE__*/React.createElement(RunnerIcon, { size: 24 })),
             /*#__PURE__*/React.createElement("div", null,
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 17, fontWeight: 700, color: '#E8E0F0' } }, "Free Run"),
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: '#B0A8CC', marginTop: 3 } }, "Run as far as you want"))
@@ -740,7 +1003,7 @@ const RunClubScreen = ({ profile }) => {
                    background: 'rgba(125,216,160,0.08)', border: '1px solid rgba(125,216,160,0.2)', boxShadow: '0 4px 20px rgba(125,216,160,0.06)' } },
           /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 } },
             /*#__PURE__*/React.createElement("div", { style: { width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'linear-gradient(135deg, rgba(125,216,160,0.2), rgba(100,181,246,0.15))', fontSize: 24 } }, "🎯"),
+                     background: 'linear-gradient(135deg, rgba(125,216,160,0.2), rgba(100,181,246,0.15))' } }, /*#__PURE__*/React.createElement(TargetIcon, { size: 24 })),
             /*#__PURE__*/React.createElement("div", null,
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 17, fontWeight: 700, color: '#E8E0F0' } }, "Goal Run"),
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: '#B0A8CC', marginTop: 3 } }, "Set a distance target"))
@@ -778,8 +1041,8 @@ const RunClubScreen = ({ profile }) => {
             onClick: () => { var t = parseFloat(goalTarget); if (t > 0) startRun({ unit: goalUnit, target: t }); },
             style: { width: '100%', padding: 14, borderRadius: 16, fontSize: 16, fontWeight: 700, border: 'none', cursor: 'pointer',
                      background: 'linear-gradient(135deg, #7DD8A0 0%, #A882FF 100%)', color: '#FFF',
-                     boxShadow: '0 4px 20px rgba(125,216,160,0.3)' }
-          }, "Start Goal Run 🎯")
+                     boxShadow: '0 4px 20px rgba(125,216,160,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }
+          }, "Start Goal Run ", /*#__PURE__*/React.createElement(TargetIcon, { size: 16 }))
         )
       )
     );
@@ -906,7 +1169,9 @@ const RunClubScreen = ({ profile }) => {
           /*#__PURE__*/React.createElement("button", { onClick: () => setView('dashboard'),
             style: { fontSize: 14, fontWeight: 600, color: '#A882FF', background: 'none', border: 'none', cursor: 'pointer' }
           }, "← Back"),
-          /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, "⚙ Admin Inbox"),
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 6 } },
+            /*#__PURE__*/React.createElement(GearIcon, { size: 18 }),
+            /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 22, color: 'var(--c-text)' } }, "Admin Inbox")),
           pendingCount > 0 && /*#__PURE__*/React.createElement("span", {
             style: { fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 10, background: 'rgba(255,138,138,0.15)', color: '#FF8A8A' }
           }, pendingCount)
@@ -970,21 +1235,28 @@ const RunClubScreen = ({ profile }) => {
 
   return /*#__PURE__*/React.createElement("div", { className: "rc-pastel-bg", style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
     /*#__PURE__*/React.createElement(RunClubStyles, null),
-    /*#__PURE__*/React.createElement("div", { style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
+    /*#__PURE__*/React.createElement("div", { className: "rc-inner", style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
 
       // Header
       /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 20, paddingTop: 12 } },
-        /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { fontSize: 36, marginBottom: 4 } }, "👟"),
-        /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 28, background: 'linear-gradient(135deg, #A882FF 0%, #FF96C8 50%, #7DD8A0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } }, "Run Club"),
-        /*#__PURE__*/React.createElement("p", { style: { fontSize: 11, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--c-text-sub)', marginTop: 2 } }, "✨ DOODLES RUNNERS ✨")),
+        /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 4, display: 'flex', justifyContent: 'center' } },
+          /*#__PURE__*/React.createElement("div", { style: { width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                     background: 'linear-gradient(135deg, rgba(168,130,255,0.2), rgba(255,150,200,0.2))', border: '1px solid rgba(168,130,255,0.2)' } },
+            /*#__PURE__*/React.createElement(RunShoeIcon, { size: 28 }))),
+        /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 28, background: 'linear-gradient(135deg, #A882FF 0%, #FF96C8 50%, #7DD8A0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } }, "Doodles Run Club")),
 
       // Sub-nav
       /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 8, marginBottom: 20, justifyContent: 'center', flexWrap: 'wrap' } },
-        /*#__PURE__*/React.createElement(RCPill, { active: view === 'dashboard', onClick: () => setView('dashboard'), color: '#A882FF' }, "🏠 Home"),
-        /*#__PURE__*/React.createElement(RCPill, { active: view === 'history', onClick: () => setView('history'), color: '#FF96C8' }, "📋 History"),
-        /*#__PURE__*/React.createElement(RCPill, { active: view === 'leaderboard', onClick: () => setView('leaderboard'), color: '#64B5F6' }, "🏆 Board"),
-        /*#__PURE__*/React.createElement(RCPill, { active: view === 'achievements', onClick: () => setView('achievements'), color: '#FFB74D' }, "🏅 Badges"),
-        isAdmin && /*#__PURE__*/React.createElement(RCPill, { active: view === 'admin', onClick: () => setView('admin'), color: '#7DD8A0' }, "⚙ Admin")),
+        /*#__PURE__*/React.createElement(RCPill, { active: view === 'dashboard', onClick: () => setView('dashboard'), color: '#A882FF' },
+          /*#__PURE__*/React.createElement("span", { style: { display: 'inline-flex', alignItems: 'center', gap: 5 } }, /*#__PURE__*/React.createElement(HouseIcon, { size: 14 }), " Home")),
+        /*#__PURE__*/React.createElement(RCPill, { active: view === 'history', onClick: () => setView('history'), color: '#FF96C8' },
+          /*#__PURE__*/React.createElement("span", { style: { display: 'inline-flex', alignItems: 'center', gap: 5 } }, /*#__PURE__*/React.createElement(ListIcon, { size: 14 }), " History")),
+        /*#__PURE__*/React.createElement(RCPill, { active: view === 'leaderboard', onClick: () => setView('leaderboard'), color: '#64B5F6' },
+          /*#__PURE__*/React.createElement("span", { style: { display: 'inline-flex', alignItems: 'center', gap: 5 } }, /*#__PURE__*/React.createElement(TrophyIcon, { size: 14 }), " Board")),
+        /*#__PURE__*/React.createElement(RCPill, { active: view === 'achievements', onClick: () => setView('achievements'), color: '#FFB74D' },
+          /*#__PURE__*/React.createElement("span", { style: { display: 'inline-flex', alignItems: 'center', gap: 5 } }, /*#__PURE__*/React.createElement(MedalIcon, { size: 14 }), " Badges")),
+        isAdmin && /*#__PURE__*/React.createElement(RCPill, { active: view === 'admin', onClick: () => setView('admin'), color: '#7DD8A0' },
+          /*#__PURE__*/React.createElement("span", { style: { display: 'inline-flex', alignItems: 'center', gap: 5 } }, /*#__PURE__*/React.createElement(GearIcon, { size: 14 }), " Admin"))),
 
       // Start Run
       view === 'dashboard' && /*#__PURE__*/React.createElement("button", {
@@ -997,35 +1269,35 @@ const RunClubScreen = ({ profile }) => {
                  fontFamily: "'Paytone One', 'Fredoka', sans-serif",
                  animation: 'rcStartGlow 3s ease-in-out infinite',
                  transition: 'transform 0.2s ease' }
-      }, /*#__PURE__*/React.createElement("span", { style: { fontSize: 22 } }, "👟"), "Start Run"),
+      }, /*#__PURE__*/React.createElement(RunShoeIcon, { size: 22, active: true }), "Start Run"),
 
       // === DASHBOARD ===
       view === 'dashboard' && !loading && /*#__PURE__*/React.createElement(React.Fragment, null,
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 } },
           /*#__PURE__*/React.createElement("div", { style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 20, padding: 16, borderLeft: '4px solid #7DD8A0', boxShadow: '0 4px 16px rgba(125,216,160,0.12)' }, className: "rc-pop-in" },
             /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 } },
-              /*#__PURE__*/React.createElement("span", { style: { fontSize: 16 } }, "🏃"),
+              /*#__PURE__*/React.createElement(RunnerIcon, { size: 16 }),
               /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#5CAA7F' } }, "This Week")),
             /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 24, color: 'var(--c-text)' } }, formatDistanceMiles(s.weekDistanceM || 0) + ' mi'),
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 4, fontWeight: 500 } }, (s.weekRuns || 0) + ' runs')),
 
           /*#__PURE__*/React.createElement("div", { style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 20, padding: 16, borderLeft: '4px solid #A882FF', boxShadow: '0 4px 16px rgba(168,130,255,0.12)' }, className: "rc-pop-in" },
             /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 } },
-              /*#__PURE__*/React.createElement("span", { style: { fontSize: 16 } }, "👟"),
+              /*#__PURE__*/React.createElement(RunShoeIcon, { size: 16 }),
               /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#8B6FD0' } }, "Total")),
             /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 24, color: 'var(--c-text)' } }, formatDistanceMiles(s.totalDistanceM || 0) + ' mi'),
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 4, fontWeight: 500 } }, (s.totalRuns || 0) + ' runs')),
 
           /*#__PURE__*/React.createElement("div", { style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 20, padding: 16, borderLeft: '4px solid #FFB74D', boxShadow: '0 4px 16px rgba(255,183,77,0.12)' }, className: "rc-pop-in" },
             /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 } },
-              /*#__PURE__*/React.createElement("span", { style: { fontSize: 16 } }, "🔥"),
+              /*#__PURE__*/React.createElement(FireIcon, { size: 16 }),
               /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E09530' } }, "Streak")),
             /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 24, color: 'var(--c-text)' } }, (s.streakDays || 0) + 'd'),
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 4, fontWeight: 500 } }, "days running")),
 
           /*#__PURE__*/React.createElement("div", { style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 20, padding: 16, borderLeft: '4px solid #64B5F6', boxShadow: '0 4px 16px rgba(100,181,246,0.12)' }, className: "rc-pop-in" },
             /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 } },
-              /*#__PURE__*/React.createElement("span", { style: { fontSize: 16 } }, "⚡"),
+              /*#__PURE__*/React.createElement(BoltIcon, { size: 16 }),
               /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#4A9ADB' } }, "Best Pace")),
             /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 24, color: 'var(--c-text)' } }, formatPace(s.bestPaceSec || 0)),
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 4, fontWeight: 500 } }, "/km"))
@@ -1037,18 +1309,18 @@ const RunClubScreen = ({ profile }) => {
                    background: 'linear-gradient(135deg, rgba(255,183,77,0.12), rgba(168,130,255,0.12))', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
                    borderRadius: 20, padding: '14px 18px', border: '1px solid rgba(255,183,77,0.2)', boxShadow: '0 2px 12px rgba(255,183,77,0.08)' } },
           /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-            /*#__PURE__*/React.createElement("span", { style: { fontSize: 20 } }, "🏅"),
+            /*#__PURE__*/React.createElement(MedalIcon, { size: 20 }),
             /*#__PURE__*/React.createElement("span", { style: { fontSize: 14, fontWeight: 700, color: 'var(--c-text)' } }, unlockedCount + '/' + achievements.length + ' Badges')),
           /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: '#A882FF' } }, "View all →")),
 
         // Recent runs
         runs.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
           /*#__PURE__*/React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: 'var(--c-text)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 } },
-            /*#__PURE__*/React.createElement("span", null, "📊"), "Recent Runs"),
+            /*#__PURE__*/React.createElement(ChartBarIcon, { size: 16 }), "Recent Runs"),
           /*#__PURE__*/React.createElement("div", { className: "rc-stagger" },
           runs.slice(0, 4).map(function(r, i) {
             var runColors = ['#7DD8A0', '#A882FF', '#FF96C8', '#64B5F6'];
-            return /*#__PURE__*/React.createElement("div", { key: r.id, style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 18, padding: '14px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderLeft: '3px solid ' + runColors[i % 4], boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }, className: "rc-pop-in" },
+            return /*#__PURE__*/React.createElement("div", { key: r.id, onClick: function() { openRunDetail(r); }, style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 18, padding: '14px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderLeft: '3px solid ' + runColors[i % 4], boxShadow: '0 2px 10px rgba(0,0,0,0.04)', cursor: 'pointer' }, className: "rc-pop-in" },
               /*#__PURE__*/React.createElement("div", null,
                 /*#__PURE__*/React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: 'var(--c-text)' } }, formatDistanceMiles(r.distanceM) + ' mi'),
                 /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)', marginTop: 2 } }, formatDateShort(r.startedAt) + ' \xB7 ' + formatDuration(r.durationSec))),
@@ -1059,9 +1331,9 @@ const RunClubScreen = ({ profile }) => {
         ),
 
         runs.length === 0 && /*#__PURE__*/React.createElement("div", { style: { background: 'linear-gradient(135deg, rgba(168,130,255,0.08), rgba(255,150,200,0.08))', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 24, textAlign: 'center', padding: '40px 24px', border: '1px dashed rgba(168,130,255,0.3)' }, className: "rc-pop-in" },
-          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { fontSize: 56, marginBottom: 12 } }, "🏃‍♂️"),
+          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 12, display: 'flex', justifyContent: 'center' } }, /*#__PURE__*/React.createElement(RunnerIcon, { size: 56 })),
           /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 18, color: 'var(--c-text)', marginBottom: 8 } }, "Ready to run?"),
-          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', lineHeight: 1.6, maxWidth: 260, margin: '0 auto' } }, "Your journey starts with a single step. Tap Start Run above and let's go! 💪"))
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', lineHeight: 1.6, maxWidth: 260, margin: '0 auto' } }, "Your journey starts with a single step. Tap Start Run above and let's go!"))
       ),
 
       // === HISTORY ===
@@ -1069,7 +1341,7 @@ const RunClubScreen = ({ profile }) => {
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger" },
         runs.map(function(r, i) {
           var histColors = ['#7DD8A0', '#A882FF', '#FF96C8', '#64B5F6', '#FFB74D'];
-          return /*#__PURE__*/React.createElement("div", { key: r.id, style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 18, padding: '14px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderLeft: '3px solid ' + histColors[i % 5], boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }, className: "rc-pop-in" },
+          return /*#__PURE__*/React.createElement("div", { key: r.id, onClick: function() { openRunDetail(r); }, style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 18, padding: '14px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderLeft: '3px solid ' + histColors[i % 5], boxShadow: '0 2px 10px rgba(0,0,0,0.04)', cursor: 'pointer' }, className: "rc-pop-in" },
             /*#__PURE__*/React.createElement("div", null,
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: 'var(--c-text)' } }, formatDistanceMiles(r.distanceM) + ' mi'),
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)', marginTop: 2 } }, formatDateShort(r.startedAt) + ' \xB7 ' + formatDuration(r.durationSec))),
@@ -1078,7 +1350,7 @@ const RunClubScreen = ({ profile }) => {
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)' } }, (r.calories || estimateCalories(r.distanceM)) + ' cal')));
         })),
         runs.length === 0 && !loading && /*#__PURE__*/React.createElement("div", { style: { background: 'linear-gradient(135deg, rgba(255,150,200,0.08), rgba(100,181,246,0.08))', borderRadius: 24, textAlign: 'center', padding: '40px 24px', border: '1px dashed rgba(255,150,200,0.3)' } },
-          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { fontSize: 48, marginBottom: 12 } }, "📋"),
+          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 12, display: 'flex', justifyContent: 'center' } }, /*#__PURE__*/React.createElement(ListIcon, { size: 48 })),
           /*#__PURE__*/React.createElement("p", { style: { fontSize: 15, fontWeight: 600, color: 'var(--c-text)', marginBottom: 4 } }, "No runs yet"),
           /*#__PURE__*/React.createElement("p", { style: { fontSize: 13, color: 'var(--c-text-sub)' } }, "Complete a run to see it here!"))
       ),
@@ -1090,13 +1362,13 @@ const RunClubScreen = ({ profile }) => {
           /*#__PURE__*/React.createElement(RCPill, { active: lbScope === 'alltime', onClick: () => setLbScope('alltime'), color: '#A882FF' }, "All Time")),
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger" },
         lbRows.map(function(r, i) {
-          var medalEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null;
+          var medalColors = [['#FFE082', '#FFD54F'], ['#E0E0E0', '#BDBDBD'], ['#FFAB91', '#FF8A65']];
           var topBorder = i === 0 ? '2px solid #FFD700' : i === 1 ? '2px solid #C0C0C0' : i === 2 ? '2px solid #CD7F32' : '1px solid rgba(0,0,0,0.04)';
           return /*#__PURE__*/React.createElement("div", { key: i, style: { background: i < 3 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.7)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 18, padding: '12px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 12, border: topBorder, boxShadow: i < 3 ? '0 4px 16px rgba(0,0,0,0.06)' : '0 2px 8px rgba(0,0,0,0.03)' }, className: "rc-pop-in" },
             /*#__PURE__*/React.createElement("div", { style: { width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     fontSize: medalEmoji ? 18 : 13, fontWeight: 700, fontFamily: "'Paytone One', sans-serif",
-                     background: i === 0 ? 'linear-gradient(135deg, #FFE082, #FFD54F)' : i === 1 ? 'linear-gradient(135deg, #E0E0E0, #BDBDBD)' : i === 2 ? 'linear-gradient(135deg, #FFAB91, #FF8A65)' : 'rgba(168,130,255,0.1)',
-                     color: 'var(--c-text)' } }, medalEmoji || r.rank),
+                     fontSize: 13, fontWeight: 700, fontFamily: "'Paytone One', sans-serif",
+                     background: i < 3 ? 'linear-gradient(135deg, ' + medalColors[i][0] + ', ' + medalColors[i][1] + ')' : 'rgba(168,130,255,0.1)',
+                     color: 'var(--c-text)' } }, i < 3 ? /*#__PURE__*/React.createElement(TrophyIcon, { size: 16 }) : r.rank),
             /*#__PURE__*/React.createElement("div", { style: { width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                      fontSize: 12, fontWeight: 700, background: r.avatarColor || '#C5B3E6', color: '#FFF', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' } }, (r.username || '?')[0].toUpperCase()),
             /*#__PURE__*/React.createElement("div", { style: { flex: 1, minWidth: 0 } },
@@ -1106,7 +1378,7 @@ const RunClubScreen = ({ profile }) => {
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, color: 'var(--c-text-sub)', fontWeight: 500 } }, r.runs + ' runs')));
         })),
         lbRows.length === 0 && !loading && /*#__PURE__*/React.createElement("div", { style: { background: 'linear-gradient(135deg, rgba(100,181,246,0.08), rgba(168,130,255,0.08))', borderRadius: 24, textAlign: 'center', padding: '40px 24px', border: '1px dashed rgba(100,181,246,0.3)' } },
-          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { fontSize: 48, marginBottom: 12 } }, "🏆"),
+          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 12, display: 'flex', justifyContent: 'center' } }, /*#__PURE__*/React.createElement(TrophyIcon, { size: 48 })),
           /*#__PURE__*/React.createElement("p", { style: { fontSize: 15, fontWeight: 600, color: 'var(--c-text)', marginBottom: 4 } }, "No runners yet"),
           /*#__PURE__*/React.createElement("p", { style: { fontSize: 13, color: 'var(--c-text-sub)' } }, "Be the first to hit the leaderboard!"))
       ),
@@ -1114,7 +1386,7 @@ const RunClubScreen = ({ profile }) => {
       // === ACHIEVEMENTS ===
       view === 'achievements' && /*#__PURE__*/React.createElement(React.Fragment, null,
         /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 20, padding: '16px 0' } },
-          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { fontSize: 40, marginBottom: 8 } }, "🏅"),
+          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 8, display: 'flex', justifyContent: 'center' } }, /*#__PURE__*/React.createElement(MedalIcon, { size: 40 })),
           /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 28, background: 'linear-gradient(135deg, #FFB74D, #FF96C8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } }, unlockedCount + ' / ' + achievements.length),
           /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, color: 'var(--c-text-sub)', fontWeight: 600, marginTop: 4 } }, "badges earned")),
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 } },
@@ -1140,7 +1412,10 @@ const RunClubScreen = ({ profile }) => {
       loading && accessStatus === 'approved' && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', gap: 12 } },
         /*#__PURE__*/React.createElement("div", { style: { width: 32, height: 32, borderRadius: '50%', border: '3px solid rgba(168,130,255,0.15)', borderTopColor: '#A882FF',
                    animation: 'rcSpin 0.8s linear infinite' } }),
-        /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)' } }, "Loading..."))
+        /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)' } }, "Loading...")),
+
+      // Footer
+      /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center', padding: '24px 0 8px', opacity: 0.4, fontSize: 11, fontWeight: 500, color: 'var(--c-text-sub)', letterSpacing: '0.05em' } }, "coded by Degos")
     )
   );
 };
