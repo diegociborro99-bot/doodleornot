@@ -560,6 +560,11 @@ const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
   .rc-current-pos { animation: rcPulse 2s ease-in-out infinite; }
   .leaflet-container { background: #1a1030 !important; }
   .leaflet-control-attribution { display: none !important; }
+  @keyframes rcCountIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes rcCountOut { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+  @keyframes rcCountRing { 0% { stroke-dashoffset: 283; } 100% { stroke-dashoffset: 0; } }
+  @keyframes rcGoExplode { 0% { transform: scale(0.2); opacity: 0; } 40% { transform: scale(1.3); opacity: 1; } 60% { transform: scale(0.95); } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes rcGoRays { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.8); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) {
     .rc-slide-up, .rc-pop-in, .rc-shine, .rc-fade-in, .rc-float, .rc-shimmer { animation: none !important; }
   }
@@ -787,6 +792,10 @@ const RunClubScreen = ({ profile }) => {
   const [goalTarget, setGoalTarget] = useState('3');
   const [goalReached, setGoalReached] = useState(false);
 
+  // Countdown
+  const [countdown, setCountdown] = useState(null);
+  const countdownRef = useRef(null);
+
   // GPS state
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -922,14 +931,51 @@ const RunClubScreen = ({ profile }) => {
     );
   };
 
-  const startRun = (mode) => {
-    if (!navigator.geolocation) { setGpsError('GPS not available'); return; }
+  // Tone.js beep helper
+  var playCountBeep = function(isGo) {
+    try {
+      var Tone = window.Tone;
+      if (!Tone) return;
+      if (Tone.context.state !== 'running') Tone.start();
+      var synth = new Tone.Synth({
+        oscillator: { type: isGo ? 'triangle' : 'sine' },
+        envelope: { attack: 0.01, decay: isGo ? 0.4 : 0.15, sustain: 0, release: isGo ? 0.3 : 0.1 }
+      }).toDestination();
+      synth.triggerAttackRelease(isGo ? 'C5' : 'G4', isGo ? '8n' : '16n');
+      setTimeout(function() { synth.dispose(); }, 1000);
+    } catch (e) {}
+  };
+
+  var launchRun = function(mode) {
     setRunMode(mode); setGoalReached(false); setGpsError(null); setDistance(0); setElapsed(0); setGpsRoute([]); setSplits([]);
     lastPosRef.current = null; pausedAtRef.current = 0; lastSplitTimeRef.current = 0;
-    startTimeRef.current = Date.now();
-    setIsRunning(true); setIsPaused(false); setView('active');
     setRunZone(null);
+    startTimeRef.current = Date.now();
+    setIsRunning(true); setIsPaused(false); setCountdown(null); setView('active');
     startGpsWatch();
+  };
+
+  const startRun = (mode) => {
+    if (!navigator.geolocation) { setGpsError('GPS not available'); return; }
+    // Start countdown
+    setRunMode(mode);
+    setView('countdown');
+    setCountdown(3);
+    playCountBeep(false);
+    if (countdownRef.current) clearTimeout(countdownRef.current);
+    countdownRef.current = setTimeout(function() {
+      setCountdown(2); playCountBeep(false);
+      countdownRef.current = setTimeout(function() {
+        setCountdown(1); playCountBeep(false);
+        countdownRef.current = setTimeout(function() {
+          setCountdown('GO'); playCountBeep(true);
+          if (navigator.vibrate) navigator.vibrate(300);
+          countdownRef.current = setTimeout(function() {
+            launchRun(mode);
+          }, 800);
+        }, 1000);
+      }, 1000);
+    }, 1000);
   };
 
   const pauseRun = () => { setIsPaused(true); pausedAtRef.current = elapsed; if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; } };
@@ -971,10 +1017,11 @@ const RunClubScreen = ({ profile }) => {
   };
 
   const discardRun = () => {
+    if (countdownRef.current) { clearTimeout(countdownRef.current); countdownRef.current = null; }
     if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
     if (timerRef.current) clearInterval(timerRef.current);
     setIsRunning(false); setIsPaused(false); setDistance(0); setElapsed(0);
-    setGpsRoute([]); setSplits([]); setRunMode(null); setView('dashboard');
+    setGpsRoute([]); setSplits([]); setRunMode(null); setCountdown(null); setView('dashboard');
   };
 
   // Open run detail
@@ -1272,6 +1319,65 @@ const RunClubScreen = ({ profile }) => {
           }, "Start Goal Run ", /*#__PURE__*/React.createElement(TargetIcon, { size: 16 }))
         )
       )
+    );
+  }
+
+  /* ========== COUNTDOWN ========== */
+  if (view === 'countdown') {
+    var cdLabel = countdown === 'GO' ? 'GO!' : String(countdown);
+    var isGo = countdown === 'GO';
+    var cdAnim = isGo ? 'rcGoExplode 0.6s cubic-bezier(0.22,1,0.36,1) forwards' : 'rcCountIn 0.35s cubic-bezier(0.22,1,0.36,1) forwards';
+    var cdColor = isGo ? '#7DD8A0' : (countdown === 1 ? '#FF6B95' : countdown === 2 ? '#FFB74D' : '#A882FF');
+
+    return /*#__PURE__*/React.createElement("div", { style: {
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh', zIndex: 100,
+      background: 'linear-gradient(180deg, #F0E8FF 0%, #FFE8EC 40%, #D6F0FF 70%, #FFF5D6 100%)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+    } },
+      /*#__PURE__*/React.createElement(RunClubStyles, null),
+
+      // Cancel button
+      /*#__PURE__*/React.createElement("button", { onClick: discardRun,
+        style: { position: 'absolute', top: 'max(16px, env(safe-area-inset-top))', left: 20,
+                 fontSize: 12, fontWeight: 700, borderRadius: 20, padding: '6px 14px',
+                 background: 'rgba(255,138,138,0.15)', color: '#FF8A8A', border: 'none', cursor: 'pointer', zIndex: 10 }
+      }, "Cancel"),
+
+      // Rays behind GO
+      isGo && /*#__PURE__*/React.createElement("div", { style: {
+        position: 'absolute', width: 300, height: 300, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(125,216,160,0.3) 0%, rgba(125,216,160,0) 70%)',
+        animation: 'rcGoRays 0.8s ease-out forwards', pointerEvents: 'none'
+      } }),
+
+      // Ring timer
+      /*#__PURE__*/React.createElement("div", { key: 'ring-' + countdown, style: { position: 'absolute', width: 180, height: 180 } },
+        /*#__PURE__*/React.createElement("svg", { viewBox: '0 0 100 100', style: { width: '100%', height: '100%', transform: 'rotate(-90deg)' } },
+          /*#__PURE__*/React.createElement("circle", { cx: 50, cy: 50, r: 45, fill: 'none', stroke: 'rgba(168,130,255,0.1)', strokeWidth: 3 }),
+          /*#__PURE__*/React.createElement("circle", { cx: 50, cy: 50, r: 45, fill: 'none', stroke: cdColor, strokeWidth: 3,
+            strokeDasharray: 283, strokeDashoffset: 283, strokeLinecap: 'round',
+            style: { animation: 'rcCountRing ' + (isGo ? '0.6s' : '0.9s') + ' ease-out forwards' } }))),
+
+      // Number / GO
+      /*#__PURE__*/React.createElement("div", { key: 'cd-' + countdown, style: {
+        fontSize: isGo ? 72 : 96, fontWeight: 900, lineHeight: 1,
+        fontFamily: "'Paytone One', 'Fredoka', sans-serif",
+        color: cdColor,
+        textShadow: '0 4px 24px rgba(0,0,0,0.08)',
+        animation: cdAnim,
+        zIndex: 2
+      } }, cdLabel),
+
+      // "get ready" label
+      !isGo && /*#__PURE__*/React.createElement("div", { style: {
+        marginTop: 20, fontSize: 14, fontWeight: 600, color: 'var(--c-text-sub)',
+        letterSpacing: '0.15em', textTransform: 'uppercase', opacity: 0.7
+      } }, "get ready"),
+
+      isGo && /*#__PURE__*/React.createElement("div", { style: {
+        marginTop: 20, fontSize: 16, fontWeight: 700, color: '#7DD8A0',
+        letterSpacing: '0.1em', textTransform: 'uppercase'
+      } }, "let's go!")
     );
   }
 
