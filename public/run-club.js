@@ -3,6 +3,7 @@
 (function() {
   "use strict";
   var React = window.React;
+  var ReactDOM = window.ReactDOM;
   var useState = React.useState;
   var useEffect = React.useEffect;
   var useRef = React.useRef;
@@ -237,6 +238,10 @@ const getAchievementMedal = (id, unlocked) => {
 /* ---------- CSS injected once ---------- */
 
 const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
+  /* Neutralize anim-page-in stacking context so the bottom nav's z-index works globally.
+     Then raise the bottom nav above the Run Club portal overlay. */
+  .anim-page-in { transform: none !important; filter: none !important; }
+  .fixed.bottom-0.z-20 { z-index: 200 !important; }
   @keyframes rcPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
   @keyframes rcBreathe { 0%,100% { box-shadow: 0 0 20px rgba(123,123,255,0.3); } 50% { box-shadow: 0 0 40px rgba(123,123,255,0.6); } }
   @keyframes rcSlideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -537,7 +542,7 @@ const RunClubScreen = ({ profile }) => {
 
   /* ========== ACCESS LOADING ========== */
   if (accessLoading) {
-    return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
+    return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 480, margin: '0 auto', padding: '16px 20px calc(100px + env(safe-area-inset-bottom)) 20px', minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
         /*#__PURE__*/React.createElement("div", { style: { width: 24, height: 24, borderRadius: '50%', border: '2px solid var(--c-border)', borderTopColor: 'var(--c-accent)', animation: 'rcPulse 1s linear infinite' } })));
@@ -545,7 +550,7 @@ const RunClubScreen = ({ profile }) => {
 
   /* ========== ACCESS GATE — Apply to Join ========== */
   if (accessStatus !== 'approved') {
-    return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
+    return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 480, margin: '0 auto', padding: '16px 20px calc(100px + env(safe-area-inset-bottom)) 20px', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
 
@@ -621,7 +626,7 @@ const RunClubScreen = ({ profile }) => {
     const dist = Math.round(distance); const dur = elapsed;
     const pace = dist > 0 ? Math.round((dur / (dist / 1000))) : 0;
     const hitGoal = runMode && runMode !== 'free' && goalReached;
-    return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
+    return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
         /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 24 } },
@@ -855,7 +860,7 @@ const RunClubScreen = ({ profile }) => {
     var pendingCount = pendingRequests.length;
     var reviewedList = allRequests.filter(function(r) { return r.status !== 'pending'; });
 
-    return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
+    return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
         // Header
@@ -925,7 +930,7 @@ const RunClubScreen = ({ profile }) => {
   var s = runStats || {};
   var unlockedCount = achievements.filter(function(a) { return a.unlocked; }).length;
 
-  return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
+  return /*#__PURE__*/React.createElement("div", { style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, background: "var(--c-bg)", overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
     /*#__PURE__*/React.createElement(RunClubStyles, null),
     /*#__PURE__*/React.createElement("div", { style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
 
@@ -1075,7 +1080,29 @@ const RunClubScreen = ({ profile }) => {
 };
 
 
+  // Portal wrapper: renders RunClub directly into document.body to escape
+  // the anim-page-in stacking context (transform/filter trap position:fixed).
+  var RunClubPortal = function(props) {
+    var portalEl = useRef(null);
+    if (!portalEl.current) {
+      portalEl.current = document.createElement('div');
+      portalEl.current.id = 'run-club-portal';
+    }
+    useEffect(function() {
+      document.body.appendChild(portalEl.current);
+      return function() {
+        if (portalEl.current && portalEl.current.parentNode) {
+          portalEl.current.parentNode.removeChild(portalEl.current);
+        }
+      };
+    }, []);
+    return ReactDOM.createPortal(
+      React.createElement(RunClubScreen, props),
+      portalEl.current
+    );
+  };
+
   // Expose to global scope so app.js can use them
-  window.RunClubScreen = RunClubScreen;
+  window.RunClubScreen = RunClubPortal;
   window.RunShoeIcon = RunShoeIcon;
 })();

@@ -9036,9 +9036,14 @@ function DoodleOrNot() {
     onDismissChallenge: () => setChallengeSeed(null),
     onOpenLeagues: () => setLeaguesOpen(true),
     onPlay: m => setMode(m)
-  }), tab === 'run' && window.RunClubScreen && /*#__PURE__*/React.createElement(window.RunClubScreen, {
+  }), tab === 'run' && (window.RunClubScreen ? /*#__PURE__*/React.createElement(window.RunClubScreen, {
     profile: profile
-  }), tab === 'board' && /*#__PURE__*/React.createElement(LeaderboardScreen, {
+  }) : /*#__PURE__*/React.createElement("div", {
+    style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, fontFamily: "'Fredoka', sans-serif" }
+  }, /*#__PURE__*/React.createElement("div", { style: { fontSize: 48 } }, "🏃"), /*#__PURE__*/React.createElement("div", { style: { fontSize: 16, color: "var(--c-sub)" } }, "Loading Run Club..."), /*#__PURE__*/React.createElement("button", {
+    onClick: () => window.location.reload(),
+    style: { marginTop: 8, padding: "8px 20px", borderRadius: 12, border: "none", background: "var(--c-accent)", color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }
+  }, "Reload"))), tab === 'board' && /*#__PURE__*/React.createElement(LeaderboardScreen, {
     profile: profile,
     weekPts: stats.weekPts
   }), tab === 'profile' && /*#__PURE__*/React.createElement(ProfileScreen, {
