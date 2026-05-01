@@ -745,8 +745,7 @@ const I18N = {
   }
 };
 const t = key => {
-  const lang = getPrefs().lang || 'en';
-  return I18N[lang] && I18N[lang][key] || I18N.en[key] || key;
+  return I18N.en[key] || key;
 };
 
 /* ---------- Daily power-ups ---------- */
