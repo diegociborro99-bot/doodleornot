@@ -821,6 +821,20 @@ const RunClubScreen = ({ profile }) => {
   // GPS smoothing buffer for Kalman-like filtering
   const gpsBufRef = useRef([]);
 
+  // Screen Wake Lock — keeps phone awake during run
+  const wakeLockRef = useRef(null);
+  const acquireWakeLock = async function() {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
+        wakeLockRef.current.addEventListener('release', function() { wakeLockRef.current = null; });
+      }
+    } catch (e) { /* wake lock not supported or failed */ }
+  };
+  const releaseWakeLock = function() {
+    if (wakeLockRef.current) { wakeLockRef.current.release().catch(function() {}); wakeLockRef.current = null; }
+  };
+
   // Post-run zone
   const [runZone, setRunZone] = useState(null);
 
@@ -1065,6 +1079,7 @@ const RunClubScreen = ({ profile }) => {
     setRunZone(null);
     startTimeRef.current = Date.now();
     setIsRunning(true); setIsPaused(false); setCountdown(null); setView('active');
+    acquireWakeLock();
     startGpsWatch();
   };
 
@@ -1091,10 +1106,11 @@ const RunClubScreen = ({ profile }) => {
     }, 1000);
   };
 
-  const pauseRun = () => { setIsPaused(true); pausedAtRef.current = elapsed; if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; } };
-  const resumeRun = () => { setIsPaused(false); startTimeRef.current = Date.now(); startGpsWatch(); };
+  const pauseRun = () => { if (navigator.vibrate) navigator.vibrate(80); setIsPaused(true); pausedAtRef.current = elapsed; if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; } releaseWakeLock(); };
+  const resumeRun = () => { if (navigator.vibrate) navigator.vibrate([50, 30, 50]); setIsPaused(false); startTimeRef.current = Date.now(); acquireWakeLock(); startGpsWatch(); };
 
   const finishRun = async () => {
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
     if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
     if (timerRef.current) clearInterval(timerRef.current);
     const dist = Math.round(distance); const dur = elapsed;
@@ -1137,14 +1153,17 @@ const RunClubScreen = ({ profile }) => {
       } catch (e) { console.warn('Failed to save run:', e); }
     }
     setIsRunning(false); setIsPaused(false);
+    releaseWakeLock();
   };
 
   const discardRun = () => {
+    if (navigator.vibrate) navigator.vibrate(150);
     if (countdownRef.current) { clearTimeout(countdownRef.current); countdownRef.current = null; }
     if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
     if (timerRef.current) clearInterval(timerRef.current);
     setIsRunning(false); setIsPaused(false); setDistance(0); setElapsed(0);
     setGpsRoute([]); setSplits([]); setRunMode(null); setCountdown(null); setView('dashboard');
+    releaseWakeLock();
   };
 
   // Open run detail
@@ -1574,7 +1593,18 @@ const RunClubScreen = ({ profile }) => {
               /*#__PURE__*/React.createElement("div", { className: "font-display",
                 style: { fontSize: 'clamp(36px, 10vw, 48px)', lineHeight: 1, color: 'var(--c-text)' }
               }, formatDuration(elapsed)),
-              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 4, color: 'var(--c-text-sub)' } }, "Duration")
+              /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 4, color: 'var(--c-text-sub)' } }, "Duration"),
+              // ETA: estimated time to goal
+              !goalReached && distance > 50 && elapsed > 10 && (function() {
+                var targetM = runMode.unit === 'mi' ? runMode.target * 1609.344 : runMode.target * 1000;
+                var remainingM = targetM - distance;
+                var speed = distance / elapsed; // m/s average
+                var etaSec = Math.round(remainingM / speed);
+                return /*#__PURE__*/React.createElement("div", { style: { marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '5px 14px', borderRadius: 14,
+                  background: 'rgba(100,181,246,0.12)', border: '1px solid rgba(100,181,246,0.2)' } },
+                  /*#__PURE__*/React.createElement(ClockIcon, { size: 12 }),
+                  /*#__PURE__*/React.createElement("span", { style: { fontSize: 11, fontWeight: 700, color: '#64B5F6' } }, formatDuration(etaSec) + ' remaining'));
+              })()
             )
           : /*#__PURE__*/React.createElement(React.Fragment, null,
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--c-text-sub)', marginBottom: 4 } }, "Duration"),
@@ -1842,6 +1872,78 @@ const RunClubScreen = ({ profile }) => {
             /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 24, color: 'var(--c-text)' } }, formatPace(s.bestPaceSec || 0)),
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', marginTop: 4, fontWeight: 500 } }, "/km"))
         ),
+
+        // Personal Records
+        runs.length > 0 && (function() {
+          var longestRun = runs.reduce(function(best, r) { return (r.distanceM || 0) > (best.distanceM || 0) ? r : best; }, runs[0]);
+          var fastestPace = runs.filter(function(r) { return r.distanceM > 500; }).reduce(function(best, r) {
+            return (r.avgPaceSec || 9999) < (best.avgPaceSec || 9999) ? r : best;
+          }, { avgPaceSec: 0 });
+          var longestTime = runs.reduce(function(best, r) { return (r.durationSec || 0) > (best.durationSec || 0) ? r : best; }, runs[0]);
+          var totalCal = runs.reduce(function(sum, r) { return sum + (r.calories || estimateCalories(r.distanceM || 0)); }, 0);
+          return /*#__PURE__*/React.createElement("div", { className: "rc-pop-in",
+            style: { background: 'linear-gradient(135deg, rgba(168,130,255,0.08), rgba(255,150,200,0.08))',
+                     backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                     borderRadius: 20, padding: '16px 18px', marginBottom: 20,
+                     border: '1px solid rgba(168,130,255,0.12)' } },
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 } },
+              /*#__PURE__*/React.createElement(TrophyIcon, { size: 16 }),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: 'var(--c-text)' } }, "Personal Records")),
+            /*#__PURE__*/React.createElement("div", { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 } },
+              /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center', padding: '10px 4px', borderRadius: 14, background: 'rgba(255,255,255,0.6)' } },
+                /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 16, color: '#A882FF' } }, formatDistanceMiles(longestRun.distanceM || 0)),
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 8, fontWeight: 700, color: 'var(--c-text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 } }, "Longest mi")),
+              /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center', padding: '10px 4px', borderRadius: 14, background: 'rgba(255,255,255,0.6)' } },
+                /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 16, color: '#7DD8A0' } }, formatPace(fastestPace.avgPaceSec || 0)),
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 8, fontWeight: 700, color: 'var(--c-text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 } }, "Best pace")),
+              /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center', padding: '10px 4px', borderRadius: 14, background: 'rgba(255,255,255,0.6)' } },
+                /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 16, color: '#FFB74D' } }, formatDuration(longestTime.durationSec || 0)),
+                /*#__PURE__*/React.createElement("div", { style: { fontSize: 8, fontWeight: 700, color: 'var(--c-text-sub)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 4 } }, "Longest run"))),
+            /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center', marginTop: 10, fontSize: 11, fontWeight: 600, color: 'var(--c-text-sub)' } },
+              totalCal.toLocaleString() + ' total calories burned'));
+        })(),
+
+        // Weekly activity chart
+        runs.length > 0 && /*#__PURE__*/React.createElement("div", { className: "rc-pop-in",
+          style: { background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                   borderRadius: 20, padding: '16px 18px', marginBottom: 20, boxShadow: '0 4px 16px rgba(168,130,255,0.08)' } },
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 } },
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 8 } },
+              /*#__PURE__*/React.createElement(ChartBarIcon, { size: 16 }),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: 'var(--c-text)' } }, "This Week")),
+            /*#__PURE__*/React.createElement("span", { style: { fontSize: 11, fontWeight: 600, color: 'var(--c-text-sub)' } },
+              formatDistanceMiles(s.weekDistanceM || 0) + ' mi total')),
+          /*#__PURE__*/React.createElement(React.Fragment, null, (function() {
+            var dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+            var now = new Date();
+            var dayOfWeek = now.getDay(); // 0=Sun
+            var mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            var monday = new Date(now); monday.setDate(now.getDate() - mondayOffset); monday.setHours(0,0,0,0);
+            var dailyDist = [0,0,0,0,0,0,0];
+            runs.forEach(function(r) {
+              var rd = new Date(r.startedAt);
+              var diff = Math.floor((rd - monday) / 86400000);
+              if (diff >= 0 && diff < 7) dailyDist[diff] += (r.distanceM || 0);
+            });
+            var maxD = Math.max.apply(null, dailyDist.concat([1000])); // min 1km scale
+            var barW = 100 / 7;
+            var todayIdx = mondayOffset;
+            return /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'flex-end', gap: 4, height: 80 } },
+              dailyDist.map(function(d, i) {
+                var pct = Math.max(4, (d / maxD) * 100);
+                var isToday = i === todayIdx;
+                var hasRun = d > 0;
+                return /*#__PURE__*/React.createElement("div", { key: i, style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 } },
+                  /*#__PURE__*/React.createElement("div", { style: { fontSize: 8, fontWeight: 700, color: hasRun ? '#A882FF' : 'transparent', marginBottom: 2 } },
+                    d > 0 ? (d / 1609.344).toFixed(1) : ''),
+                  /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 28, height: pct + '%', minHeight: 3, borderRadius: 6,
+                    background: hasRun ? 'linear-gradient(180deg, #A882FF, #FF96C8)' : 'rgba(0,0,0,0.06)',
+                    boxShadow: hasRun ? '0 2px 8px rgba(168,130,255,0.25)' : 'none',
+                    transition: 'height 0.6s cubic-bezier(.22,1,.36,1)' } }),
+                  /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: isToday ? 800 : 600,
+                    color: isToday ? '#A882FF' : 'var(--c-text-sub)', marginTop: 2 } }, dayLabels[i]));
+              }));
+          })())),
 
         // Badges preview
         achievements.length > 0 && /*#__PURE__*/React.createElement("div", { className: "rc-pop-in", onClick: () => setView('achievements'),
