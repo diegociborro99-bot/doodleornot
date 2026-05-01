@@ -1,6 +1,6 @@
 /* Doodle or Not — Service Worker
-   Strategy: network-first for HTML/JS (always fresh), cache-first for assets (images/fonts).
-   Bumping VERSION forces a full cache refresh on next visit. */
+   Strategy: network-first with FULL cache bypass for app files.
+   Bumping VERSION forces a complete cache refresh on next visit. */
 const VERSION = 'don-v19-2026-05-01';
 
 const CORE = [
@@ -36,12 +36,7 @@ self.addEventListener('activate', (e) => {
     })
     .then((deletedCount) => self.clients.claim().then(() => deletedCount))
     .then((deletedCount) => {
-      // Only force-reload when UPGRADING from an old SW version.
-      // On first install (no old caches), skip — the page already loaded fine.
       if (deletedCount > 0) {
-        // Force-reload all open tabs so they pick up fresh index.html + app.js.
-        // This is critical: if the old app.js had a syntax error, the page has
-        // no controllerchange listener and will stay stuck without this.
         self.clients.matchAll({ type: 'window' }).then(tabs => {
           tabs.forEach(tab => tab.navigate(tab.url));
         });
@@ -50,12 +45,11 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Allow clients to trigger skipWaiting manually (e.g. from update prompt)
 self.addEventListener('message', (e) => {
   if (e.data === 'skipWaiting') self.skipWaiting();
 });
 
-// Enable navigation preload if supported (faster network-first for navigations)
+// Enable navigation preload if supported
 self.addEventListener('activate', (e2) => {
   if (self.registration.navigationPreload) {
     e2.waitUntil(self.registration.navigationPreload.enable());
@@ -70,14 +64,21 @@ self.addEventListener('fetch', (e) => {
   // API calls: always network, never cache
   if (url.pathname.startsWith('/api/')) return;
 
-  // HTML & own JS: network-first (always get latest), fall back to cache
-  const isAppShell = url.pathname.endsWith('.html')
+  // App shell files (HTML & own JS): network-first with FULL cache bypass.
+  // cache: 'no-store' tells the browser to skip its HTTP cache entirely —
+  // every request hits the real server. This is the key fix: without it,
+  // the browser can return a 304 from its own disk cache even when the
+  // server has new content, because ETags/Last-Modified can be stale.
+  const isAppShell = url.origin === self.location.origin && (
+    url.pathname.endsWith('.html')
+    || url.pathname.endsWith('.js')
+    || url.pathname.endsWith('.css')
     || url.pathname === '/'
-    || url.pathname.endsWith('.js');
+  );
 
-  if (isAppShell && url.origin === self.location.origin) {
+  if (isAppShell) {
     e.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-store' })
         .then((resp) => {
           const copy = resp.clone();
           caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
