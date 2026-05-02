@@ -484,7 +484,88 @@ const ACHIEVEMENT_MEDALS = {
     /*#__PURE__*/React.createElement("line", { x1: 24, y1: 18, x2: 28, y2: 18, stroke: unlocked ? '#5D4037' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
     /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 18, r: 1, fill: unlocked ? '#5D4037' : '#666' }),
     /*#__PURE__*/React.createElement("text", { x: 24, y: 33, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#5D4037' : '#666' }, "NOON"),
-    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FFEE58' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 }))
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FFEE58' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  // === v20 NEW ACHIEVEMENTS ===
+  cal_1000: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FF7043' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 12, fill: unlocked ? '#FFF' : '#666' }, "🔥"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 6, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "1K CAL"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF7043' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  cal_10000: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", { id: "g_inferno", x1: "0", y1: "0", x2: "1", y2: "1" },
+      /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#FF6B6B' : '#3A3550' }),
+      /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#FF8F00' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g_inferno)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 12, fill: unlocked ? '#FFF' : '#666' }, "🔥"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 28, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "10K CAL"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF6B6B' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  ran_2k: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#B2DFDB' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 11, fontWeight: "bold", fill: unlocked ? '#00695C' : '#666' }, "2"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#00796B' : '#666' }, "KM"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#B2DFDB' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  ran_30k: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", { id: "g_ultra", x1: "0", y1: "0", x2: "1", y2: "1" },
+      /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#E040FB' : '#3A3550' }),
+      /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#7C4DFF' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g_ultra)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 9, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "30"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 7, fill: unlocked ? '#E1BEE7' : '#666' }, "KM"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#E040FB' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  sub_4_pace: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FFEB3B' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 15, textAnchor: "middle", fontSize: 10, fill: unlocked ? '#F57F17' : '#666' }, "⚡"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 6, fontWeight: "bold", fill: unlocked ? '#F57F17' : '#666' }, "<4:00"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FFEB3B' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  hour_run: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#42A5F5' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 18, r: 9, fill: unlocked ? '#1E88E5' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("line", { x1: 24, y1: 18, x2: 24, y2: 12, stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("line", { x1: 24, y1: 18, x2: 28, y2: 20, stroke: unlocked ? '#FFF' : '#666', strokeWidth: 1.5, strokeLinecap: "round" }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 33, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#1565C0' : '#666' }, "60MIN"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#42A5F5' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  two_hour_run: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", { id: "g_endurance", x1: "0", y1: "0", x2: "1", y2: "1" },
+      /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#1565C0' : '#3A3550' }),
+      /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#0D47A1' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g_endurance)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 17, textAnchor: "middle", fontSize: 7, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "2HR"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 26, textAnchor: "middle", fontSize: 5, fill: unlocked ? '#BBDEFB' : '#666' }, "ENDURANCE"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#1565C0' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  dawn_patrol: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#FFB74D' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 16, r: 7, fill: unlocked ? '#FFF176' : '#2A2740', opacity: unlocked ? 1 : 0.5 }),
+    /*#__PURE__*/React.createElement("path", { d: "M12,26 L36,26", stroke: unlocked ? '#5D4037' : '#666', strokeWidth: 1.2 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 33, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#5D4037' : '#666' }, "5AM"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FFB74D' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  midnight_runner: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: unlocked ? '#263238' : '#3A3550', opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 20, cy: 14, r: 5, fill: unlocked ? '#FFF' : '#2A2740', opacity: unlocked ? 0.9 : 0.5 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 22, cy: 12, r: 5, fill: unlocked ? '#263238' : '#3A3550' }),
+    /*#__PURE__*/React.createElement("circle", { cx: 30, cy: 12, r: 1.2, fill: unlocked ? '#FFF' : '#666', opacity: 0.7 }),
+    /*#__PURE__*/React.createElement("circle", { cx: 27, cy: 18, r: 0.8, fill: unlocked ? '#FFF' : '#666', opacity: 0.5 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 30, textAnchor: "middle", fontSize: 5, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "11PM+"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#263238' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 })),
+
+  two_hundred_runs: (unlocked) => /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 48 48", width: 40, height: 40 },
+    /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", { id: "g_200", x1: "0", y1: "0", x2: "1", y2: "1" },
+      /*#__PURE__*/React.createElement("stop", { offset: "0%", stopColor: unlocked ? '#FF6B6B' : '#3A3550' }),
+      /*#__PURE__*/React.createElement("stop", { offset: "33%", stopColor: unlocked ? '#FFB347' : '#3A3550' }),
+      /*#__PURE__*/React.createElement("stop", { offset: "66%", stopColor: unlocked ? '#77DD77' : '#2A2740' }),
+      /*#__PURE__*/React.createElement("stop", { offset: "100%", stopColor: unlocked ? '#64B5F6' : '#2A2740' }))),
+    /*#__PURE__*/React.createElement("circle", { cx: 24, cy: 20, r: 16, fill: "url(#g_200)", opacity: unlocked ? 1 : 0.4 }),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 18, textAnchor: "middle", fontSize: 11, fontWeight: "bold", fill: unlocked ? '#FFF' : '#666' }, "200"),
+    /*#__PURE__*/React.createElement("text", { x: 24, y: 27, textAnchor: "middle", fontSize: 5, fill: unlocked ? '#FFF' : '#666' }, "RUNS"),
+    /*#__PURE__*/React.createElement("polygon", { points: "18,36 24,42 30,36 28,36 24,40 20,36", fill: unlocked ? '#FF6B6B' : '#3A3550', opacity: unlocked ? 0.8 : 0.3 }))
 };
 
 const getAchievementMedal = (id, unlocked) => {
@@ -651,6 +732,16 @@ const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
     font-size: 11px; font-weight: 700;
     letter-spacing: 0.04em;
   }
+
+  /* === ADMIN CARD DISMISS === */
+  @keyframes rcCardDismiss {
+    0% { transform: translateX(0); opacity: 1; max-height: 200px; margin-bottom: 14px; }
+    50% { transform: translateX(80px); opacity: 0.3; }
+    100% { transform: translateX(120px); opacity: 0; max-height: 0; margin-bottom: 0; padding: 0; overflow: hidden; }
+  }
+  .rc-card-dismissed { animation: rcCardDismiss 0.4s cubic-bezier(.16,1,.3,1) forwards; pointer-events: none; }
+  .rc-card-approved { border-left-color: #7DD8A0 !important; }
+  .rc-card-denied { border-left-color: #FF8A8A !important; }
 
   /* === REDUCED MOTION === */
   @media (prefers-reduced-motion: reduce) {
@@ -998,14 +1089,38 @@ const RunClubScreen = ({ profile }) => {
     }
   };
 
+  const [reviewingIds, setReviewingIds] = useState({});
+  const [dismissedIds, setDismissedIds] = useState({});
+
   const handleReview = async (id, decision) => {
-    if (!api) return;
-    try {
-      await api.reviewAccess(id, decision, reviewNote);
+    if (!api || reviewingIds[id]) return;
+    if (navigator.vibrate) navigator.vibrate(decision === 'approved' ? [50, 30, 50] : 80);
+    // Optimistic: mark as reviewing + start dismiss animation
+    setReviewingIds(prev => ({ ...prev, [id]: decision }));
+    setTimeout(() => { setDismissedIds(prev => ({ ...prev, [id]: true })); }, 100);
+    // After animation, remove from pending
+    setTimeout(() => {
       setPendingRequests(prev => prev.filter(r => r.id !== id));
       setAllRequests(prev => prev.map(r => r.id === id ? { ...r, status: decision } : r));
+      setReviewingIds(prev => { var n = { ...prev }; delete n[id]; return n; });
+      setDismissedIds(prev => { var n = { ...prev }; delete n[id]; return n; });
+    }, 450);
+    // Fire API in background
+    try {
+      await api.reviewAccess(id, decision, reviewNote);
       setReviewNote('');
-    } catch (e) {}
+    } catch (e) {
+      // Revert on failure
+      setPendingRequests(prev => [...prev, allRequests.find(r => r.id === id)].filter(Boolean));
+      setAllRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'pending' } : r));
+    }
+  };
+
+  const handleBatchApprove = () => {
+    if (navigator.vibrate) navigator.vibrate([50, 30, 50, 30, 50]);
+    pendingRequests.forEach((r, i) => {
+      setTimeout(() => handleReview(r.id, 'approved'), i * 150);
+    });
   };
 
   // Timer
@@ -1847,16 +1962,25 @@ const RunClubScreen = ({ profile }) => {
         /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 } },
           /*#__PURE__*/React.createElement("h2", { style: { fontSize: 15, fontWeight: 700, color: 'var(--c-text)', display: 'flex', alignItems: 'center', gap: 8 } },
             /*#__PURE__*/React.createElement(InboxIcon, { size: 18 }), "Pending Requests"),
-          pendingCount > 0 && /*#__PURE__*/React.createElement("span", {
-            style: { fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 12, background: 'linear-gradient(135deg, #FF6B6B, #FFB347, #77DD77, #64B5F6)', color: '#FFF', animation: 'rcBreathe 3s ease-in-out infinite' }
-          }, pendingCount + ' waiting')
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 8, alignItems: 'center' } },
+            pendingCount > 1 && /*#__PURE__*/React.createElement("button", {
+              onClick: handleBatchApprove,
+              style: { fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 12, background: 'linear-gradient(135deg, #7DD8A0, #66BB6A)', color: '#FFF', border: 'none', cursor: 'pointer', transition: 'all 0.2s' }
+            }, "Approve All"),
+            pendingCount > 0 && /*#__PURE__*/React.createElement("span", {
+              style: { fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 12, background: 'linear-gradient(135deg, #FF6B6B, #FFB347, #77DD77, #64B5F6)', color: '#FFF', animation: 'rcBreathe 3s ease-in-out infinite' }
+            }, pendingCount + ' waiting'))
         ),
 
         pendingCount > 0 && pendingRequests.map(function(r) {
-          return /*#__PURE__*/React.createElement("div", { key: r.id, className: "rc-pop-in",
+          var isDismissed = dismissedIds[r.id];
+          var reviewState = reviewingIds[r.id];
+          return /*#__PURE__*/React.createElement("div", { key: r.id,
+            className: "rc-pop-in" + (isDismissed ? ' rc-card-dismissed' : '') + (reviewState === 'approved' ? ' rc-card-approved' : '') + (reviewState === 'denied' ? ' rc-card-denied' : ''),
             style: { background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
                      borderRadius: 20, padding: 20, marginBottom: 14, boxShadow: '0 4px 20px rgba(255,107,107,0.06)',
-                     border: '1px solid rgba(255,107,107,0.10)', borderLeft: '4px solid #FFB74D' } },
+                     border: '1px solid rgba(255,107,107,0.10)', borderLeft: '4px solid #FFB74D',
+                     transition: 'border-left-color 0.2s ease' } },
             // User info row
             /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 } },
               /*#__PURE__*/React.createElement("div", { style: { width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -1874,14 +1998,22 @@ const RunClubScreen = ({ profile }) => {
             // Action buttons
             /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 10 } },
               /*#__PURE__*/React.createElement("button", { onClick: function() { handleReview(r.id, 'approved'); },
-                style: { flex: 1, padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer',
-                         background: 'linear-gradient(135deg, #7DD8A0, #66BB6A)', color: '#FFF',
-                         boxShadow: '0 3px 12px rgba(125,216,160,0.25)', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }
-              }, /*#__PURE__*/React.createElement(CheckCircleIcon, { size: 16 }), "Approve"),
+                disabled: !!reviewState,
+                style: { flex: 1, padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700, border: 'none', cursor: reviewState ? 'default' : 'pointer',
+                         background: reviewState === 'approved' ? '#7DD8A0' : 'linear-gradient(135deg, #7DD8A0, #66BB6A)', color: '#FFF',
+                         boxShadow: '0 3px 12px rgba(125,216,160,0.25)', transition: 'all 0.2s',
+                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                         opacity: reviewState === 'denied' ? 0.4 : 1,
+                         transform: reviewState === 'approved' ? 'scale(1.04)' : 'none' }
+              }, reviewState === 'approved' ? "Approved ✓" : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(CheckCircleIcon, { size: 16 }), "Approve")),
               /*#__PURE__*/React.createElement("button", { onClick: function() { handleReview(r.id, 'denied'); },
-                style: { flex: 1, padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer',
-                         background: 'rgba(255,138,138,0.12)', color: '#FF8A8A', transition: 'all 0.2s' }
-              }, "Deny"))
+                disabled: !!reviewState,
+                style: { flex: 1, padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 700, border: 'none', cursor: reviewState ? 'default' : 'pointer',
+                         background: reviewState === 'denied' ? '#FF8A8A' : 'rgba(255,138,138,0.12)',
+                         color: reviewState === 'denied' ? '#FFF' : '#FF8A8A', transition: 'all 0.2s',
+                         opacity: reviewState === 'approved' ? 0.4 : 1,
+                         transform: reviewState === 'denied' ? 'scale(1.04)' : 'none' }
+              }, reviewState === 'denied' ? "Denied ✗" : "Deny"))
           );
         }),
 
@@ -2067,16 +2199,27 @@ const RunClubScreen = ({ profile }) => {
               }));
           })())),
 
-        // Badges preview
+        // Badges preview with progress bar
         achievements.length > 0 && /*#__PURE__*/React.createElement("div", { className: "rc-glass rc-pop-in", onClick: () => setView('achievements'),
-          style: { marginBottom: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                   padding: '16px 20px', position: 'relative', overflow: 'hidden' } },
+          style: { marginBottom: 24, cursor: 'pointer', padding: '18px 20px', position: 'relative', overflow: 'hidden' } },
           /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', top: -10, left: -10, width: 50, height: 50, borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(255,183,77,0.2), transparent)', pointerEvents: 'none' } }),
-          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-            /*#__PURE__*/React.createElement(MedalIcon, { size: 20 }),
-            /*#__PURE__*/React.createElement("span", { style: { fontSize: 14, fontWeight: 700, color: 'var(--c-text)' } }, unlockedCount + '/' + achievements.length + ' Badges')),
-          /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: '#FF6B6B' } }, "View all →")),
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
+            /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+              /*#__PURE__*/React.createElement(MedalIcon, { size: 20 }),
+              /*#__PURE__*/React.createElement("span", { style: { fontSize: 14, fontWeight: 700, color: 'var(--c-text)' } }, unlockedCount + '/' + achievements.length + ' Badges')),
+            /*#__PURE__*/React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: '#FF6B6B' } }, "View all →")),
+          // Mini progress bar
+          /*#__PURE__*/React.createElement("div", { style: { width: '100%', height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.06)', overflow: 'hidden' } },
+            /*#__PURE__*/React.createElement("div", { style: { height: '100%', borderRadius: 2, transition: 'width 1s ease-out',
+              width: (achievements.length > 0 ? (unlockedCount / achievements.length) * 100 : 0) + '%',
+              background: 'linear-gradient(90deg, #FF6B6B, #FFB347, #FFE66D, #77DD77, #64B5F6, #BA93FF)' } })),
+          // Show last 5 unlocked medals inline
+          unlockedCount > 0 && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 2, marginTop: 12, justifyContent: 'center' } },
+            achievements.filter(function(a) { return a.unlocked; }).slice(-5).map(function(a) {
+              return /*#__PURE__*/React.createElement("div", { key: a.id, style: { transform: 'scale(0.65)', transformOrigin: 'center', opacity: 0.9 } },
+                getAchievementMedal(a.id, true));
+            }))),
 
         // Recent runs
         runs.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null,
@@ -2101,10 +2244,20 @@ const RunClubScreen = ({ profile }) => {
           }))
         ),
 
-        runs.length === 0 && /*#__PURE__*/React.createElement("div", { style: { background: 'linear-gradient(135deg, rgba(255,107,107,0.06), rgba(119,221,119,0.08))', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 24, textAlign: 'center', padding: '40px 24px', border: '1px dashed rgba(255,107,107,0.2)' }, className: "rc-pop-in" },
-          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 12, display: 'flex', justifyContent: 'center' } }, /*#__PURE__*/React.createElement(RunnerIcon, { size: 56 })),
-          /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 18, color: 'var(--c-text)', marginBottom: 8 } }, "Ready to run?"),
-          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', lineHeight: 1.6, maxWidth: 260, margin: '0 auto' } }, "Your journey starts with a single step. Tap Start Run above and let's go!"))
+        runs.length === 0 && /*#__PURE__*/React.createElement("div", { className: "rc-glass rc-pop-in",
+          style: { textAlign: 'center', padding: '48px 24px', marginBottom: 24, position: 'relative', overflow: 'hidden' } },
+          /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', top: 0, left: 0, right: 0, height: 4,
+            background: 'linear-gradient(90deg, #FF6B6B, #FFB347, #FFE66D, #77DD77, #64B5F6, #BA93FF)' } }),
+          /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 16, display: 'flex', justifyContent: 'center' } },
+            /*#__PURE__*/React.createElement("div", { style: { width: 72, height: 72, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'linear-gradient(135deg, rgba(255,107,107,0.1), rgba(100,181,246,0.1))', border: '2px dashed rgba(255,107,107,0.2)' } },
+              /*#__PURE__*/React.createElement(RunnerIcon, { size: 36 }))),
+          /*#__PURE__*/React.createElement("div", { className: "font-display rc-gradient-text", style: { fontSize: 22, marginBottom: 8 } }, "Ready to run?"),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--c-text-sub)', lineHeight: 1.6, maxWidth: 260, margin: '0 auto', marginBottom: 16 } }, "Your journey starts with a single step. Tap Start Run above and let's go!"),
+          /*#__PURE__*/React.createElement("div", { style: { display: 'flex', justifyContent: 'center', gap: 16, fontSize: 11, color: 'var(--c-text-sub)' } },
+            /*#__PURE__*/React.createElement("span", null, "🏅 " + achievements.length + " badges"),
+            /*#__PURE__*/React.createElement("span", null, "🏆 Leaderboard"),
+            /*#__PURE__*/React.createElement("span", null, "🤖 AI Coach")))
       ),
 
       // === HISTORY ===
@@ -2192,7 +2345,25 @@ const RunClubScreen = ({ profile }) => {
       ),
 
       // === ACHIEVEMENTS ===
-      view === 'achievements' && /*#__PURE__*/React.createElement(React.Fragment, null,
+      view === 'achievements' && (function() {
+        // Rarity tiers for visual flair
+        var RARITY = {
+          // Legendary (rainbow)
+          marathon: 'legendary', total_1000mi: 'legendary', streak_100: 'legendary', two_hundred_runs: 'legendary',
+          // Epic (purple)
+          half_marathon: 'epic', total_500mi: 'epic', streak_30: 'epic', hundred_runs: 'epic', speed_demon: 'epic',
+          sub_4_pace: 'epic', cal_10000: 'epic', ran_30k: 'epic', two_hour_run: 'epic',
+          // Rare (blue)
+          ran_10k: 'rare', total_100mi: 'rare', total_250mi: 'rare', streak_14: 'rare', fifty_runs: 'rare',
+          long_run_15k: 'rare', sub_5_pace: 'rare', cal_1000: 'rare', hour_run: 'rare',
+          // Common (green) — everything else
+        };
+        var RARITY_COLORS = { legendary: '#FFD700', epic: '#BA93FF', rare: '#64B5F6', common: '#7DD8A0' };
+        var RARITY_LABELS = { legendary: 'LEGENDARY', epic: 'EPIC', rare: 'RARE', common: 'COMMON' };
+        var RARITY_BG = { legendary: 'linear-gradient(135deg, #FFD700, #FF6B6B, #BA93FF, #64B5F6)', epic: 'linear-gradient(135deg, #BA93FF, #E040FB)', rare: '#64B5F6', common: '#7DD8A0' };
+        var getRarity = function(id) { return RARITY[id] || 'common'; };
+
+        return /*#__PURE__*/React.createElement(React.Fragment, null,
         /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 24, padding: '16px 0' } },
           /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { marginBottom: 8, display: 'flex', justifyContent: 'center' } }, /*#__PURE__*/React.createElement(MedalIcon, { size: 40 })),
           /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 32, background: 'linear-gradient(135deg, #FF6B6B, #FFB347, #77DD77, #64B5F6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } }, unlockedCount + ' / ' + achievements.length),
@@ -2206,22 +2377,39 @@ const RunClubScreen = ({ profile }) => {
         // Unlocked badges first, then locked
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 } },
           // Sort: unlocked first
-          [].concat(achievements).sort(function(a, b) { return (b.unlocked ? 1 : 0) - (a.unlocked ? 1 : 0); }).map(function(a, i) {
+          [].concat(achievements).sort(function(a, b) {
+            // Sort: unlocked first, then by rarity (legendary > epic > rare > common)
+            var rarityOrder = { legendary: 4, epic: 3, rare: 2, common: 1 };
+            if (a.unlocked !== b.unlocked) return b.unlocked ? 1 : -1;
+            return (rarityOrder[getRarity(b.id)] || 0) - (rarityOrder[getRarity(a.id)] || 0);
+          }).map(function(a, i) {
+            var rarity = getRarity(a.id);
+            var rarityColor = RARITY_COLORS[rarity];
+            var isLegendary = rarity === 'legendary';
             return /*#__PURE__*/React.createElement("div", { key: a.id, className: "rc-pop-in",
               style: { textAlign: 'center', padding: '18px 12px', position: 'relative', overflow: 'hidden',
                        background: a.unlocked ? 'rgba(255,255,255,0.85)' : 'rgba(240,238,245,0.5)',
                        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
                        borderRadius: 20,
-                       border: a.unlocked ? '2px solid rgba(255,107,107,0.18)' : '1px dashed rgba(0,0,0,0.1)',
-                       boxShadow: a.unlocked ? '0 6px 20px rgba(255,107,107,0.12)' : 'inset 0 2px 8px rgba(0,0,0,0.03)',
+                       border: a.unlocked ? '2px solid ' + rarityColor + '33' : '1px dashed rgba(0,0,0,0.1)',
+                       boxShadow: a.unlocked && isLegendary ? '0 6px 24px rgba(255,215,0,0.2), 0 0 0 1px rgba(255,215,0,0.15)' : a.unlocked ? '0 6px 20px ' + rarityColor + '1A' : 'inset 0 2px 8px rgba(0,0,0,0.03)',
                        transition: 'transform 0.2s ease, box-shadow 0.2s ease' } },
 
+              // Rarity label at top
+              /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', top: 8, right: 8, fontSize: 7, fontWeight: 800,
+                padding: '2px 7px', borderRadius: 6, letterSpacing: '0.12em', textTransform: 'uppercase',
+                background: isLegendary && a.unlocked ? RARITY_BG.legendary : (a.unlocked ? rarityColor + '20' : 'rgba(0,0,0,0.04)'),
+                color: a.unlocked ? (isLegendary ? '#B8860B' : rarityColor) : 'rgba(0,0,0,0.15)',
+                WebkitBackgroundClip: isLegendary && a.unlocked ? 'text' : 'unset',
+                WebkitTextFillColor: isLegendary && a.unlocked ? 'transparent' : 'unset',
+                backgroundClip: isLegendary && a.unlocked ? 'text' : 'unset' } },
+                RARITY_LABELS[rarity]),
+
               // Medal with lock overlay for locked
-              /*#__PURE__*/React.createElement("div", { className: a.unlocked ? 'rc-shine' : '',
-                style: { marginBottom: 10, display: 'flex', justifyContent: 'center', position: 'relative',
+              /*#__PURE__*/React.createElement("div", { className: a.unlocked ? (isLegendary ? 'rc-float' : 'rc-shine') : '',
+                style: { marginBottom: 10, marginTop: 6, display: 'flex', justifyContent: 'center', position: 'relative',
                          filter: a.unlocked ? 'none' : 'grayscale(1) opacity(0.35)' } },
                 getAchievementMedal(a.id, a.unlocked),
-                // Lock icon overlay on locked badges
                 !a.unlocked && /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', bottom: -2, right: 'calc(50% - 20px)',
                   width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' } },
@@ -2230,20 +2418,20 @@ const RunClubScreen = ({ profile }) => {
               // Shimmer on unlocked only
               a.unlocked && /*#__PURE__*/React.createElement("div", { className: "rc-shimmer", style: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 20, pointerEvents: 'none' } }),
 
-              // Name — dimmed for locked
+              // Name
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: a.unlocked ? 'var(--c-text)' : 'rgba(0,0,0,0.3)', marginBottom: 4 } }, a.name),
 
-              // Description — hidden for locked, replaced with "???"
+              // Description
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 10, color: a.unlocked ? 'var(--c-text-sub)' : 'rgba(0,0,0,0.2)', lineHeight: 1.5, fontStyle: a.unlocked ? 'normal' : 'italic' } },
                 a.unlocked ? a.desc : '???'),
 
-              // Unlocked date or LOCKED label
+              // Status label
               a.unlocked
-                ? /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: '#7DD8A0', marginTop: 8, padding: '3px 10px', borderRadius: 10, background: 'rgba(125,216,160,0.12)', display: 'inline-block' } }, formatDateShort(a.unlockedAt))
+                ? /*#__PURE__*/React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: rarityColor, marginTop: 8, padding: '3px 10px', borderRadius: 10, background: rarityColor + '15', display: 'inline-block' } }, formatDateShort(a.unlockedAt))
                 : /*#__PURE__*/React.createElement("div", { style: { fontSize: 8, fontWeight: 700, color: 'rgba(0,0,0,0.2)', marginTop: 8, padding: '3px 10px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', display: 'inline-block', letterSpacing: '0.15em', textTransform: 'uppercase' } }, "locked"));
           })
         )
-      ),
+      ); })(),
 
       // Loading
       loading && accessStatus === 'approved' && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', gap: 12 } },

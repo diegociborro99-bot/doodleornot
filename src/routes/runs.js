@@ -157,6 +157,17 @@ const RUN_ACHIEVEMENTS = [
   { id: 'sub_5_pace', name: 'Sub Five', desc: 'Average pace under 5:00/km', check: (s) => s.bestPaceSec > 0 && s.bestPaceSec < 300 },
   { id: 'weekend_warrior', name: 'Weekend Warrior', desc: 'Run on a Saturday or Sunday', checkRun: (r) => { var d = new Date(r.startedAt).getDay(); return d === 0 || d === 6; } },
   { id: 'lunch_run', name: 'Lunch Laps', desc: 'Start a run between 11am and 1pm', checkRun: (r) => { var h = new Date(r.startedAt).getHours(); return h >= 11 && h < 13; } },
+  // === v20 NEW ACHIEVEMENTS ===
+  { id: 'cal_1000', name: 'Furnace', desc: 'Burn 1,000 total calories', check: (s) => Math.round(s.totalDistanceM / 1000 * 62) >= 1000 },
+  { id: 'cal_10000', name: 'Inferno', desc: 'Burn 10,000 total calories', check: (s) => Math.round(s.totalDistanceM / 1000 * 62) >= 10000 },
+  { id: 'ran_2k', name: 'Warm Up Done', desc: 'Run 2km in a single run', checkRun: (r) => r.distanceM >= 2000 },
+  { id: 'ran_30k', name: 'Ultra Curious', desc: 'Run 30km in a single run', checkRun: (r) => r.distanceM >= 30000 },
+  { id: 'sub_4_pace', name: 'Lightning', desc: 'Average pace under 4:00/km', check: (s) => s.bestPaceSec > 0 && s.bestPaceSec < 240 },
+  { id: 'hour_run', name: 'Hour Power', desc: 'Run for 60+ minutes non-stop', checkRun: (r) => r.durationSec >= 3600 },
+  { id: 'two_hour_run', name: 'Endurance King', desc: 'Run for 2+ hours non-stop', checkRun: (r) => r.durationSec >= 7200 },
+  { id: 'dawn_patrol', name: 'Dawn Patrol', desc: 'Start a run before 5 AM', checkRun: (r) => new Date(r.startedAt).getHours() < 5 },
+  { id: 'midnight_runner', name: 'Midnight Runner', desc: 'Start a run after 11 PM', checkRun: (r) => new Date(r.startedAt).getHours() >= 23 },
+  { id: 'two_hundred_runs', name: 'Unstoppable', desc: 'Complete 200 runs', check: (s) => s.totalRuns >= 200 },
 ];
 
 async function checkAndUnlockAchievements(userId, runStats, run) {
