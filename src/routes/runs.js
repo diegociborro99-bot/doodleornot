@@ -44,27 +44,37 @@ router.post('/access/request', requireAuth, async (req, res) => {
       return res.json({ status: 'approved' });
     }
     const { socialProof, message } = req.body || {};
-    const existing = await prisma.runClubAccess.findUnique({ where: { userId: req.userId } });
-    if (existing) {
-      // Allow re-apply after denial — delete old record and create fresh
-      if (existing.status === 'denied') {
-        await prisma.runClubAccess.delete({ where: { userId: req.userId } });
-      } else {
-        return res.json({ status: existing.status, message: 'Already requested' });
-      }
-    }
+    const spVal = typeof socialProof === 'string' ? socialProof.slice(0, 200) : null;
+    const msgVal = typeof message === 'string' ? message.slice(0, 500) : null;
 
-    const access = await prisma.runClubAccess.create({
-      data: {
+    // Use upsert to avoid race conditions / unique constraint violations
+    const access = await prisma.runClubAccess.upsert({
+      where: { userId: req.userId },
+      create: {
         userId: req.userId,
-        socialProof: typeof socialProof === 'string' ? socialProof.slice(0, 200) : null,
-        message: typeof message === 'string' ? message.slice(0, 500) : null
+        socialProof: spVal,
+        message: msgVal
+      },
+      update: {
+        // Only update if status was 'denied' (re-apply); otherwise keep existing
+        socialProof: spVal,
+        message: msgVal
       }
     });
+
+    // If status is denied and they're re-applying, reset to pending
+    if (access.status === 'denied') {
+      const updated = await prisma.runClubAccess.update({
+        where: { userId: req.userId },
+        data: { status: 'pending', reviewNote: null, reviewedAt: null, requestedAt: new Date() }
+      });
+      return res.json({ status: updated.status });
+    }
+
     res.json({ status: access.status });
   } catch (err) {
-    console.error('POST /access/request error:', err);
-    res.status(500).json({ error: 'server_error' });
+    console.error('POST /access/request error:', err.message, err.code, err.meta);
+    res.status(500).json({ error: 'server_error', detail: err.message });
   }
 });
 

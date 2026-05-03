@@ -22,6 +22,7 @@
     if (!resp.ok) {
       const err = new Error((data && data.error) || `http_${resp.status}`);
       err.status = resp.status;
+      err.detail = data && data.detail;
       throw err;
     }
     return data;

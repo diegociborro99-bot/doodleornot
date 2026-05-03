@@ -60,10 +60,28 @@
 
 const RunShoeIcon = ({ size = 24, active }) => /*#__PURE__*/React.createElement("svg", {
   viewBox: "0 0 24 24", width: size, height: size, fill: "none",
-  stroke: active ? '#A8E6CF' : "var(--c-text)", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round"
-}, /*#__PURE__*/React.createElement("path", {
-  d: "M3 18h18l-1.5-4c-.4-1.1-1.5-1.8-2.7-1.8H14l-1-2.5c-.3-.8-1.1-1.2-1.9-1L7.5 10 6 8.5 4.5 10l-1 2.5L3 18z"
-}), /*#__PURE__*/React.createElement("path", { d: "M7 15h2M11 15h2M15 15h2" }));
+  strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round"
+},
+  // Running person silhouette — much more recognizable than a shoe
+  /*#__PURE__*/React.createElement("g", { stroke: active ? '#A8E6CF' : "var(--c-text)" },
+    // Head
+    /*#__PURE__*/React.createElement("circle", { cx: 14, cy: 4.5, r: 2, fill: active ? '#A8E6CF' : 'none' }),
+    // Body
+    /*#__PURE__*/React.createElement("path", { d: "M13.5 7L12 12" }),
+    // Arms
+    /*#__PURE__*/React.createElement("path", { d: "M16 8.5L12.5 10L9 8" }),
+    // Front leg (extended)
+    /*#__PURE__*/React.createElement("path", { d: "M12 12L15 16L17 20" }),
+    // Back leg (bent)
+    /*#__PURE__*/React.createElement("path", { d: "M12 12L9 15L7 19" })
+  ),
+  // Motion lines
+  active && /*#__PURE__*/React.createElement("g", { stroke: '#A8E6CF', strokeWidth: 1.2, opacity: 0.5 },
+    /*#__PURE__*/React.createElement("path", { d: "M5 9h2.5" }),
+    /*#__PURE__*/React.createElement("path", { d: "M4 12h3" }),
+    /*#__PURE__*/React.createElement("path", { d: "M5 15h2" })
+  )
+);
 
 const GpsIcon = ({ size = 20, color }) => /*#__PURE__*/React.createElement("svg", {
   viewBox: "0 0 24 24", width: size, height: size, fill: "none",
@@ -689,6 +707,12 @@ const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
   @keyframes rcGradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
   @keyframes rcSkeletonPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.8; } }
   @keyframes rcPullSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes rcSplashIn { 0% { transform: scale(0.6) rotate(-8deg); opacity: 0; } 60% { transform: scale(1.05) rotate(2deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+  @keyframes rcSplashTitle { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+  @keyframes rcSplashOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.15); } }
+  @keyframes rcSplashSparkle { 0%,100% { transform: scale(0) rotate(0deg); opacity: 0; } 50% { transform: scale(1) rotate(180deg); opacity: 1; } }
+  @keyframes rcSplashRunnerBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes rcSplashDots { 0%,20% { opacity: 0; } 50% { opacity: 1; } 80%,100% { opacity: 0; } }
 
   /* === SKELETON LOADING === */
   .rc-skeleton {
@@ -900,6 +924,93 @@ var SkeletonDashboard = function() {
       })));
 };
 
+/* ---------- Splash Screen Component ---------- */
+var RunClubSplash = function(props) {
+  var onDone = props.onDone;
+  var exiting = useState(false), isExiting = exiting[0], setExiting = exiting[1];
+
+  useEffect(function() {
+    var t1 = setTimeout(function() { setExiting(true); }, 2200);
+    var t2 = setTimeout(function() { onDone(); }, 2800);
+    return function() { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  // Running character SVG (inspired by the Doodles Run Club illustration)
+  var runnerSvg = React.createElement("svg", { viewBox: "0 0 200 200", width: 140, height: 140, style: { animation: 'rcSplashRunnerBob 0.8s ease-in-out infinite' } },
+    // Shadow
+    React.createElement("ellipse", { cx: 100, cy: 185, rx: 35, ry: 8, fill: 'rgba(0,0,0,0.08)' }),
+    // Back leg
+    React.createElement("path", { d: "M95 120 L75 145 L65 170", stroke: '#F5CBA7', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
+    React.createElement("path", { d: "M65 170 L60 175", stroke: '#77DD77', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
+    // Front leg
+    React.createElement("path", { d: "M105 120 L125 145 L130 168", stroke: '#F5CBA7', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
+    React.createElement("path", { d: "M130 168 L138 172", stroke: '#77DD77', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
+    // Body
+    React.createElement("path", { d: "M100 70 L100 125", stroke: '#F5CBA7', strokeWidth: 10, strokeLinecap: 'round', fill: 'none' }),
+    // Tank top
+    React.createElement("rect", { x: 88, y: 72, width: 24, height: 35, rx: 6, fill: '#A8E6CF' }),
+    React.createElement("rect", { x: 92, y: 72, width: 8, height: 35, rx: 3, fill: '#FFD93D', opacity: 0.6 }),
+    // Back arm
+    React.createElement("path", { d: "M95 82 L72 95 L60 85", stroke: '#F5CBA7', strokeWidth: 7, strokeLinecap: 'round', fill: 'none' }),
+    // Front arm
+    React.createElement("path", { d: "M105 82 L128 90 L138 80", stroke: '#F5CBA7', strokeWidth: 7, strokeLinecap: 'round', fill: 'none' }),
+    // Head
+    React.createElement("circle", { cx: 100, cy: 50, r: 22, fill: '#F5CBA7' }),
+    // Hair (white curls like the Doodles character)
+    React.createElement("circle", { cx: 88, cy: 38, r: 10, fill: 'white' }),
+    React.createElement("circle", { cx: 100, cy: 32, r: 11, fill: 'white' }),
+    React.createElement("circle", { cx: 112, cy: 36, r: 10, fill: 'white' }),
+    React.createElement("circle", { cx: 82, cy: 44, r: 7, fill: 'white' }),
+    React.createElement("circle", { cx: 118, cy: 42, r: 7, fill: 'white' }),
+    // Eyes
+    React.createElement("circle", { cx: 93, cy: 52, r: 3, fill: '#2D2D3F' }),
+    React.createElement("circle", { cx: 107, cy: 52, r: 3, fill: '#2D2D3F' }),
+    // Mouth
+    React.createElement("path", { d: "M95 60 Q100 65 105 60", stroke: '#E8A0BF', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }),
+    // Sparkles
+    React.createElement("g", { style: { animation: 'rcSplashSparkle 1.5s ease-in-out infinite' } },
+      React.createElement("path", { d: "M45 45 L48 40 L51 45 L48 50Z", fill: '#FFB347', opacity: 0.7 })),
+    React.createElement("g", { style: { animation: 'rcSplashSparkle 1.5s ease-in-out 0.5s infinite' } },
+      React.createElement("path", { d: "M155 55 L158 50 L161 55 L158 60Z", fill: '#64B5F6', opacity: 0.7 })),
+    React.createElement("g", { style: { animation: 'rcSplashSparkle 1.5s ease-in-out 1s infinite' } },
+      React.createElement("path", { d: "M140 30 L143 25 L146 30 L143 35Z", fill: '#FF6B6B', opacity: 0.7 })),
+    // Motion lines
+    React.createElement("g", { stroke: '#ccc', strokeWidth: 2, strokeLinecap: 'round', opacity: 0.4 },
+      React.createElement("path", { d: "M50 90 L35 90" }),
+      React.createElement("path", { d: "M45 105 L28 105" }),
+      React.createElement("path", { d: "M50 120 L38 120" }))
+  );
+
+  // "Doodles Run Club" text in the brand colors
+  var titleText = React.createElement("div", { style: { textAlign: 'center', animation: 'rcSplashTitle 0.6s cubic-bezier(.16,1,.3,1) 0.3s both' } },
+    React.createElement("div", { style: { fontSize: 36, fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.02em' } },
+      React.createElement("span", { style: { color: '#FFB347', textShadow: '0 2px 8px rgba(255,179,71,0.3)' } }, "Doodles"),
+      React.createElement("br"),
+      React.createElement("span", { style: { color: '#64B5F6', textShadow: '0 2px 8px rgba(100,181,246,0.3)' } }, "Run "),
+      React.createElement("span", { style: { color: '#FF8FAB', textShadow: '0 2px 8px rgba(255,143,171,0.3)' } }, "Club")),
+    React.createElement("div", { style: { fontSize: 12, color: '#aaa', marginTop: 12, letterSpacing: '0.15em', textTransform: 'uppercase', animation: 'rcSplashDots 1.5s ease-in-out infinite' } }, "Loading your runs...")
+  );
+
+  return React.createElement("div", {
+    style: {
+      position: 'fixed', inset: 0, zIndex: 9999,
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24,
+      background: 'linear-gradient(145deg, #FFF5F0 0%, #FFF0F5 30%, #F0F8FF 60%, #F5FFF5 100%)',
+      animation: isExiting ? 'rcSplashOut 0.6s ease-in forwards' : 'none',
+      overflow: 'hidden'
+    }
+  },
+    // Background decorative circles
+    React.createElement("div", { style: { position: 'absolute', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,179,71,0.12) 0%, transparent 70%)', top: '10%', left: '-5%' } }),
+    React.createElement("div", { style: { position: 'absolute', width: 250, height: 250, borderRadius: '50%', background: 'radial-gradient(circle, rgba(100,181,246,0.1) 0%, transparent 70%)', bottom: '15%', right: '-8%' } }),
+    React.createElement("div", { style: { position: 'absolute', width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,143,171,0.1) 0%, transparent 70%)', top: '50%', left: '60%' } }),
+    // Runner with bounce-in
+    React.createElement("div", { style: { animation: 'rcSplashIn 0.7s cubic-bezier(.16,1,.3,1) both', position: 'relative', zIndex: 1 } }, runnerSvg),
+    // Title
+    titleText
+  );
+};
+
 /* ---------- Pull-to-Refresh Hook ---------- */
 var usePullToRefresh = function(onRefresh, containerRef) {
   var pullStartY = useRef(0);
@@ -1073,9 +1184,17 @@ var LeafletMap = function(props) {
     if (polylineRef.current) {
       polylineRef.current.setLatLngs(latlngs);
     } else if (latlngs.length >= 2) {
+      // Gradient-like effect: main line + glow outline for Strava-style look
       polylineRef.current = L.polyline(latlngs, {
-        color: '#FF6B6B', weight: 4, opacity: 0.9,
-        lineCap: 'round', lineJoin: 'round'
+        color: '#FF6B6B', weight: 4, opacity: 0.95,
+        lineCap: 'round', lineJoin: 'round',
+        smoothFactor: 1.5 // Leaflet smoothing for cleaner curves
+      }).addTo(mapRef.current);
+      // Glow outline beneath
+      L.polyline(latlngs, {
+        color: '#FF6B6B', weight: 8, opacity: 0.2,
+        lineCap: 'round', lineJoin: 'round',
+        smoothFactor: 1.5
       }).addTo(mapRef.current);
     }
 
@@ -1122,6 +1241,9 @@ const RunClubScreen = ({ profile }) => {
   const [lbScope, setLbScope] = useState('weekly');
   const [loading, setLoading] = useState(true);
   const api = typeof window !== 'undefined' ? window.DON_API : null;
+
+  // Splash screen
+  const [showSplash, setShowSplash] = useState(true);
 
   // Access control
   const [accessStatus, setAccessStatus] = useState(null);
@@ -1285,12 +1407,13 @@ const RunClubScreen = ({ profile }) => {
       setAccessStatus(res.status || 'pending');
       setRequestLoading(false);
     } catch (e) {
-      console.error('Request access failed:', e, 'status:', e && e.status);
+      console.error('Request access failed:', e, 'status:', e && e.status, 'detail:', e && e.detail);
       // If 401, user needs to re-login
       if (e && e.status === 401) {
         setRequestError('Session expired. Please log out and log back in.');
       } else {
-        setRequestError('Could not submit request (error ' + (e && e.status || 'network') + '). Try refreshing the page.');
+        var detail = e && e.detail ? ' — ' + e.detail : '';
+        setRequestError('Could not submit request (error ' + (e && e.status || 'network') + detail + '). Try refreshing the page.');
       }
       setRequestLoading(false);
     }
@@ -1359,62 +1482,105 @@ const RunClubScreen = ({ profile }) => {
     if (distance >= targetM) { setGoalReached(true); if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 300]); }
   }, [distance, runMode, goalReached]);
 
+  // Kalman filter state for Strava-quality GPS smoothing
+  var kalmanRef = useRef({ lat: null, lng: null, varLat: null, varLng: null, lastTs: 0 });
+  var speedBufRef = useRef([]);
+
   const startGpsWatch = () => {
     gpsBufRef.current = [];
+    kalmanRef.current = { lat: null, lng: null, varLat: null, varLng: null, lastTs: 0 };
+    speedBufRef.current = [];
+
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
-        const { latitude, longitude, accuracy, speed: nativeSpeed } = pos.coords;
+        const { latitude, longitude, accuracy, speed: nativeSpeed, heading } = pos.coords;
         var now = Date.now();
         setGpsAccuracy(Math.round(accuracy));
 
-        // Adaptive accuracy threshold: tighter when moving, looser when starting
-        var accThreshold = lastPosRef.current ? 35 : 60;
+        // Adaptive accuracy threshold: reject very inaccurate readings
+        var accThreshold = lastPosRef.current ? 30 : 50;
         if (accuracy > accThreshold) return;
 
-        // GPS smoothing: weighted average of last 3 readings (more recent = higher weight)
-        var buf = gpsBufRef.current;
-        buf.push({ lat: latitude, lng: longitude, ts: now, acc: accuracy });
-        if (buf.length > 4) buf.shift();
+        // ========== KALMAN FILTER — Strava-quality position smoothing ==========
+        var k = kalmanRef.current;
+        var smoothLat, smoothLng;
+        var R = accuracy * accuracy; // measurement noise (variance from accuracy)
 
-        var smoothLat = latitude, smoothLng = longitude;
-        if (buf.length >= 3) {
-          var totalW = 0;
-          var wLat = 0, wLng = 0;
-          for (var bi = 0; bi < buf.length; bi++) {
-            // Weight: more recent + more accurate = higher weight
-            var recency = 1 + bi * 0.5;
-            var accWeight = 1 / Math.max(1, buf[bi].acc);
-            var w = recency * accWeight;
-            wLat += buf[bi].lat * w;
-            wLng += buf[bi].lng * w;
-            totalW += w;
-          }
-          smoothLat = wLat / totalW;
-          smoothLng = wLng / totalW;
+        if (k.lat === null) {
+          // First reading — initialize Kalman state
+          k.lat = latitude;
+          k.lng = longitude;
+          k.varLat = R;
+          k.varLng = R;
+          k.lastTs = now;
+          smoothLat = latitude;
+          smoothLng = longitude;
+        } else {
+          var dt = (now - k.lastTs) / 1000;
+          if (dt <= 0) dt = 0.1;
+
+          // Process noise: increases uncertainty over time (Q)
+          // Higher Q = more responsive to new readings, lower = smoother but laggier
+          var Q = dt * 3.0; // tuned for running (moderate movement)
+
+          // Prediction step: uncertainty grows
+          k.varLat += Q;
+          k.varLng += Q;
+
+          // Update step: Kalman gain
+          var KLat = k.varLat / (k.varLat + R);
+          var KLng = k.varLng / (k.varLng + R);
+
+          // Apply correction
+          k.lat = k.lat + KLat * (latitude - k.lat);
+          k.lng = k.lng + KLng * (longitude - k.lng);
+
+          // Update variance
+          k.varLat = (1 - KLat) * k.varLat;
+          k.varLng = (1 - KLng) * k.varLng;
+          k.lastTs = now;
+
+          smoothLat = k.lat;
+          smoothLng = k.lng;
         }
 
-        setGpsRoute(prev => [...prev, { lat: smoothLat, lng: smoothLng, ts: now }]);
+        // Add to route for smooth polyline rendering
+        setGpsRoute(prev => {
+          var newPt = { lat: smoothLat, lng: smoothLng, ts: now };
+          // Deduplicate: skip if too close to last point (< 1m) for cleaner polyline
+          if (prev.length > 0) {
+            var last = prev[prev.length - 1];
+            var d = haversineDistance(last.lat, last.lng, smoothLat, smoothLng);
+            if (d < 1) return prev;
+          }
+          return prev.concat(newPt);
+        });
         lastMovementRef.current = now;
         if (autoPaused) setAutoPaused(false);
 
         if (lastPosRef.current) {
           var d = haversineDistance(lastPosRef.current.lat, lastPosRef.current.lng, smoothLat, smoothLng);
-          var dt = (now - lastPosRef.current.ts) / 1000; // seconds since last point
+          var dt2 = (now - lastPosRef.current.ts) / 1000;
 
-          // Calculate speed: prefer native GPS speed if available, otherwise derive
-          var spd = 0;
+          // Speed calculation: smooth average of last 5 readings for stable display
+          var rawSpd = 0;
           if (nativeSpeed != null && nativeSpeed >= 0) {
-            spd = nativeSpeed;
-          } else if (dt > 0) {
-            spd = d / dt;
+            rawSpd = nativeSpeed;
+          } else if (dt2 > 0) {
+            rawSpd = d / dt2;
           }
-          setCurrentSpeed(Math.round(spd * 10) / 10);
+          var sBuf = speedBufRef.current;
+          sBuf.push(rawSpd);
+          if (sBuf.length > 5) sBuf.shift();
+          var avgSpd = sBuf.reduce(function(a, b) { return a + b; }, 0) / sBuf.length;
+          setCurrentSpeed(Math.round(avgSpd * 10) / 10);
 
-          // Drift elimination: ignore tiny movements that are GPS noise
-          // Use accuracy-adaptive min distance: at least max(2, accuracy * 0.3)
-          var minDist = Math.max(2, accuracy * 0.3);
-          // Speed sanity check: >15 m/s (54 km/h) is likely GPS teleport for a runner
-          if (d > minDist && d < 300 && spd < 15) {
+          // Distance accumulation with drift elimination
+          // Adaptive min distance based on accuracy + speed
+          var minDist = Math.max(1.5, accuracy * 0.25);
+          // Speed sanity: >12 m/s (43 km/h) = GPS teleport for a runner
+          var instantSpd = dt2 > 0 ? d / dt2 : 0;
+          if (d > minDist && d < 200 && instantSpd < 12) {
             setDistance(prev => {
               const newDist = prev + d;
               const currentKm = Math.floor(newDist / 1000);
@@ -1443,7 +1609,7 @@ const RunClubScreen = ({ profile }) => {
           setTimeout(function() { startGpsWatch(); }, 3000);
         }
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 1000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -1606,6 +1772,13 @@ const RunClubScreen = ({ profile }) => {
     else { paceZone = { color: '#FF8A8A', label: 'Walk' }; }
   }
 
+  /* ========== SPLASH SCREEN ========== */
+  if (showSplash) {
+    return /*#__PURE__*/React.createElement(React.Fragment, null,
+      /*#__PURE__*/React.createElement(RunClubStyles, null),
+      /*#__PURE__*/React.createElement(RunClubSplash, { onDone: function() { setShowSplash(false); } }));
+  }
+
   /* ========== ACCESS LOADING ========== */
   if (accessLoading) {
     return /*#__PURE__*/React.createElement("div", { className: "rc-pastel-bg", style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
@@ -1621,15 +1794,39 @@ const RunClubScreen = ({ profile }) => {
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 480, margin: '0 auto', padding: '16px 20px calc(100px + env(safe-area-inset-bottom)) 20px', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
 
-        // Logo + Title
+        // Logo + Title — Doodles Run Club character
         /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 32 } },
+          // Running character (mini version of splash)
           /*#__PURE__*/React.createElement("div", {
             className: "rc-float",
-            style: { width: 88, height: 88, borderRadius: '50%', margin: '0 auto 16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,179,71,0.15))', border: '2px solid rgba(255,107,107,0.18)', boxShadow: '0 8px 32px rgba(255,107,107,0.12)' }
-          }, /*#__PURE__*/React.createElement(RunShoeIcon, { size: 40 })),
-          /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 32, marginBottom: 8, background: 'linear-gradient(135deg, #FF6B6B 0%, #FFB347 25%, #77DD77 50%, #64B5F6 75%, #BA93FF 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' } }, "Doodles Run Club"),
-          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, lineHeight: 1.7, color: 'var(--c-text-sub)', maxWidth: 320, margin: '0 auto' } },
+            style: { margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+          }, /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 200 200", width: 100, height: 100 },
+            React.createElement("ellipse", { cx: 100, cy: 185, rx: 30, ry: 6, fill: 'rgba(0,0,0,0.06)' }),
+            React.createElement("path", { d: "M95 120 L75 145 L65 170", stroke: '#F5CBA7', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
+            React.createElement("path", { d: "M65 170 L60 175", stroke: '#77DD77', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
+            React.createElement("path", { d: "M105 120 L125 145 L130 168", stroke: '#F5CBA7', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
+            React.createElement("path", { d: "M130 168 L138 172", stroke: '#77DD77', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
+            React.createElement("path", { d: "M100 70 L100 125", stroke: '#F5CBA7', strokeWidth: 10, strokeLinecap: 'round', fill: 'none' }),
+            React.createElement("rect", { x: 88, y: 72, width: 24, height: 35, rx: 6, fill: '#A8E6CF' }),
+            React.createElement("rect", { x: 92, y: 72, width: 8, height: 35, rx: 3, fill: '#FFD93D', opacity: 0.6 }),
+            React.createElement("path", { d: "M95 82 L72 95 L60 85", stroke: '#F5CBA7', strokeWidth: 7, strokeLinecap: 'round', fill: 'none' }),
+            React.createElement("path", { d: "M105 82 L128 90 L138 80", stroke: '#F5CBA7', strokeWidth: 7, strokeLinecap: 'round', fill: 'none' }),
+            React.createElement("circle", { cx: 100, cy: 50, r: 22, fill: '#F5CBA7' }),
+            React.createElement("circle", { cx: 88, cy: 38, r: 10, fill: 'white' }),
+            React.createElement("circle", { cx: 100, cy: 32, r: 11, fill: 'white' }),
+            React.createElement("circle", { cx: 112, cy: 36, r: 10, fill: 'white' }),
+            React.createElement("circle", { cx: 82, cy: 44, r: 7, fill: 'white' }),
+            React.createElement("circle", { cx: 118, cy: 42, r: 7, fill: 'white' }),
+            React.createElement("circle", { cx: 93, cy: 52, r: 3, fill: '#2D2D3F' }),
+            React.createElement("circle", { cx: 107, cy: 52, r: 3, fill: '#2D2D3F' }),
+            React.createElement("path", { d: "M95 60 Q100 65 105 60", stroke: '#E8A0BF', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' })
+          )),
+          // Title in brand colors
+          /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 32, marginBottom: 4, lineHeight: 1.15 } },
+            React.createElement("span", { style: { color: '#FFB347' } }, "Doodles "),
+            React.createElement("span", { style: { color: '#64B5F6' } }, "Run "),
+            React.createElement("span", { style: { color: '#FF8FAB' } }, "Club")),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, lineHeight: 1.7, color: 'var(--c-text-sub)', maxWidth: 320, margin: '8px auto 0' } },
             "An exclusive running community for Doodles holders. Track your runs, compete on leaderboards, and earn achievements.")
         ),
 
@@ -2283,13 +2480,30 @@ const RunClubScreen = ({ profile }) => {
       // Header — time-based greeting
       /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { marginBottom: 24, paddingTop: 16 } },
         /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 14 } },
+          // Mini Doodles runner character as avatar
           /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { width: 52, height: 52, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'linear-gradient(135deg, #FF6B6B, #FFB347, #77DD77, #64B5F6, #BA93FF)', boxShadow: '0 6px 24px rgba(255,107,107,0.2)' } },
-            /*#__PURE__*/React.createElement(RunShoeIcon, { size: 26, active: true })),
+                     background: 'linear-gradient(135deg, #FFF5F0, #FFF0F5, #F0F8FF)', boxShadow: '0 4px 16px rgba(255,107,107,0.12)', border: '1.5px solid rgba(255,179,71,0.2)' } },
+            /*#__PURE__*/React.createElement("svg", { viewBox: "60 25 80 160", width: 32, height: 38 },
+              React.createElement("circle", { cx: 100, cy: 50, r: 16, fill: '#F5CBA7' }),
+              React.createElement("circle", { cx: 90, cy: 40, r: 8, fill: 'white' }),
+              React.createElement("circle", { cx: 100, cy: 35, r: 9, fill: 'white' }),
+              React.createElement("circle", { cx: 110, cy: 39, r: 8, fill: 'white' }),
+              React.createElement("circle", { cx: 93, cy: 52, r: 2.5, fill: '#2D2D3F' }),
+              React.createElement("circle", { cx: 107, cy: 52, r: 2.5, fill: '#2D2D3F' }),
+              React.createElement("path", { d: "M95 59 Q100 63 105 59", stroke: '#E8A0BF', strokeWidth: 2, fill: 'none', strokeLinecap: 'round' }),
+              React.createElement("rect", { x: 89, y: 68, width: 22, height: 30, rx: 5, fill: '#A8E6CF' }),
+              React.createElement("rect", { x: 93, y: 68, width: 7, height: 30, rx: 3, fill: '#FFD93D', opacity: 0.5 }),
+              React.createElement("path", { d: "M95 115 L78 140 L72 155", stroke: '#F5CBA7', strokeWidth: 6, strokeLinecap: 'round', fill: 'none' }),
+              React.createElement("path", { d: "M105 115 L120 140 L126 155", stroke: '#F5CBA7', strokeWidth: 6, strokeLinecap: 'round', fill: 'none' }),
+              React.createElement("path", { d: "M72 155 L68 160", stroke: '#77DD77', strokeWidth: 6, strokeLinecap: 'round', fill: 'none' }),
+              React.createElement("path", { d: "M126 155 L132 160", stroke: '#77DD77', strokeWidth: 6, strokeLinecap: 'round', fill: 'none' }))),
           /*#__PURE__*/React.createElement("div", null,
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)', marginBottom: 2 } },
               (function() { var h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; })() + (profile && profile.username ? ', ' + profile.username : '')),
-            /*#__PURE__*/React.createElement("h1", { className: "font-display rc-gradient-text", style: { fontSize: 24, lineHeight: 1.1 } }, "Doodles Run Club")))),
+            /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 24, lineHeight: 1.1 } },
+              React.createElement("span", { style: { color: '#FFB347' } }, "Doodles "),
+              React.createElement("span", { style: { color: '#64B5F6' } }, "Run "),
+              React.createElement("span", { style: { color: '#FF8FAB' } }, "Club"))))),
 
       // Sub-nav
       /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 8, marginBottom: 20, justifyContent: 'center', flexWrap: 'wrap' } },
