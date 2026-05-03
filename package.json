@@ -4,9 +4,9 @@
   "private": true,
   "description": "Daily Doodles NFT trivia game — PostgreSQL-backed.",
   "scripts": {
-    "start": "node server.js",
+    "start": "prisma migrate deploy && node server.js",
     "dev": "node server.js",
-    "postinstall": "prisma generate && prisma migrate deploy && npx tailwindcss -i tw-input.css -o public/tailwind.css --minify",
+    "postinstall": "prisma generate && npx tailwindcss -i tw-input.css -o public/tailwind.css --minify",
     "db:migrate": "prisma migrate deploy",
     "db:dev": "prisma migrate dev",
     "db:studio": "prisma studio"
