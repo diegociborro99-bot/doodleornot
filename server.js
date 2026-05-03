@@ -126,6 +126,16 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000); // check every hour
 
+// ----- run Prisma migrations programmatically at startup -----
+const { execSync } = require('child_process');
+try {
+  console.log('Running prisma migrate deploy...');
+  execSync('npx prisma migrate deploy', { stdio: 'inherit', timeout: 30000 });
+  console.log('Prisma migrations applied successfully.');
+} catch (e) {
+  console.error('Prisma migrate deploy failed (non-fatal):', e.message);
+}
+
 app.listen(PORT, () => {
   console.log(`Doodle or Not listening on :${PORT} (node ${process.version})`);
 });
