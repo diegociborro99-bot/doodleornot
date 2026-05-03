@@ -126,31 +126,15 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000); // check every hour
 
-// ----- run Prisma migrations programmatically at startup -----
-const { execSync } = require('child_process');
-(async () => {
-  const p = require('./src/db');
-  try {
-    // Step 1: Resolve any failed migrations before attempting deploy
-    try {
-      execSync('npx prisma migrate resolve --rolled-back 20260429200000_add_run_club 2>/dev/null', { stdio: 'pipe', timeout: 15000 });
-      console.log('Resolved failed migration (marked as rolled-back).');
-    } catch (_) { /* not failed or doesn't exist — fine */ }
+app.listen(PORT, () => {
+  console.log(`Doodle or Not listening on :${PORT} (node ${process.version})`);
 
-    // Also resolve the old name in case it's stuck under that
+  // Run migrations AFTER server is listening (so Railway healthcheck passes)
+  const prisma = require('./src/db');
+  setTimeout(async () => {
     try {
-      execSync('npx prisma migrate resolve --rolled-back 20260429_add_run_club 2>/dev/null', { stdio: 'pipe', timeout: 15000 });
-    } catch (_) { /* fine */ }
-
-    // Step 2: Run migrations
-    console.log('Running prisma migrate deploy...');
-    execSync('npx prisma migrate deploy', { stdio: 'inherit', timeout: 30000 });
-    console.log('Prisma migrations applied successfully.');
-  } catch (e) {
-    console.error('Prisma migrate deploy failed, creating tables directly:', e.message);
-    // Fallback: create tables directly via SQL (idempotent with IF NOT EXISTS)
-    try {
-      await p.$executeRawUnsafe(`
+      console.log('[migration] Creating Run Club tables if needed...');
+      await prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "RunClubAccess" (
           "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
           "userId" TEXT NOT NULL,
@@ -163,11 +147,11 @@ const { execSync } = require('child_process');
           CONSTRAINT "RunClubAccess_pkey" PRIMARY KEY ("id")
         )
       `);
-      await p.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "RunClubAccess_userId_key" ON "RunClubAccess"("userId")`);
-      await p.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "RunClubAccess_status_idx" ON "RunClubAccess"("status")`);
-      await p.$executeRawUnsafe(`DO $$ BEGIN ALTER TABLE "RunClubAccess" ADD CONSTRAINT "RunClubAccess_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+      await prisma.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "RunClubAccess_userId_key" ON "RunClubAccess"("userId")`);
+      await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "RunClubAccess_status_idx" ON "RunClubAccess"("status")`);
+      await prisma.$executeRawUnsafe(`DO $$ BEGIN ALTER TABLE "RunClubAccess" ADD CONSTRAINT "RunClubAccess_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
-      await p.$executeRawUnsafe(`
+      await prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "Run" (
           "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
           "userId" TEXT NOT NULL,
@@ -183,11 +167,11 @@ const { execSync } = require('child_process');
           CONSTRAINT "Run_pkey" PRIMARY KEY ("id")
         )
       `);
-      await p.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "Run_userId_idx" ON "Run"("userId")`);
-      await p.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "Run_userId_startedAt_idx" ON "Run"("userId", "startedAt")`);
-      await p.$executeRawUnsafe(`DO $$ BEGIN ALTER TABLE "Run" ADD CONSTRAINT "Run_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+      await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "Run_userId_idx" ON "Run"("userId")`);
+      await prisma.$executeRawUnsafe(`CREATE INDEX IF NOT EXISTS "Run_userId_startedAt_idx" ON "Run"("userId", "startedAt")`);
+      await prisma.$executeRawUnsafe(`DO $$ BEGIN ALTER TABLE "Run" ADD CONSTRAINT "Run_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
-      await p.$executeRawUnsafe(`
+      await prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "RunStats" (
           "userId" TEXT NOT NULL,
           "totalRuns" INTEGER NOT NULL DEFAULT 0,
@@ -204,9 +188,9 @@ const { execSync } = require('child_process');
           CONSTRAINT "RunStats_pkey" PRIMARY KEY ("userId")
         )
       `);
-      await p.$executeRawUnsafe(`DO $$ BEGIN ALTER TABLE "RunStats" ADD CONSTRAINT "RunStats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+      await prisma.$executeRawUnsafe(`DO $$ BEGIN ALTER TABLE "RunStats" ADD CONSTRAINT "RunStats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
-      await p.$executeRawUnsafe(`
+      await prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "RunAchievement" (
           "userId" TEXT NOT NULL,
           "achievementId" TEXT NOT NULL,
@@ -214,9 +198,9 @@ const { execSync } = require('child_process');
           CONSTRAINT "RunAchievement_pkey" PRIMARY KEY ("userId", "achievementId")
         )
       `);
-      await p.$executeRawUnsafe(`DO $$ BEGIN ALTER TABLE "RunAchievement" ADD CONSTRAINT "RunAchievement_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+      await prisma.$executeRawUnsafe(`DO $$ BEGIN ALTER TABLE "RunAchievement" ADD CONSTRAINT "RunAchievement_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
 
-      await p.$executeRawUnsafe(`
+      await prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "WeeklyChallenge" (
           "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
           "weekStart" TEXT NOT NULL,
@@ -228,25 +212,16 @@ const { execSync } = require('child_process');
           CONSTRAINT "WeeklyChallenge_pkey" PRIMARY KEY ("id")
         )
       `);
-      await p.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "WeeklyChallenge_weekStart_key" ON "WeeklyChallenge"("weekStart")`);
+      await prisma.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "WeeklyChallenge_weekStart_key" ON "WeeklyChallenge"("weekStart")`);
 
-      console.log('Fallback: Run Club tables created directly via SQL.');
-
-      // Mark migration as applied so Prisma doesn't complain next time
-      try {
-        execSync('npx prisma migrate resolve --applied 20260429200000_add_run_club', { stdio: 'pipe', timeout: 15000 });
-        console.log('Marked migration as applied.');
-      } catch (_) { /* fine */ }
-    } catch (sqlErr) {
-      if (sqlErr.message && sqlErr.message.includes('already exists')) {
-        console.log('Run Club tables already exist — OK.');
+      console.log('[migration] Run Club tables ready.');
+    } catch (err) {
+      // "already exists" errors are fine
+      if (err.message && err.message.includes('already exists')) {
+        console.log('[migration] Run Club tables already exist — OK.');
       } else {
-        console.error('Fallback SQL failed:', sqlErr.message);
+        console.error('[migration] Error creating tables:', err.message);
       }
     }
-  }
-})();
-
-app.listen(PORT, () => {
-  console.log(`Doodle or Not listening on :${PORT} (node ${process.version})`);
+  }, 1000);
 });
