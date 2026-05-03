@@ -926,77 +926,158 @@ var RunClubSplash = function(props) {
     return function() { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
-  // Running character SVG (inspired by the Doodles Run Club illustration)
-  var runnerSvg = React.createElement("svg", { viewBox: "0 0 200 200", width: 140, height: 140, style: { animation: 'rcSplashRunnerBob 0.8s ease-in-out infinite' } },
-    // Shadow
-    React.createElement("ellipse", { cx: 100, cy: 185, rx: 35, ry: 8, fill: 'rgba(0,0,0,0.08)' }),
-    // Back leg
-    React.createElement("path", { d: "M95 120 L75 145 L65 170", stroke: '#F5CBA7', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
-    React.createElement("path", { d: "M65 170 L60 175", stroke: '#77DD77', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
-    // Front leg
-    React.createElement("path", { d: "M105 120 L125 145 L130 168", stroke: '#F5CBA7', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
-    React.createElement("path", { d: "M130 168 L138 172", stroke: '#77DD77', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
-    // Body
-    React.createElement("path", { d: "M100 70 L100 125", stroke: '#F5CBA7', strokeWidth: 10, strokeLinecap: 'round', fill: 'none' }),
-    // Tank top
-    React.createElement("rect", { x: 88, y: 72, width: 24, height: 35, rx: 6, fill: '#A8E6CF' }),
-    React.createElement("rect", { x: 92, y: 72, width: 8, height: 35, rx: 3, fill: '#FFD93D', opacity: 0.6 }),
-    // Back arm
-    React.createElement("path", { d: "M95 82 L72 95 L60 85", stroke: '#F5CBA7', strokeWidth: 7, strokeLinecap: 'round', fill: 'none' }),
-    // Front arm
-    React.createElement("path", { d: "M105 82 L128 90 L138 80", stroke: '#F5CBA7', strokeWidth: 7, strokeLinecap: 'round', fill: 'none' }),
-    // Head
-    React.createElement("circle", { cx: 100, cy: 50, r: 22, fill: '#F5CBA7' }),
-    // Hair (white curls like the Doodles character)
-    React.createElement("circle", { cx: 88, cy: 38, r: 10, fill: 'white' }),
-    React.createElement("circle", { cx: 100, cy: 32, r: 11, fill: 'white' }),
-    React.createElement("circle", { cx: 112, cy: 36, r: 10, fill: 'white' }),
-    React.createElement("circle", { cx: 82, cy: 44, r: 7, fill: 'white' }),
-    React.createElement("circle", { cx: 118, cy: 42, r: 7, fill: 'white' }),
-    // Eyes
-    React.createElement("circle", { cx: 93, cy: 52, r: 3, fill: '#2D2D3F' }),
-    React.createElement("circle", { cx: 107, cy: 52, r: 3, fill: '#2D2D3F' }),
-    // Mouth
-    React.createElement("path", { d: "M95 60 Q100 65 105 60", stroke: '#E8A0BF', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }),
-    // Sparkles
-    React.createElement("g", { style: { animation: 'rcSplashSparkle 1.5s ease-in-out infinite' } },
-      React.createElement("path", { d: "M45 45 L48 40 L51 45 L48 50Z", fill: '#FFB347', opacity: 0.7 })),
-    React.createElement("g", { style: { animation: 'rcSplashSparkle 1.5s ease-in-out 0.5s infinite' } },
-      React.createElement("path", { d: "M155 55 L158 50 L161 55 L158 60Z", fill: '#64B5F6', opacity: 0.7 })),
-    React.createElement("g", { style: { animation: 'rcSplashSparkle 1.5s ease-in-out 1s infinite' } },
-      React.createElement("path", { d: "M140 30 L143 25 L146 30 L143 35Z", fill: '#FF6B6B', opacity: 0.7 })),
-    // Motion lines
-    React.createElement("g", { stroke: '#ccc', strokeWidth: 2, strokeLinecap: 'round', opacity: 0.4 },
-      React.createElement("path", { d: "M50 90 L35 90" }),
-      React.createElement("path", { d: "M45 105 L28 105" }),
-      React.createElement("path", { d: "M50 120 L38 120" }))
+  // Premium Doodles runner — detailed SVG with proper anatomy, outlines, shading
+  var runnerSvg = React.createElement("svg", { viewBox: "0 0 280 320", width: 200, height: 228, style: { filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.08))' } },
+    React.createElement("defs", null,
+      // Skin gradient
+      React.createElement("linearGradient", { id: "skinG", x1: "0", y1: "0", x2: "0", y2: "1" },
+        React.createElement("stop", { offset: "0%", stopColor: "#FFE0C2" }),
+        React.createElement("stop", { offset: "100%", stopColor: "#F5CBA7" })),
+      // Shirt gradient
+      React.createElement("linearGradient", { id: "shirtG", x1: "0", y1: "0", x2: "1", y2: "1" },
+        React.createElement("stop", { offset: "0%", stopColor: "#A8E6CF" }),
+        React.createElement("stop", { offset: "100%", stopColor: "#7DD8A0" })),
+      // Shorts gradient
+      React.createElement("linearGradient", { id: "shortsG", x1: "0", y1: "0", x2: "0", y2: "1" },
+        React.createElement("stop", { offset: "0%", stopColor: "#64B5F6" }),
+        React.createElement("stop", { offset: "100%", stopColor: "#42A5F5" })),
+      // Shoe gradient
+      React.createElement("linearGradient", { id: "shoeG", x1: "0", y1: "0", x2: "1", y2: "1" },
+        React.createElement("stop", { offset: "0%", stopColor: "#77DD77" }),
+        React.createElement("stop", { offset: "100%", stopColor: "#4FC3F7" })),
+      // Hair gradient
+      React.createElement("linearGradient", { id: "hairG", x1: "0", y1: "0", x2: "0", y2: "1" },
+        React.createElement("stop", { offset: "0%", stopColor: "#FFFFFF" }),
+        React.createElement("stop", { offset: "100%", stopColor: "#F0EDE8" }))
+    ),
+    // Ground shadow
+    React.createElement("ellipse", { cx: 140, cy: 305, rx: 55, ry: 10, fill: 'rgba(100,100,140,0.08)' }),
+    // === BACK LEG (behind body) ===
+    // Thigh
+    React.createElement("path", { d: "M128 195 Q110 225 95 252", stroke: '#2D2D3F', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }),
+    React.createElement("path", { d: "M128 195 Q110 225 95 252", stroke: 'url(#skinG)', strokeWidth: 14, fill: 'none', strokeLinecap: 'round', opacity: 0.85 }),
+    // Calf
+    React.createElement("path", { d: "M95 252 Q88 268 82 282", stroke: '#2D2D3F', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }),
+    React.createElement("path", { d: "M95 252 Q88 268 82 282", stroke: 'url(#skinG)', strokeWidth: 12, fill: 'none', strokeLinecap: 'round', opacity: 0.85 }),
+    // Back shoe
+    React.createElement("path", { d: "M82 282 Q78 290 70 293 Q65 294 62 290 Q60 286 65 283 Q72 280 82 280", fill: 'url(#shoeG)', stroke: '#2D2D3F', strokeWidth: 2 }),
+    React.createElement("path", { d: "M68 288 L78 285", stroke: 'white', strokeWidth: 1.5, opacity: 0.6, strokeLinecap: 'round' }),
+    // === BACK ARM ===
+    React.createElement("path", { d: "M130 138 Q108 155 90 145 Q80 138 75 128", stroke: '#2D2D3F', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }),
+    React.createElement("path", { d: "M130 138 Q108 155 90 145 Q80 138 75 128", stroke: 'url(#skinG)', strokeWidth: 11, fill: 'none', strokeLinecap: 'round', opacity: 0.85 }),
+    // Back fist
+    React.createElement("circle", { cx: 75, cy: 126, r: 7, fill: '#F5CBA7', stroke: '#2D2D3F', strokeWidth: 1.8 }),
+    // === BODY / TORSO ===
+    // Torso shape (rounded)
+    React.createElement("path", { d: "M122 115 Q120 118 118 125 L115 180 Q115 195 135 195 L148 195 Q168 195 165 180 L162 125 Q160 118 158 115", fill: 'url(#shirtG)', stroke: '#2D2D3F', strokeWidth: 2.5, strokeLinejoin: 'round' }),
+    // Shirt stripe (yellow diagonal)
+    React.createElement("path", { d: "M132 118 Q133 150 135 185", stroke: '#FFD93D', strokeWidth: 10, opacity: 0.45, strokeLinecap: 'round', fill: 'none' }),
+    // Shirt neckline
+    React.createElement("path", { d: "M126 118 Q140 126 154 118", stroke: '#2D2D3F', strokeWidth: 1.5, fill: 'none', strokeLinecap: 'round' }),
+    // Shirt shine
+    React.createElement("path", { d: "M125 130 Q128 150 127 170", stroke: 'rgba(255,255,255,0.4)', strokeWidth: 3, fill: 'none', strokeLinecap: 'round' }),
+    // === SHORTS ===
+    React.createElement("path", { d: "M116 188 L112 212 Q112 216 118 216 L135 210 L152 216 Q158 216 158 212 L154 188 Q152 192 135 192 Q118 192 116 188Z", fill: 'url(#shortsG)', stroke: '#2D2D3F', strokeWidth: 2.5 }),
+    // Shorts line
+    React.createElement("path", { d: "M135 192 L135 212", stroke: '#2D2D3F', strokeWidth: 1.2, opacity: 0.3 }),
+    // === FRONT LEG ===
+    // Thigh
+    React.createElement("path", { d: "M148 210 Q168 235 178 258", stroke: '#2D2D3F', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }),
+    React.createElement("path", { d: "M148 210 Q168 235 178 258", stroke: 'url(#skinG)', strokeWidth: 15, fill: 'none', strokeLinecap: 'round' }),
+    // Calf
+    React.createElement("path", { d: "M178 258 Q185 272 190 285", stroke: '#2D2D3F', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }),
+    React.createElement("path", { d: "M178 258 Q185 272 190 285", stroke: 'url(#skinG)', strokeWidth: 13, fill: 'none', strokeLinecap: 'round' }),
+    // Front shoe (bigger, detailed)
+    React.createElement("path", { d: "M190 285 Q194 295 202 298 Q210 300 215 296 Q218 292 214 287 Q206 282 190 283", fill: 'url(#shoeG)', stroke: '#2D2D3F', strokeWidth: 2.2 }),
+    React.createElement("path", { d: "M198 293 L208 290", stroke: 'white', strokeWidth: 2, opacity: 0.7, strokeLinecap: 'round' }),
+    React.createElement("path", { d: "M196 289 L204 287", stroke: 'white', strokeWidth: 1.5, opacity: 0.5, strokeLinecap: 'round' }),
+    // Sole
+    React.createElement("path", { d: "M192 296 Q202 300 214 296", stroke: '#2D2D3F', strokeWidth: 2, fill: 'none', strokeLinecap: 'round' }),
+    // === FRONT ARM ===
+    React.createElement("path", { d: "M152 138 Q172 148 188 140 Q198 132 205 120", stroke: '#2D2D3F', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' }),
+    React.createElement("path", { d: "M152 138 Q172 148 188 140 Q198 132 205 120", stroke: 'url(#skinG)', strokeWidth: 12, fill: 'none', strokeLinecap: 'round' }),
+    // Front fist
+    React.createElement("circle", { cx: 207, cy: 118, r: 8, fill: '#FFE0C2', stroke: '#2D2D3F', strokeWidth: 2 }),
+    // === HEAD ===
+    // Neck
+    React.createElement("rect", { x: 132, y: 100, width: 16, height: 20, rx: 8, fill: 'url(#skinG)', stroke: '#2D2D3F', strokeWidth: 1.5 }),
+    // Head shape (slightly tilted forward for running pose)
+    React.createElement("ellipse", { cx: 142, cy: 75, rx: 30, ry: 32, fill: 'url(#skinG)', stroke: '#2D2D3F', strokeWidth: 2.5, transform: 'rotate(5, 142, 75)' }),
+    // Ear
+    React.createElement("ellipse", { cx: 170, cy: 78, rx: 6, ry: 8, fill: '#F5CBA7', stroke: '#2D2D3F', strokeWidth: 1.8 }),
+    React.createElement("ellipse", { cx: 170, cy: 78, rx: 3, ry: 5, fill: '#EAB892' }),
+    // === HAIR — Fluffy cloud curls ===
+    React.createElement("circle", { cx: 118, cy: 58, r: 14, fill: 'url(#hairG)', stroke: '#2D2D3F', strokeWidth: 2 }),
+    React.createElement("circle", { cx: 132, cy: 46, r: 16, fill: 'url(#hairG)', stroke: '#2D2D3F', strokeWidth: 2 }),
+    React.createElement("circle", { cx: 150, cy: 42, r: 17, fill: 'url(#hairG)', stroke: '#2D2D3F', strokeWidth: 2 }),
+    React.createElement("circle", { cx: 165, cy: 50, r: 14, fill: 'url(#hairG)', stroke: '#2D2D3F', strokeWidth: 2 }),
+    React.createElement("circle", { cx: 170, cy: 64, r: 10, fill: 'url(#hairG)', stroke: '#2D2D3F', strokeWidth: 2 }),
+    React.createElement("circle", { cx: 112, cy: 68, r: 10, fill: 'url(#hairG)', stroke: '#2D2D3F', strokeWidth: 2 }),
+    React.createElement("circle", { cx: 125, cy: 48, r: 12, fill: 'url(#hairG)' }),
+    React.createElement("circle", { cx: 158, cy: 44, r: 12, fill: 'url(#hairG)' }),
+    // Hair shine highlights
+    React.createElement("circle", { cx: 135, cy: 44, r: 4, fill: 'white', opacity: 0.5 }),
+    React.createElement("circle", { cx: 155, cy: 42, r: 3, fill: 'white', opacity: 0.4 }),
+    // === FACE ===
+    // Eyes — expressive with highlights
+    React.createElement("ellipse", { cx: 132, cy: 78, rx: 5, ry: 5.5, fill: '#2D2D3F' }),
+    React.createElement("ellipse", { cx: 154, cy: 76, rx: 5, ry: 5.5, fill: '#2D2D3F' }),
+    // Eye highlights (life sparkle)
+    React.createElement("circle", { cx: 134, cy: 76, r: 2, fill: 'white' }),
+    React.createElement("circle", { cx: 156, cy: 74, r: 2, fill: 'white' }),
+    React.createElement("circle", { cx: 130, cy: 80, r: 1, fill: 'white', opacity: 0.6 }),
+    React.createElement("circle", { cx: 152, cy: 78, r: 1, fill: 'white', opacity: 0.6 }),
+    // Eyebrows (determined running expression)
+    React.createElement("path", { d: "M126 70 Q132 67 138 69", stroke: '#2D2D3F', strokeWidth: 2.2, fill: 'none', strokeLinecap: 'round' }),
+    React.createElement("path", { d: "M148 68 Q154 65 160 67", stroke: '#2D2D3F', strokeWidth: 2.2, fill: 'none', strokeLinecap: 'round' }),
+    // Blush
+    React.createElement("ellipse", { cx: 124, cy: 85, rx: 7, ry: 4, fill: '#FFB5B5', opacity: 0.35 }),
+    React.createElement("ellipse", { cx: 162, cy: 83, rx: 7, ry: 4, fill: '#FFB5B5', opacity: 0.35 }),
+    // Nose (tiny)
+    React.createElement("path", { d: "M142 82 Q144 85 142 87", stroke: '#E0B090', strokeWidth: 1.5, fill: 'none', strokeLinecap: 'round' }),
+    // Mouth — happy open smile
+    React.createElement("path", { d: "M133 92 Q143 102 155 92", stroke: '#2D2D3F', strokeWidth: 2.2, fill: 'none', strokeLinecap: 'round' }),
+    React.createElement("path", { d: "M135 93 Q143 100 153 93", fill: '#E8A0BF', opacity: 0.6 }),
+    // === MOTION EFFECTS ===
+    // Speed lines (left side, dynamic)
+    React.createElement("g", { opacity: 0.2, stroke: '#64B5F6', strokeWidth: 2.5, strokeLinecap: 'round' },
+      React.createElement("path", { d: "M48 130 L20 130" }),
+      React.createElement("path", { d: "M42 150 L8 150" }),
+      React.createElement("path", { d: "M48 170 L22 170" }),
+      React.createElement("path", { d: "M52 190 L30 190" })),
+    // Wind particles
+    React.createElement("circle", { cx: 35, cy: 140, r: 2.5, fill: '#FFB347', opacity: 0.3 }),
+    React.createElement("circle", { cx: 25, cy: 160, r: 2, fill: '#FF8FAB', opacity: 0.25 }),
+    React.createElement("circle", { cx: 40, cy: 180, r: 1.8, fill: '#64B5F6', opacity: 0.3 })
   );
 
-  // "Doodles Run Club" text in the brand colors
-  var titleText = React.createElement("div", { style: { textAlign: 'center', animation: 'rcSplashTitle 0.6s cubic-bezier(.16,1,.3,1) 0.3s both' } },
-    React.createElement("div", { style: { fontSize: 36, fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.02em' } },
-      React.createElement("span", { style: { color: '#FFB347', textShadow: '0 2px 8px rgba(255,179,71,0.3)' } }, "Doodles"),
+  // "Doodles Run Club" text in the brand colors — premium typography
+  var titleText = React.createElement("div", { style: { textAlign: 'center', animation: 'rcSplashTitle 0.6s cubic-bezier(.34,1.56,.64,1) 0.4s both' } },
+    React.createElement("div", { style: { fontSize: 42, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em' } },
+      React.createElement("span", { style: { color: '#FFB347', textShadow: '0 2px 12px rgba(255,179,71,0.25)' } }, "Doodles"),
       React.createElement("br"),
-      React.createElement("span", { style: { color: '#64B5F6', textShadow: '0 2px 8px rgba(100,181,246,0.3)' } }, "Run "),
-      React.createElement("span", { style: { color: '#FF8FAB', textShadow: '0 2px 8px rgba(255,143,171,0.3)' } }, "Club")),
-    React.createElement("div", { style: { fontSize: 12, color: '#aaa', marginTop: 12, letterSpacing: '0.15em', textTransform: 'uppercase', animation: 'rcSplashDots 1.5s ease-in-out infinite' } }, "Loading your runs...")
+      React.createElement("span", { style: { color: '#64B5F6', textShadow: '0 2px 12px rgba(100,181,246,0.25)' } }, "Run "),
+      React.createElement("span", { style: { color: '#FF8FAB', textShadow: '0 2px 12px rgba(255,143,171,0.25)' } }, "Club")),
+    React.createElement("div", { style: { fontSize: 11, color: '#bbb', marginTop: 16, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 500 } },
+      React.createElement("span", { style: { animation: 'rcSplashDots 1.5s ease-in-out infinite' } }, "Loading your runs..."))
   );
 
   return React.createElement("div", {
     style: {
       position: 'fixed', inset: 0, zIndex: 9999,
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24,
-      background: 'linear-gradient(145deg, #FFF5F0 0%, #FFF0F5 30%, #F0F8FF 60%, #F5FFF5 100%)',
-      animation: isExiting ? 'rcSplashOut 0.6s ease-in forwards' : 'none',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16,
+      background: '#FFFFFF',
+      animation: isExiting ? 'rcSplashOut 0.5s cubic-bezier(.22,1,.36,1) forwards' : 'none',
       overflow: 'hidden'
     }
   },
-    // Background decorative circles
-    React.createElement("div", { style: { position: 'absolute', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,179,71,0.12) 0%, transparent 70%)', top: '10%', left: '-5%' } }),
-    React.createElement("div", { style: { position: 'absolute', width: 250, height: 250, borderRadius: '50%', background: 'radial-gradient(circle, rgba(100,181,246,0.1) 0%, transparent 70%)', bottom: '15%', right: '-8%' } }),
-    React.createElement("div", { style: { position: 'absolute', width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,143,171,0.1) 0%, transparent 70%)', top: '50%', left: '60%' } }),
-    // Runner with bounce-in
-    React.createElement("div", { style: { animation: 'rcSplashIn 0.7s cubic-bezier(.16,1,.3,1) both', position: 'relative', zIndex: 1 } }, runnerSvg),
+    // Soft gradient orbs in the background
+    React.createElement("div", { style: { position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,179,71,0.1) 0%, transparent 65%)', top: '-5%', left: '-10%', animation: 'rcBgFloat 8s ease-in-out infinite alternate' } }),
+    React.createElement("div", { style: { position: 'absolute', width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(100,181,246,0.08) 0%, transparent 65%)', bottom: '-8%', right: '-12%', animation: 'rcBgFloat 10s ease-in-out 2s infinite alternate-reverse' } }),
+    React.createElement("div", { style: { position: 'absolute', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,143,171,0.07) 0%, transparent 65%)', top: '45%', left: '55%', animation: 'rcBgFloat 7s ease-in-out 1s infinite alternate' } }),
+    // Runner with bounce-in animation
+    React.createElement("div", { style: { animation: 'rcSplashIn 0.8s cubic-bezier(.34,1.56,.64,1) both', position: 'relative', zIndex: 1 } },
+      React.createElement("div", { style: { animation: 'rcSplashRunnerBob 1.2s ease-in-out infinite' } }, runnerSvg)),
     // Title
     titleText
   );
@@ -1785,32 +1866,32 @@ const RunClubScreen = ({ profile }) => {
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 480, margin: '0 auto', padding: '16px 20px calc(100px + env(safe-area-inset-bottom)) 20px', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
 
-        // Logo + Title — Doodles Run Club character
+        // Logo + Title — Doodles Run Club character (premium head)
         /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { textAlign: 'center', marginBottom: 32 } },
-          // Running character (mini version of splash)
           /*#__PURE__*/React.createElement("div", {
             className: "rc-float",
             style: { margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }
-          }, /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 200 200", width: 100, height: 100 },
-            React.createElement("ellipse", { cx: 100, cy: 185, rx: 30, ry: 6, fill: 'rgba(0,0,0,0.06)' }),
-            React.createElement("path", { d: "M95 120 L75 145 L65 170", stroke: '#F5CBA7', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
-            React.createElement("path", { d: "M65 170 L60 175", stroke: '#77DD77', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
-            React.createElement("path", { d: "M105 120 L125 145 L130 168", stroke: '#F5CBA7', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
-            React.createElement("path", { d: "M130 168 L138 172", stroke: '#77DD77', strokeWidth: 8, strokeLinecap: 'round', fill: 'none' }),
-            React.createElement("path", { d: "M100 70 L100 125", stroke: '#F5CBA7', strokeWidth: 10, strokeLinecap: 'round', fill: 'none' }),
-            React.createElement("rect", { x: 88, y: 72, width: 24, height: 35, rx: 6, fill: '#A8E6CF' }),
-            React.createElement("rect", { x: 92, y: 72, width: 8, height: 35, rx: 3, fill: '#FFD93D', opacity: 0.6 }),
-            React.createElement("path", { d: "M95 82 L72 95 L60 85", stroke: '#F5CBA7', strokeWidth: 7, strokeLinecap: 'round', fill: 'none' }),
-            React.createElement("path", { d: "M105 82 L128 90 L138 80", stroke: '#F5CBA7', strokeWidth: 7, strokeLinecap: 'round', fill: 'none' }),
-            React.createElement("circle", { cx: 100, cy: 50, r: 22, fill: '#F5CBA7' }),
-            React.createElement("circle", { cx: 88, cy: 38, r: 10, fill: 'white' }),
-            React.createElement("circle", { cx: 100, cy: 32, r: 11, fill: 'white' }),
-            React.createElement("circle", { cx: 112, cy: 36, r: 10, fill: 'white' }),
-            React.createElement("circle", { cx: 82, cy: 44, r: 7, fill: 'white' }),
-            React.createElement("circle", { cx: 118, cy: 42, r: 7, fill: 'white' }),
-            React.createElement("circle", { cx: 93, cy: 52, r: 3, fill: '#2D2D3F' }),
-            React.createElement("circle", { cx: 107, cy: 52, r: 3, fill: '#2D2D3F' }),
-            React.createElement("path", { d: "M95 60 Q100 65 105 60", stroke: '#E8A0BF', strokeWidth: 2.5, fill: 'none', strokeLinecap: 'round' })
+          }, /*#__PURE__*/React.createElement("svg", { viewBox: "95 25 100 90", width: 110, height: 100, style: { filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.06))' } },
+            React.createElement("ellipse", { cx: 142, cy: 75, rx: 30, ry: 32, fill: '#FFE0C2', stroke: '#2D2D3F', strokeWidth: 2.5, transform: 'rotate(5, 142, 75)' }),
+            React.createElement("ellipse", { cx: 170, cy: 78, rx: 5, ry: 7, fill: '#F5CBA7', stroke: '#2D2D3F', strokeWidth: 1.5 }),
+            React.createElement("circle", { cx: 118, cy: 58, r: 13, fill: 'white', stroke: '#2D2D3F', strokeWidth: 2 }),
+            React.createElement("circle", { cx: 132, cy: 46, r: 15, fill: 'white', stroke: '#2D2D3F', strokeWidth: 2 }),
+            React.createElement("circle", { cx: 150, cy: 42, r: 16, fill: 'white', stroke: '#2D2D3F', strokeWidth: 2 }),
+            React.createElement("circle", { cx: 165, cy: 50, r: 13, fill: 'white', stroke: '#2D2D3F', strokeWidth: 2 }),
+            React.createElement("circle", { cx: 170, cy: 64, r: 9, fill: 'white', stroke: '#2D2D3F', strokeWidth: 2 }),
+            React.createElement("circle", { cx: 112, cy: 68, r: 9, fill: 'white', stroke: '#2D2D3F', strokeWidth: 2 }),
+            React.createElement("circle", { cx: 135, cy: 44, r: 4, fill: 'white', opacity: 0.5 }),
+            React.createElement("circle", { cx: 155, cy: 42, r: 3, fill: 'white', opacity: 0.4 }),
+            React.createElement("ellipse", { cx: 132, cy: 78, rx: 5, ry: 5.5, fill: '#2D2D3F' }),
+            React.createElement("ellipse", { cx: 154, cy: 76, rx: 5, ry: 5.5, fill: '#2D2D3F' }),
+            React.createElement("circle", { cx: 134, cy: 76, r: 2, fill: 'white' }),
+            React.createElement("circle", { cx: 156, cy: 74, r: 2, fill: 'white' }),
+            React.createElement("path", { d: "M126 70 Q132 67 138 69", stroke: '#2D2D3F', strokeWidth: 2, fill: 'none', strokeLinecap: 'round' }),
+            React.createElement("path", { d: "M148 68 Q154 65 160 67", stroke: '#2D2D3F', strokeWidth: 2, fill: 'none', strokeLinecap: 'round' }),
+            React.createElement("ellipse", { cx: 124, cy: 85, rx: 6, ry: 3.5, fill: '#FFB5B5', opacity: 0.35 }),
+            React.createElement("ellipse", { cx: 162, cy: 83, rx: 6, ry: 3.5, fill: '#FFB5B5', opacity: 0.35 }),
+            React.createElement("path", { d: "M133 92 Q143 102 155 92", stroke: '#2D2D3F', strokeWidth: 2, fill: 'none', strokeLinecap: 'round' }),
+            React.createElement("path", { d: "M135 93 Q143 100 153 93", fill: '#E8A0BF', opacity: 0.5 })
           )),
           // Title in brand colors
           /*#__PURE__*/React.createElement("h1", { className: "font-display", style: { fontSize: 32, marginBottom: 4, lineHeight: 1.15 } },
@@ -2471,23 +2552,23 @@ const RunClubScreen = ({ profile }) => {
       // Header — time-based greeting
       /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { marginBottom: 24, paddingTop: 16 } },
         /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 14 } },
-          // Mini Doodles runner character as avatar
+          // Mini Doodles runner head as avatar
           /*#__PURE__*/React.createElement("div", { className: "rc-float", style: { width: 52, height: 52, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'linear-gradient(135deg, #FFF5F0, #FFF0F5, #F0F8FF)', boxShadow: '0 4px 16px rgba(255,107,107,0.12)', border: '1.5px solid rgba(255,179,71,0.2)' } },
-            /*#__PURE__*/React.createElement("svg", { viewBox: "60 25 80 160", width: 32, height: 38 },
-              React.createElement("circle", { cx: 100, cy: 50, r: 16, fill: '#F5CBA7' }),
-              React.createElement("circle", { cx: 90, cy: 40, r: 8, fill: 'white' }),
-              React.createElement("circle", { cx: 100, cy: 35, r: 9, fill: 'white' }),
-              React.createElement("circle", { cx: 110, cy: 39, r: 8, fill: 'white' }),
-              React.createElement("circle", { cx: 93, cy: 52, r: 2.5, fill: '#2D2D3F' }),
-              React.createElement("circle", { cx: 107, cy: 52, r: 2.5, fill: '#2D2D3F' }),
-              React.createElement("path", { d: "M95 59 Q100 63 105 59", stroke: '#E8A0BF', strokeWidth: 2, fill: 'none', strokeLinecap: 'round' }),
-              React.createElement("rect", { x: 89, y: 68, width: 22, height: 30, rx: 5, fill: '#A8E6CF' }),
-              React.createElement("rect", { x: 93, y: 68, width: 7, height: 30, rx: 3, fill: '#FFD93D', opacity: 0.5 }),
-              React.createElement("path", { d: "M95 115 L78 140 L72 155", stroke: '#F5CBA7', strokeWidth: 6, strokeLinecap: 'round', fill: 'none' }),
-              React.createElement("path", { d: "M105 115 L120 140 L126 155", stroke: '#F5CBA7', strokeWidth: 6, strokeLinecap: 'round', fill: 'none' }),
-              React.createElement("path", { d: "M72 155 L68 160", stroke: '#77DD77', strokeWidth: 6, strokeLinecap: 'round', fill: 'none' }),
-              React.createElement("path", { d: "M126 155 L132 160", stroke: '#77DD77', strokeWidth: 6, strokeLinecap: 'round', fill: 'none' }))),
+                     background: 'linear-gradient(135deg, #FFF8F0, #FFF0F5)', boxShadow: '0 4px 16px rgba(255,179,71,0.12)', border: '1.5px solid rgba(255,179,71,0.15)' } },
+            /*#__PURE__*/React.createElement("svg", { viewBox: "100 30 85 80", width: 34, height: 32 },
+              React.createElement("ellipse", { cx: 142, cy: 75, rx: 26, ry: 28, fill: '#FFE0C2', stroke: '#2D2D3F', strokeWidth: 2 }),
+              React.createElement("circle", { cx: 118, cy: 58, r: 12, fill: 'white', stroke: '#2D2D3F', strokeWidth: 1.5 }),
+              React.createElement("circle", { cx: 132, cy: 46, r: 14, fill: 'white', stroke: '#2D2D3F', strokeWidth: 1.5 }),
+              React.createElement("circle", { cx: 150, cy: 42, r: 15, fill: 'white', stroke: '#2D2D3F', strokeWidth: 1.5 }),
+              React.createElement("circle", { cx: 165, cy: 50, r: 12, fill: 'white', stroke: '#2D2D3F', strokeWidth: 1.5 }),
+              React.createElement("circle", { cx: 135, cy: 44, r: 4, fill: 'white', opacity: 0.6 }),
+              React.createElement("ellipse", { cx: 132, cy: 76, rx: 4, ry: 4.5, fill: '#2D2D3F' }),
+              React.createElement("ellipse", { cx: 154, cy: 74, rx: 4, ry: 4.5, fill: '#2D2D3F' }),
+              React.createElement("circle", { cx: 134, cy: 74, r: 1.8, fill: 'white' }),
+              React.createElement("circle", { cx: 156, cy: 72, r: 1.8, fill: 'white' }),
+              React.createElement("path", { d: "M135 88 Q143 96 153 88", stroke: '#2D2D3F', strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round' }),
+              React.createElement("ellipse", { cx: 124, cy: 82, rx: 5, ry: 3, fill: '#FFB5B5', opacity: 0.3 }),
+              React.createElement("ellipse", { cx: 162, cy: 80, rx: 5, ry: 3, fill: '#FFB5B5', opacity: 0.3 }))),
           /*#__PURE__*/React.createElement("div", null,
             /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)', marginBottom: 2 } },
               (function() { var h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; })() + (profile && profile.username ? ', ' + profile.username : '')),
