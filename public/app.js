@@ -9036,7 +9036,8 @@ function DoodleOrNot() {
     onOpenLeagues: () => setLeaguesOpen(true),
     onPlay: m => setMode(m)
   }), tab === 'run' && (window.RunClubScreen ? /*#__PURE__*/React.createElement(window.RunClubScreen, {
-    profile: profile
+    profile: profile,
+    onBack: () => setTab('home')
   }) : /*#__PURE__*/React.createElement("div", {
     style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40, background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, fontFamily: "'Fredoka', sans-serif" }
   }, /*#__PURE__*/React.createElement("div", { style: { fontSize: 48 } }, "🏃"), /*#__PURE__*/React.createElement("div", { style: { fontSize: 16, color: "var(--c-sub)" } }, "Loading Run Club..."), /*#__PURE__*/React.createElement("button", {

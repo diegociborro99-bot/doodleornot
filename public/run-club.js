@@ -1205,7 +1205,7 @@ var LeafletMap = function(props) {
    MAIN COMPONENT
    ========================================================================== */
 
-const RunClubScreen = ({ profile }) => {
+const RunClubScreen = ({ profile, onBack }) => {
   const [view, setView] = useState('dashboard');
   const [runStats, setRunStats] = useState(null);
   const [runs, setRuns] = useState([]);
@@ -2439,6 +2439,18 @@ const RunClubScreen = ({ profile }) => {
           /*#__PURE__*/React.createElement("path", { d: "M1 4v6h6" }),
           /*#__PURE__*/React.createElement("path", { d: "M3.51 15a9 9 0 102.13-9.36L1 10" })))),
     /*#__PURE__*/React.createElement("div", { className: "rc-inner", style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
+
+      // Back to Doodle or Not button
+      onBack && /*#__PURE__*/React.createElement("button", {
+        onClick: function() { if (navigator.vibrate) navigator.vibrate(30); onBack(); },
+        style: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 12,
+          background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid rgba(100,181,246,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+          fontSize: 12, fontWeight: 600, color: '#64B5F6', cursor: 'pointer', marginBottom: 12, transition: 'transform 0.15s' }
+      },
+        /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 20 20", width: 14, height: 14, fill: "none", stroke: "#64B5F6", strokeWidth: 2.5, strokeLinecap: "round", strokeLinejoin: "round" },
+          React.createElement("path", { d: "M15 10H5M5 10l4-4M5 10l4 4" })),
+        "Back to Doodle or Not"),
 
       // Header — time-based greeting
       /*#__PURE__*/React.createElement("div", { className: "rc-slide-up", style: { marginBottom: 24, paddingTop: 16 } },
