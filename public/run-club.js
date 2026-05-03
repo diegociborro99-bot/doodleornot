@@ -1227,8 +1227,10 @@ const RunClubScreen = ({ profile }) => {
     setAccessLoading(true);
     var attempt = function(retry) {
       api.runAccessStatus().then(data => {
+        console.log('[RunClub] access status:', data);
         setAccessStatus(data.status); setIsAdmin(!!data.isAdmin); setAccessLoading(false);
       }).catch(function(err) {
+        console.error('[RunClub] access status failed (retry=' + retry + '):', err, 'status:', err && err.status);
         if (retry > 0) { setTimeout(function() { attempt(retry - 1); }, 1000); }
         else { setAccessStatus('none'); setAccessLoading(false); }
       });
@@ -1283,8 +1285,13 @@ const RunClubScreen = ({ profile }) => {
       setAccessStatus(res.status || 'pending');
       setRequestLoading(false);
     } catch (e) {
-      console.warn('Request access failed:', e);
-      setRequestError('Could not submit request. Check your connection and try again.');
+      console.error('Request access failed:', e, 'status:', e && e.status);
+      // If 401, user needs to re-login
+      if (e && e.status === 401) {
+        setRequestError('Session expired. Please log out and log back in.');
+      } else {
+        setRequestError('Could not submit request (error ' + (e && e.status || 'network') + '). Try refreshing the page.');
+      }
       setRequestLoading(false);
     }
   };
