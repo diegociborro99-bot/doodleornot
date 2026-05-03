@@ -11,6 +11,7 @@ const MAX_DURATION_SEC = 86400;
 const MAX_ROUTE_POINTS = 10_000;
 const MAX_CALORIES = 20_000;
 const ADMIN_USERNAME = 'degos';
+const isAdmin = (user) => user && user.username && user.username.toLowerCase() === ADMIN_USERNAME;
 
 // ============================================================
 // RUN CLUB ACCESS — request / approve / deny
@@ -21,7 +22,7 @@ router.get('/access/status', requireAuth, async (req, res) => {
   try {
     // Admin always has access
     const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
-    if (user && user.username === ADMIN_USERNAME) {
+    if (user && isAdmin(user)) {
       return res.json({ status: 'approved', isAdmin: true });
     }
 
@@ -39,7 +40,7 @@ router.post('/access/request', requireAuth, async (req, res) => {
   try {
     // Admin is always approved — no need to request
     const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
-    if (user && user.username === ADMIN_USERNAME) {
+    if (user && isAdmin(user)) {
       return res.json({ status: 'approved' });
     }
     const { socialProof, message } = req.body || {};
@@ -71,7 +72,7 @@ router.post('/access/request', requireAuth, async (req, res) => {
 router.get('/access/pending', requireAuth, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
-    if (!user || user.username !== ADMIN_USERNAME) return res.status(403).json({ error: 'admin_only' });
+    if (!user || !isAdmin(user)) return res.status(403).json({ error: 'admin_only' });
 
     const requests = await prisma.runClubAccess.findMany({
       where: { status: 'pending' },
@@ -89,7 +90,7 @@ router.get('/access/pending', requireAuth, async (req, res) => {
 router.get('/access/all', requireAuth, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
-    if (!user || user.username !== ADMIN_USERNAME) return res.status(403).json({ error: 'admin_only' });
+    if (!user || !isAdmin(user)) return res.status(403).json({ error: 'admin_only' });
 
     const requests = await prisma.runClubAccess.findMany({
       orderBy: { requestedAt: 'desc' },
@@ -106,7 +107,7 @@ router.get('/access/all', requireAuth, async (req, res) => {
 router.post('/access/:id/review', requireAuth, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
-    if (!user || user.username !== ADMIN_USERNAME) return res.status(403).json({ error: 'admin_only' });
+    if (!user || !isAdmin(user)) return res.status(403).json({ error: 'admin_only' });
 
     const { decision, reviewNote } = req.body || {};
     if (!['approved', 'denied'].includes(decision)) return res.status(400).json({ error: 'bad_decision' });
@@ -351,7 +352,7 @@ router.get('/community/stats', optionalAuth, async (req, res) => {
 router.post('/community/challenge', requireAuth, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
-    if (!user || user.username !== ADMIN_USERNAME) return res.status(403).json({ error: 'admin_only' });
+    if (!user || !isAdmin(user)) return res.status(403).json({ error: 'admin_only' });
 
     const { title, description, goalKm } = req.body || {};
     if (!title || !goalKm) return res.status(400).json({ error: 'missing_fields' });
@@ -377,7 +378,7 @@ router.post('/community/challenge', requireAuth, async (req, res) => {
 async function requireRunAccess(req, res, next) {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
-    if (user && user.username === ADMIN_USERNAME) return next();
+    if (user && isAdmin(user)) return next();
 
     const access = await prisma.runClubAccess.findUnique({ where: { userId: req.userId } });
     if (!access || access.status !== 'approved') {

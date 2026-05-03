@@ -97,7 +97,7 @@ app.post('/api/admin/update-sales', requireAuth, async (req, res) => {
   try {
     const prisma = require('./src/db');
     const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
-    if (!user || user.username !== 'degos') return res.status(403).json({ error: 'admin_only' });
+    if (!user || !user.username || user.username.toLowerCase() !== 'degos') return res.status(403).json({ error: 'admin_only' });
     const apiKey = process.env.OPENSEA_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'missing_opensea_key' });
     res.json({ status: 'started', message: 'Sales update running in background...' });
