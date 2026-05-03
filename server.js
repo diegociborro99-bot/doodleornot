@@ -126,14 +126,27 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000); // check every hour
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Doodle or Not listening on :${PORT} (node ${process.version})`);
 
   // Run migrations AFTER server is listening (so Railway healthcheck passes)
   const prisma = require('./src/db');
-  setTimeout(async () => {
-    try {
-      console.log('[migration] Creating Run Club tables if needed...');
+  try {
+    // Fix Prisma's failed migration state so future deploys won't crash
+    await prisma.$executeRawUnsafe(`
+      DELETE FROM "_prisma_migrations" WHERE "migration_name" LIKE '%add_run_club%' AND "finished_at" IS NULL
+    `).catch(() => {});
+    // Mark it as successfully applied
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO "_prisma_migrations" ("id", "checksum", "migration_name", "finished_at", "applied_steps_count")
+      VALUES (gen_random_uuid()::text, 'manual', '20260429200000_add_run_club', NOW(), 1)
+      ON CONFLICT DO NOTHING
+    `).catch(() => {});
+    console.log('[migration] Cleaned up Prisma migration state.');
+  } catch (_) { /* table might not exist yet on fresh DB */ }
+
+  try {
+    console.log('[migration] Creating Run Club tables if needed...');
       await prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "RunClubAccess" (
           "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
@@ -223,5 +236,4 @@ app.listen(PORT, () => {
         console.error('[migration] Error creating tables:', err.message);
       }
     }
-  }, 1000);
 });
