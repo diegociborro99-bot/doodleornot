@@ -37,6 +37,11 @@ router.get('/access/status', requireAuth, async (req, res) => {
 // POST /api/runs/access/request — request access to Run Club
 router.post('/access/request', requireAuth, async (req, res) => {
   try {
+    // Admin is always approved — no need to request
+    const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { username: true } });
+    if (user && user.username === ADMIN_USERNAME) {
+      return res.json({ status: 'approved' });
+    }
     const { socialProof, message } = req.body || {};
     const existing = await prisma.runClubAccess.findUnique({ where: { userId: req.userId } });
     if (existing) {

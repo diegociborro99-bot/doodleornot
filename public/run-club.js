@@ -687,6 +687,41 @@ const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
   @keyframes rcBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
   @keyframes rcCountOut { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
   @keyframes rcGradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  @keyframes rcSkeletonPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.8; } }
+  @keyframes rcPullSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* === SKELETON LOADING === */
+  .rc-skeleton {
+    background: linear-gradient(90deg, rgba(255,107,107,0.08) 25%, rgba(255,179,71,0.12) 50%, rgba(255,107,107,0.08) 75%);
+    background-size: 200% 100%;
+    animation: rcShimmer 1.5s ease-in-out infinite, rcSkeletonPulse 2s ease-in-out infinite;
+    border-radius: 20px;
+  }
+  .rc-skeleton-text {
+    background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.06) 75%);
+    background-size: 200% 100%;
+    animation: rcShimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+    height: 12px;
+  }
+
+  /* === PULL TO REFRESH === */
+  .rc-pull-indicator {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    z-index: 300; pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  /* === CARD PRESS FEEDBACK === */
+  .rc-pressable {
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(.22,1,.36,1), box-shadow 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rc-pressable:active {
+    transform: scale(0.97) !important;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06) !important;
+  }
 
   /* === UTILITY CLASSES === */
   .rc-slide-up { animation: rcSlideUp 0.55s cubic-bezier(.16,1,.3,1) both; }
@@ -804,6 +839,144 @@ const formatDateFull = (iso) => {
   return mo[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' at ' + h + ':' + m.toString().padStart(2, '0') + ' ' + ampm;
 };
 const estimateCalories = (distanceM) => Math.round((distanceM / 1000) * 60);
+
+/* ---------- Animated Number (count-up on mount) ---------- */
+var AnimatedNumber = function(props) {
+  var end = typeof props.value === 'number' ? props.value : parseFloat(props.value) || 0;
+  var decimals = props.decimals || 0;
+  var duration = props.duration || 1200;
+  var suffix = props.suffix || '';
+  var prefix = props.prefix || '';
+  var ref = useRef(null);
+  var startedRef = useRef(false);
+
+  useEffect(function() {
+    if (!ref.current || startedRef.current) return;
+    startedRef.current = true;
+    var startTime = null;
+    var from = 0;
+    var step = function(ts) {
+      if (!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      // ease-out cubic
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = from + (end - from) * eased;
+      if (ref.current) ref.current.textContent = prefix + current.toFixed(decimals) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [end]);
+
+  return React.createElement("span", { ref: ref }, prefix + (0).toFixed(decimals) + suffix);
+};
+
+/* ---------- Skeleton Dashboard (loading placeholder) ---------- */
+var SkeletonDashboard = function() {
+  return React.createElement(React.Fragment, null,
+    // Header skeleton
+    React.createElement("div", { className: "rc-pop-in", style: { display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24, paddingTop: 16 } },
+      React.createElement("div", { className: "rc-skeleton", style: { width: 52, height: 52, borderRadius: 16, flexShrink: 0 } }),
+      React.createElement("div", { style: { flex: 1 } },
+        React.createElement("div", { className: "rc-skeleton-text", style: { width: '60%', height: 10, marginBottom: 8 } }),
+        React.createElement("div", { className: "rc-skeleton-text", style: { width: '80%', height: 18 } }))),
+    // Nav pills skeleton
+    React.createElement("div", { style: { display: 'flex', gap: 8, marginBottom: 20, justifyContent: 'center' } },
+      [80, 72, 64, 72].map(function(w, i) {
+        return React.createElement("div", { key: i, className: "rc-skeleton", style: { width: w, height: 36, borderRadius: 22, animationDelay: (i * 0.1) + 's' } });
+      })),
+    // Start button skeleton
+    React.createElement("div", { className: "rc-skeleton", style: { width: '100%', height: 64, borderRadius: 24, marginBottom: 28 } }),
+    // Stat cards skeleton — 2x2 grid
+    React.createElement("div", { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
+      [0, 1, 2, 3].map(function(i) {
+        return React.createElement("div", { key: i, className: "rc-skeleton", style: { height: 100, borderRadius: 24, animationDelay: (i * 0.08) + 's' } });
+      })),
+    // Activity chart skeleton
+    React.createElement("div", { className: "rc-skeleton", style: { width: '100%', height: 140, borderRadius: 20, marginBottom: 20 } }),
+    // Recent runs skeleton
+    React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: 12 } },
+      [0, 1, 2].map(function(i) {
+        return React.createElement("div", { key: i, className: "rc-skeleton", style: { height: 72, borderRadius: 20, animationDelay: (i * 0.1) + 's' } });
+      })));
+};
+
+/* ---------- Pull-to-Refresh Hook ---------- */
+var usePullToRefresh = function(onRefresh, containerRef) {
+  var pullStartY = useRef(0);
+  var pullDist = useRef(0);
+  var pulling = useRef(false);
+  var indicatorRef = useRef(null);
+  var refreshingRef = useRef(false);
+
+  useEffect(function() {
+    var el = containerRef && containerRef.current ? containerRef.current : null;
+    if (!el) return;
+
+    var onTouchStart = function(e) {
+      if (el.scrollTop > 5 || refreshingRef.current) return;
+      pullStartY.current = e.touches[0].clientY;
+      pulling.current = true;
+    };
+
+    var onTouchMove = function(e) {
+      if (!pulling.current) return;
+      var dy = e.touches[0].clientY - pullStartY.current;
+      if (dy < 0) { pulling.current = false; return; }
+      pullDist.current = Math.min(dy * 0.5, 80);
+      if (indicatorRef.current) {
+        indicatorRef.current.style.opacity = Math.min(pullDist.current / 60, 1);
+        indicatorRef.current.style.transform = 'translateX(-50%) translateY(' + Math.min(pullDist.current, 60) + 'px) rotate(' + (pullDist.current * 3) + 'deg)';
+      }
+      if (pullDist.current > 10) e.preventDefault();
+    };
+
+    var onTouchEnd = function() {
+      if (!pulling.current) return;
+      pulling.current = false;
+      if (pullDist.current >= 60 && onRefresh && !refreshingRef.current) {
+        refreshingRef.current = true;
+        if (navigator.vibrate) navigator.vibrate(30);
+        if (indicatorRef.current) {
+          indicatorRef.current.style.animation = 'rcPullSpin 0.6s linear infinite';
+          indicatorRef.current.style.transform = 'translateX(-50%) translateY(50px)';
+          indicatorRef.current.style.opacity = '1';
+        }
+        Promise.resolve(onRefresh()).then(function() {
+          refreshingRef.current = false;
+          if (indicatorRef.current) {
+            indicatorRef.current.style.animation = '';
+            indicatorRef.current.style.opacity = '0';
+            indicatorRef.current.style.transform = 'translateX(-50%) translateY(0)';
+          }
+        }).catch(function() {
+          refreshingRef.current = false;
+          if (indicatorRef.current) {
+            indicatorRef.current.style.animation = '';
+            indicatorRef.current.style.opacity = '0';
+          }
+        });
+      } else {
+        pullDist.current = 0;
+        if (indicatorRef.current) {
+          indicatorRef.current.style.opacity = '0';
+          indicatorRef.current.style.transform = 'translateX(-50%) translateY(0)';
+        }
+      }
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    return function() {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [onRefresh]);
+
+  return indicatorRef;
+};
+
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371000; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
@@ -966,6 +1139,27 @@ const RunClubScreen = ({ profile }) => {
   const [achievements, setAchievements] = useState([]);
   const [community, setCommunity] = useState(null);
   const [coachTips, setCoachTips] = useState([]);
+
+  // Pull-to-refresh
+  const dashRef = useRef(null);
+  const reloadData = useCallback(function() {
+    if (!api) return Promise.resolve();
+    return Promise.all([
+      api.getRunStats().catch(function() { return null; }),
+      api.getRuns(10).catch(function() { return { runs: [] }; }),
+      api.runLeaderboard('weekly', 20).catch(function() { return { rows: [] }; }),
+      api.runAchievements().catch(function() { return { achievements: [] }; }),
+      api.communityStats().catch(function() { return null; })
+    ]).then(function(results) {
+      var stats = results[0], history = results[1], lb = results[2], achv = results[3], comm = results[4];
+      if (stats) setRunStats(stats);
+      if (history && history.runs) setRuns(history.runs);
+      if (lb && lb.rows) setLbRows(lb.rows);
+      if (achv && achv.achievements) setAchievements(achv.achievements);
+      if (comm) setCommunity(comm);
+    });
+  }, [api]);
+  var pullIndicatorRef = usePullToRefresh(reloadData, dashRef);
   const [showPostRun, setShowPostRun] = useState(false);
 
   // Run mode
@@ -1027,18 +1221,24 @@ const RunClubScreen = ({ profile }) => {
   const [selectedRunData, setSelectedRunData] = useState(null);
   const [selectedRunZone, setSelectedRunZone] = useState(null);
 
-  // Check access
+  // Check access (retry once on failure)
   useEffect(() => {
     if (!api) return;
     setAccessLoading(true);
-    api.runAccessStatus().then(data => {
-      setAccessStatus(data.status); setIsAdmin(!!data.isAdmin); setAccessLoading(false);
-    }).catch(() => { setAccessStatus('none'); setAccessLoading(false); });
+    var attempt = function(retry) {
+      api.runAccessStatus().then(data => {
+        setAccessStatus(data.status); setIsAdmin(!!data.isAdmin); setAccessLoading(false);
+      }).catch(function(err) {
+        if (retry > 0) { setTimeout(function() { attempt(retry - 1); }, 1000); }
+        else { setAccessStatus('none'); setAccessLoading(false); }
+      });
+    };
+    attempt(2);
   }, []);
 
   // Load data
   useEffect(() => {
-    if (!api || accessStatus !== 'approved') return;
+    if (!api || (accessStatus !== 'approved' && !isAdmin)) return;
     setLoading(true);
     Promise.all([
       api.getRunStats().catch(() => null),
@@ -1409,7 +1609,7 @@ const RunClubScreen = ({ profile }) => {
   }
 
   /* ========== ACCESS GATE — Apply to Join ========== */
-  if (accessStatus !== 'approved') {
+  if (accessStatus !== 'approved' && !isAdmin) {
     return /*#__PURE__*/React.createElement("div", { className: "rc-pastel-bg", style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
       /*#__PURE__*/React.createElement(RunClubStyles, null),
       /*#__PURE__*/React.createElement("div", { style: { width: '100%', maxWidth: 480, margin: '0 auto', padding: '16px 20px calc(100px + env(safe-area-inset-bottom)) 20px', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
@@ -2061,8 +2261,16 @@ const RunClubScreen = ({ profile }) => {
   var s = runStats || {};
   var unlockedCount = achievements.filter(function(a) { return a.unlocked; }).length;
 
-  return /*#__PURE__*/React.createElement("div", { className: "rc-pastel-bg", style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
+  return /*#__PURE__*/React.createElement("div", { ref: dashRef, className: "rc-pastel-bg", style: { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, height: "100vh", width: "100vw", zIndex: 100, overflowY: "auto", overflowX: "hidden", WebkitOverflowScrolling: "touch" } },
     /*#__PURE__*/React.createElement(RunClubStyles, null),
+    // Pull-to-refresh indicator
+    /*#__PURE__*/React.createElement("div", { ref: pullIndicatorRef, className: "rc-pull-indicator",
+      style: { opacity: 0, transition: 'opacity 0.2s, transform 0.15s' } },
+      /*#__PURE__*/React.createElement("div", { style: { width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'rgba(255,255,255,0.95)', boxShadow: '0 4px 20px rgba(255,107,107,0.2)', border: '2px solid rgba(255,107,107,0.15)' } },
+        /*#__PURE__*/React.createElement("svg", { viewBox: "0 0 24 24", width: 18, height: 18, fill: "none", stroke: "#FF6B6B", strokeWidth: 2.5, strokeLinecap: "round" },
+          /*#__PURE__*/React.createElement("path", { d: "M1 4v6h6" }),
+          /*#__PURE__*/React.createElement("path", { d: "M3.51 15a9 9 0 102.13-9.36L1 10" })))),
     /*#__PURE__*/React.createElement("div", { className: "rc-inner", style: { width: "100%", maxWidth: 480, margin: "0 auto", padding: "16px 20px calc(100px + env(safe-area-inset-bottom)) 20px", minHeight: "100%" } },
 
       // Header — time-based greeting
@@ -2109,12 +2317,12 @@ const RunClubScreen = ({ profile }) => {
       view === 'dashboard' && !loading && /*#__PURE__*/React.createElement(React.Fragment, null,
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger", style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
           [
-            { icon: RunnerIcon, label: 'This Week', value: formatDistanceMiles(s.weekDistanceM || 0) + ' mi', sub: (s.weekRuns || 0) + ' runs', gradient: 'linear-gradient(135deg, rgba(125,216,160,0.15), rgba(125,216,160,0.04))', accent: '#5CAA7F', dot: '#7DD8A0' },
-            { icon: RunShoeIcon, label: 'Total', value: formatDistanceMiles(s.totalDistanceM || 0) + ' mi', sub: (s.totalRuns || 0) + ' runs', gradient: 'linear-gradient(135deg, rgba(255,107,107,0.12), rgba(255,107,107,0.03))', accent: '#E85D5D', dot: '#FF6B6B' },
-            { icon: FireIcon, label: 'Streak', value: (s.streakDays || 0) + 'd', sub: 'days running', gradient: 'linear-gradient(135deg, rgba(255,183,77,0.15), rgba(255,183,77,0.04))', accent: '#E09530', dot: '#FFB74D' },
-            { icon: BoltIcon, label: 'Best Pace', value: formatPace(s.bestPaceSec || 0), sub: '/km', gradient: 'linear-gradient(135deg, rgba(100,181,246,0.15), rgba(100,181,246,0.04))', accent: '#4A9ADB', dot: '#64B5F6' }
+            { icon: RunnerIcon, label: 'This Week', numVal: parseFloat(formatDistanceMiles(s.weekDistanceM || 0)), decimals: 2, suffix: ' mi', sub: (s.weekRuns || 0) + ' runs', gradient: 'linear-gradient(135deg, rgba(125,216,160,0.15), rgba(125,216,160,0.04))', accent: '#5CAA7F', dot: '#7DD8A0' },
+            { icon: RunShoeIcon, label: 'Total', numVal: parseFloat(formatDistanceMiles(s.totalDistanceM || 0)), decimals: 2, suffix: ' mi', sub: (s.totalRuns || 0) + ' runs', gradient: 'linear-gradient(135deg, rgba(255,107,107,0.12), rgba(255,107,107,0.03))', accent: '#E85D5D', dot: '#FF6B6B' },
+            { icon: FireIcon, label: 'Streak', numVal: s.streakDays || 0, decimals: 0, suffix: 'd', sub: 'days running', gradient: 'linear-gradient(135deg, rgba(255,183,77,0.15), rgba(255,183,77,0.04))', accent: '#E09530', dot: '#FFB74D' },
+            { icon: BoltIcon, label: 'Best Pace', numVal: 0, decimals: 0, suffix: '', text: formatPace(s.bestPaceSec || 0), sub: '/km', gradient: 'linear-gradient(135deg, rgba(100,181,246,0.15), rgba(100,181,246,0.04))', accent: '#4A9ADB', dot: '#64B5F6' }
           ].map(function(item, idx) {
-            return /*#__PURE__*/React.createElement("div", { key: idx, className: "rc-glass rc-pop-in",
+            return /*#__PURE__*/React.createElement("div", { key: idx, className: "rc-glass rc-pop-in rc-pressable",
               style: { padding: '18px 16px', position: 'relative', overflow: 'hidden' } },
               // Colored accent orb
               /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', top: -20, right: -20, width: 60, height: 60, borderRadius: '50%',
@@ -2122,7 +2330,8 @@ const RunClubScreen = ({ profile }) => {
               /*#__PURE__*/React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, position: 'relative' } },
                 /*#__PURE__*/React.createElement("div", { style: { width: 6, height: 6, borderRadius: '50%', background: item.dot } }),
                 /*#__PURE__*/React.createElement("span", { style: { fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: item.accent } }, item.label)),
-              /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 26, color: 'var(--c-text)', lineHeight: 1, marginBottom: 4, position: 'relative' } }, item.value),
+              /*#__PURE__*/React.createElement("div", { className: "font-display", style: { fontSize: 26, color: 'var(--c-text)', lineHeight: 1, marginBottom: 4, position: 'relative' } },
+                item.text ? item.text : /*#__PURE__*/React.createElement(AnimatedNumber, { value: item.numVal, decimals: item.decimals, suffix: item.suffix, duration: 1400 })),
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 11, color: 'var(--c-text-sub)', fontWeight: 500, position: 'relative' } }, item.sub));
           })
         ),
@@ -2200,7 +2409,7 @@ const RunClubScreen = ({ profile }) => {
           })())),
 
         // Badges preview with progress bar
-        achievements.length > 0 && /*#__PURE__*/React.createElement("div", { className: "rc-glass rc-pop-in", onClick: () => setView('achievements'),
+        achievements.length > 0 && /*#__PURE__*/React.createElement("div", { className: "rc-glass rc-pop-in rc-pressable", onClick: () => { if (navigator.vibrate) navigator.vibrate(10); setView('achievements'); },
           style: { marginBottom: 24, cursor: 'pointer', padding: '18px 20px', position: 'relative', overflow: 'hidden' } },
           /*#__PURE__*/React.createElement("div", { style: { position: 'absolute', top: -10, left: -10, width: 50, height: 50, borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(255,183,77,0.2), transparent)', pointerEvents: 'none' } }),
@@ -2229,8 +2438,8 @@ const RunClubScreen = ({ profile }) => {
           runs.slice(0, 4).map(function(r, i) {
             var runColors = ['#FF6B6B', '#FFB347', '#77DD77', '#64B5F6'];
             var accent = runColors[i % 4];
-            return /*#__PURE__*/React.createElement("div", { key: r.id, onClick: function() { openRunDetail(r); },
-              className: "rc-glass rc-pop-in",
+            return /*#__PURE__*/React.createElement("div", { key: r.id, onClick: function() { if (navigator.vibrate) navigator.vibrate(10); openRunDetail(r); },
+              className: "rc-glass rc-pop-in rc-pressable",
               style: { padding: '16px 18px', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                        cursor: 'pointer', position: 'relative', overflow: 'hidden' } },
               // Accent line
@@ -2265,7 +2474,7 @@ const RunClubScreen = ({ profile }) => {
         /*#__PURE__*/React.createElement("div", { className: "rc-stagger" },
         runs.map(function(r, i) {
           var histColors = ['#FF6B6B', '#FFB347', '#FFE66D', '#77DD77', '#64B5F6'];
-          return /*#__PURE__*/React.createElement("div", { key: r.id, onClick: function() { openRunDetail(r); }, style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 18, padding: '14px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderLeft: '3px solid ' + histColors[i % 5], boxShadow: '0 2px 10px rgba(0,0,0,0.04)', cursor: 'pointer' }, className: "rc-pop-in" },
+          return /*#__PURE__*/React.createElement("div", { key: r.id, onClick: function() { if (navigator.vibrate) navigator.vibrate(10); openRunDetail(r); }, style: { background: "rgba(255,255,255,0.75)", backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderRadius: 18, padding: '14px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderLeft: '3px solid ' + histColors[i % 5], boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }, className: "rc-pop-in rc-pressable" },
             /*#__PURE__*/React.createElement("div", null,
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: 'var(--c-text)' } }, formatDistanceMiles(r.distanceM) + ' mi'),
               /*#__PURE__*/React.createElement("div", { style: { fontSize: 12, color: 'var(--c-text-sub)', marginTop: 2 } }, formatDateShort(r.startedAt) + ' \xB7 ' + formatDuration(r.durationSec))),
@@ -2386,7 +2595,7 @@ const RunClubScreen = ({ profile }) => {
             var rarity = getRarity(a.id);
             var rarityColor = RARITY_COLORS[rarity];
             var isLegendary = rarity === 'legendary';
-            return /*#__PURE__*/React.createElement("div", { key: a.id, className: "rc-pop-in",
+            return /*#__PURE__*/React.createElement("div", { key: a.id, className: "rc-pop-in rc-pressable",
               style: { textAlign: 'center', padding: '18px 12px', position: 'relative', overflow: 'hidden',
                        background: a.unlocked ? 'rgba(255,255,255,0.85)' : 'rgba(240,238,245,0.5)',
                        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
@@ -2434,10 +2643,7 @@ const RunClubScreen = ({ profile }) => {
       ); })(),
 
       // Loading
-      loading && accessStatus === 'approved' && /*#__PURE__*/React.createElement("div", { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 0', gap: 12 } },
-        /*#__PURE__*/React.createElement("div", { style: { width: 32, height: 32, borderRadius: '50%', border: '3px solid rgba(255,107,107,0.12)', borderTopColor: '#FF6B6B',
-                   animation: 'rcSpin 0.8s linear infinite' } }),
-        /*#__PURE__*/React.createElement("div", { style: { fontSize: 13, fontWeight: 600, color: 'var(--c-text-sub)' } }, "Loading...")),
+      loading && (accessStatus === 'approved' || isAdmin) && /*#__PURE__*/React.createElement(SkeletonDashboard, null),
 
       // Footer
       /*#__PURE__*/React.createElement("div", { style: { textAlign: 'center', padding: '24px 0 8px', opacity: 0.4, fontSize: 11, fontWeight: 500, color: 'var(--c-text-sub)', letterSpacing: '0.05em' } }, "coded by Degos"),
