@@ -1,7 +1,7 @@
 /* Doodle or Not — Service Worker
    Strategy: network-first with FULL cache bypass for app files.
    Bumping VERSION forces a complete cache refresh on next visit. */
-const VERSION = 'don-v22-2026-05-03b';
+const VERSION = 'don-v23-2026-05-03c';
 
 const CORE = [
   './',

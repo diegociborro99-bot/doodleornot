@@ -601,75 +601,62 @@ const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
   .anim-page-in { transform: none !important; filter: none !important; }
   .fixed.bottom-0.z-20 { z-index: 200 !important; }
 
-  /* === RAINBOW DOODLES BACKGROUND === */
+  /* === FORCED LIGHT THEME — Always white/pastel === */
   .rc-pastel-bg {
-    background: #FFFDF7;
+    background: #FFFFFF !important;
     background-image:
-      radial-gradient(ellipse at 10% 0%, rgba(255,107,107,0.12) 0%, transparent 50%),
-      radial-gradient(ellipse at 40% 5%, rgba(255,179,71,0.10) 0%, transparent 45%),
-      radial-gradient(ellipse at 70% 0%, rgba(255,230,109,0.10) 0%, transparent 45%),
-      radial-gradient(ellipse at 90% 15%, rgba(119,221,119,0.10) 0%, transparent 45%),
-      radial-gradient(ellipse at 20% 90%, rgba(100,181,246,0.10) 0%, transparent 50%),
-      radial-gradient(ellipse at 60% 95%, rgba(186,147,255,0.12) 0%, transparent 50%),
-      radial-gradient(ellipse at 85% 80%, rgba(119,221,119,0.08) 0%, transparent 45%);
+      radial-gradient(ellipse at 10% 0%, rgba(255,107,107,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 40% 5%, rgba(255,179,71,0.07) 0%, transparent 45%),
+      radial-gradient(ellipse at 70% 0%, rgba(255,230,109,0.06) 0%, transparent 45%),
+      radial-gradient(ellipse at 90% 15%, rgba(119,221,119,0.06) 0%, transparent 45%),
+      radial-gradient(ellipse at 20% 90%, rgba(100,181,246,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 95%, rgba(186,147,255,0.08) 0%, transparent 50%) !important;
+    color: #2D2D3F !important;
+    color-scheme: light !important;
     position: relative;
     overflow: hidden;
   }
+  .rc-pastel-bg * { color-scheme: light !important; }
   .rc-pastel-bg::before {
-    content: '✏️ ⭐ ✨ 🎨 ⚡ 🏃 💨 🔥 🌈';
+    content: '';
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-    font-size: 22px; line-height: 80px; letter-spacing: 40px;
-    word-spacing: 60px; padding: 30px 20px;
-    opacity: 0.07; pointer-events: none;
-    overflow: hidden; word-break: break-all;
-    animation: rcDoodleScroll 60s linear infinite;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255,179,71,0.06) 0%, transparent 25%),
+      radial-gradient(circle at 75% 15%, rgba(100,181,246,0.06) 0%, transparent 25%),
+      radial-gradient(circle at 50% 80%, rgba(255,143,171,0.05) 0%, transparent 25%),
+      radial-gradient(circle at 85% 70%, rgba(119,221,119,0.05) 0%, transparent 25%);
+    opacity: 1; pointer-events: none;
+    animation: rcBgFloat 20s ease-in-out infinite alternate;
   }
   .rc-pastel-bg::after {
     content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 4px;
-    background: linear-gradient(90deg, #FF6B6B, #FFB347, #FFE66D, #77DD77, #64B5F6, #BA93FF, #FF96C8);
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #FFB347, #FF8FAB, #64B5F6, #77DD77, #FFB347);
+    background-size: 200% 100%;
+    animation: rcRainbowSlide 4s linear infinite;
     z-index: 2; pointer-events: none;
   }
-  @keyframes rcDoodleScroll {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-50%); }
+  @keyframes rcBgFloat {
+    0% { transform: scale(1) translateY(0); }
+    100% { transform: scale(1.05) translateY(-20px); }
   }
-  @media (prefers-color-scheme: dark) {
-    .rc-pastel-bg {
-      background: #0D0B14;
-      background-image:
-        radial-gradient(ellipse at 10% 0%, rgba(255,107,107,0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 40% 5%, rgba(255,179,71,0.05) 0%, transparent 45%),
-        radial-gradient(ellipse at 70% 0%, rgba(255,230,109,0.04) 0%, transparent 45%),
-        radial-gradient(ellipse at 90% 15%, rgba(119,221,119,0.05) 0%, transparent 45%),
-        radial-gradient(ellipse at 20% 90%, rgba(100,181,246,0.05) 0%, transparent 50%),
-        radial-gradient(ellipse at 60% 95%, rgba(186,147,255,0.06) 0%, transparent 50%);
-    }
-    .rc-pastel-bg::before { opacity: 0.04; }
-    .rc-pastel-bg::after {
-      background: linear-gradient(90deg, #FF6B6B, #FFB347, #FFE66D, #77DD77, #64B5F6, #BA93FF, #FF96C8);
-      opacity: 0.7;
-    }
+  @keyframes rcRainbowSlide {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
   }
 
-  /* === GLASS CARDS === */
+  /* === GLASS CARDS — Always light === */
   .rc-glass {
-    background: rgba(255,255,255,0.65);
+    background: rgba(255,255,255,0.75) !important;
     backdrop-filter: blur(20px) saturate(1.4);
     -webkit-backdrop-filter: blur(20px) saturate(1.4);
-    border: 1px solid rgba(255,255,255,0.5);
+    border: 1px solid rgba(0,0,0,0.04) !important;
     border-radius: 24px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.6);
-    transition: transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+    transition: transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s ease;
+    color: #2D2D3F !important;
   }
-  .rc-glass:active { transform: scale(0.98); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
-  @media (prefers-color-scheme: dark) {
-    .rc-glass {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
-    }
-  }
+  .rc-glass:active { transform: scale(0.97); box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important; }
 
   /* === LAYOUT === */
   .rc-inner {
@@ -736,24 +723,28 @@ const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
     transition: opacity 0.2s ease;
   }
 
-  /* === CARD PRESS FEEDBACK === */
+  /* === CARD PRESS FEEDBACK — Bouncy spring === */
   .rc-pressable {
     cursor: pointer;
-    transition: transform 0.15s cubic-bezier(.22,1,.36,1), box-shadow 0.15s ease;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease;
     -webkit-tap-highlight-color: transparent;
   }
   .rc-pressable:active {
-    transform: scale(0.97) !important;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.06) !important;
+    transform: scale(0.95) !important;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08) !important;
+  }
+  .rc-pressable:hover {
+    transform: scale(1.01);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.06);
   }
 
-  /* === UTILITY CLASSES === */
-  .rc-slide-up { animation: rcSlideUp 0.55s cubic-bezier(.16,1,.3,1) both; }
-  .rc-pop-in { animation: rcPopIn 0.45s cubic-bezier(.16,1,.3,1) both; }
-  .rc-fade-in { animation: rcFadeIn 0.4s ease-out both; }
+  /* === UTILITY CLASSES — Polished spring animations === */
+  .rc-slide-up { animation: rcSlideUp 0.6s cubic-bezier(.34,1.56,.64,1) both; }
+  .rc-pop-in { animation: rcPopIn 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+  .rc-fade-in { animation: rcFadeIn 0.5s cubic-bezier(.22,1,.36,1) both; }
   .rc-shine { animation: rcShine 3s ease-in-out infinite; }
-  .rc-shimmer { background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%); background-size: 200% 100%; animation: rcShimmer 2.5s ease-in-out infinite; }
-  .rc-float { animation: rcFloat 5s ease-in-out infinite; }
+  .rc-shimmer { background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%); background-size: 200% 100%; animation: rcShimmer 2s ease-in-out infinite; }
+  .rc-float { animation: rcFloat 4s ease-in-out infinite; }
 
   .rc-stagger > *:nth-child(1) { animation-delay: 0s; }
   .rc-stagger > *:nth-child(2) { animation-delay: 0.06s; }
@@ -774,7 +765,7 @@ const RunClubStyles = () => /*#__PURE__*/React.createElement("style", null, `
 
   /* === MAP === */
   .rc-current-pos { animation: rcPulse 2s ease-in-out infinite; }
-  .leaflet-container { background: #0D0B14 !important; }
+  .leaflet-container { background: #F8F9FA !important; }
   .leaflet-control-attribution { display: none !important; }
 
   /* === RAINBOW GRADIENT TEXT === */
